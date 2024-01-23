@@ -101,7 +101,7 @@ void DCH_presel(const char* ext = ".root"){
 	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
 	for(int j = 0; j < n; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
-		char *oname = gSystem->ConcatFileName("hist_3t", filename[j]);
+		char *oname = gSystem->ConcatFileName("hist", filename[j]);
 		TFile* ofile = new TFile(oname, "RECREATE");
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
@@ -122,6 +122,10 @@ void DCH_presel(const char* ext = ".root"){
 		TH1F* h_dRll = new TH1F("h_dRll", "dR between 1st pair", 1000, 0, 5);
 		TH1F* h_dRll2 = new TH1F("h_dRll2", "dR between 2nd pair", 1000, 0, 5);
 		//TH1F* h_cat = new TH1F("h_cat", "cat", 22,0,22);
+		TH1F* h_Xmass_0t = new TH1F("h_Xmass_0t", "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
+		TH1F* h_Xmass_1t = new TH1F("h_Xmass_1t", "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
+		TH1F* h_Xmass_2t = new TH1F("h_Xmass_2t", "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
+		TH1F* h_Xmass_34t = new TH1F("h_Xmass_34t", "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
 		for (int i =0; i < tree->GetEntries(); i++){
 			tree->GetEntry(i);			
 			float *lep_pt, *tau_pt;
@@ -131,7 +135,7 @@ void DCH_presel(const char* ext = ".root"){
 			//if (lep_count != 4) continue;// 0 tau
 			//if (lep_count != 3) continue;// 1 tau
 			//if (lep_count != 2) continue;// 2 tau
-			if (lep_count != 1) continue;// 3 tau
+			//if (lep_count != 1) continue;// 3 tau
 			//if (lep_count != 0) continue;// 4 tau
 			
 			h_ST->Fill(pt_1+pt_2+pt_3+pt_4);
@@ -147,7 +151,7 @@ void DCH_presel(const char* ext = ".root"){
 			h_dRll2->Fill(getDR(eta_3,phi_3, eta_4,phi_4));			
 			cutflow->Fill(0);
 //################# Pre-Selection #########################################################			
-			/* if(lep_count == 0){
+	/*		 if(lep_count == 0){
 				tau_pt  = SortPt(cat_name,"t");
 				h_pT1->Fill(tau_pt[0]);
 				h_pT2->Fill(tau_pt[1]);
@@ -199,36 +203,50 @@ void DCH_presel(const char* ext = ".root"){
 				cutflow->Fill(6);
 			}*/
 //##################################My selection##########################################	
-			/*if (lep_count == 4){
-				//if (pt_1+pt_2+pt_3+pt_4 < 700){ continue;}//ST
-				//cutflow->Fill(1);
-				//if (getDR(eta_1,phi_1, eta_2,phi_2) >4 or getDR(eta_3,phi_3, eta_4,phi_4) >4){ continue;}
-				//cutflow->Fill(1);
-				//if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(1)+LepV(4)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(4)).M()-mZ) < 10){ continue;}
-				//cutflow->Fill(5);
-				if (mll <400 or mll >550 or mll2 <400 or mll2 >550){ continue;}  
+			if (lep_count == 4){
+				if (pt_1+pt_2+pt_3+pt_4 < 700){ continue;}//ST
 				cutflow->Fill(1);
+				if (getDR(eta_1,phi_1, eta_2,phi_2) >4 or getDR(eta_3,phi_3, eta_4,phi_4) >4){ continue;}
+				cutflow->Fill(2);
+				if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(1)+LepV(4)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(4)).M()-mZ) < 10){ continue;}
+				cutflow->Fill(3);
+				if (mll <400  or mll2 <400 ){ continue;}  
+				cutflow->Fill(4);
+				h_Xmass_0t->Fill(mll+mll2);
 			}	
 			else if (lep_count == 3){
-				//if (pt_1+pt_2+pt_3+pt_4 < 600){ continue;}//ST
-				//cutflow->Fill(1);		
-				//if (getDR(eta_1,phi_1, eta_2,phi_2) >3.6 or getDR(eta_3,phi_3, eta_4,phi_4) >3.6){ continue;}
-				//cutflow->Fill(1);	
-				//if (abs((LepV(1)+LepV(3)).M()-mZ) < 25 or abs((LepV(1)+LepV(4)).M()-mZ) < 25 or abs((LepV(2)+LepV(3)).M()-mZ) < 25 or abs((LepV(2)+LepV(4)).M()-mZ) < 25){ continue;}
-				//cutflow->Fill(5);
-				if (mll <250 or mll >550 or mll2 <250 or mll2 >550){ continue;}
-				cutflow->Fill(1);
+				if (pt_1+pt_2+pt_3+pt_4 < 600){ continue;}//ST
+				cutflow->Fill(1);		
+				if (getDR(eta_1,phi_1, eta_2,phi_2) >3.6 or getDR(eta_3,phi_3, eta_4,phi_4) >3.6){ continue;}
+				cutflow->Fill(2);	
+				if (abs((LepV(1)+LepV(3)).M()-mZ) < 25 or abs((LepV(1)+LepV(4)).M()-mZ) < 25 or abs((LepV(2)+LepV(3)).M()-mZ) < 25 or abs((LepV(2)+LepV(4)).M()-mZ) < 25){ continue;}
+				cutflow->Fill(3);
+				if (mll <250  or mll2 <250 ){ continue;}
+				cutflow->Fill(4);
+				h_Xmass_1t->Fill(mll+mll2);
 			}
 			else if (lep_count == 2){
-				//if (pt_1+pt_2+pt_3+pt_4 < 600){ continue;}//ST
-				//cutflow->Fill(1);
-				//if (getDR(eta_1,phi_1, eta_2,phi_2) >3.9 or getDR(eta_3,phi_3, eta_4,phi_4) >3.9){ continue;} 
-				//cutflow->Fill(1);
-				//if (abs((LepV(1)+LepV(3)).M()-mZ) < 85 or abs((LepV(1)+LepV(4)).M()-mZ) < 85 or abs((LepV(2)+LepV(3)).M()-mZ) < 85 or abs((LepV(2)+LepV(4)).M()-mZ) < 85){ continue;}
-				//cutflow->Fill(5);
-				if (mll <150 or mll >550 or mll2 <150 or mll2 >550){ continue;}
+				if (pt_1+pt_2+pt_3+pt_4 < 600){ continue;}//ST
 				cutflow->Fill(1);
-			}*/
+				if (getDR(eta_1,phi_1, eta_2,phi_2) >3.9 or getDR(eta_3,phi_3, eta_4,phi_4) >3.9){ continue;} 
+				cutflow->Fill(2);
+				if (abs((LepV(1)+LepV(3)).M()-mZ) < 85 or abs((LepV(1)+LepV(4)).M()-mZ) < 85 or abs((LepV(2)+LepV(3)).M()-mZ) < 85 or abs((LepV(2)+LepV(4)).M()-mZ) < 85){ continue;}
+				cutflow->Fill(3);
+				if (mll <150  or mll2 <150 ){ continue;}
+				cutflow->Fill(4);
+				h_Xmass_2t->Fill(mll+mll2);
+			}
+			else if (lep_count < 2){// used same cuts as 2t region. Gotta change!
+				if (pt_1+pt_2+pt_3+pt_4 < 600){ continue;}//ST
+				cutflow->Fill(1);
+				if (getDR(eta_1,phi_1, eta_2,phi_2) >3.9 or getDR(eta_3,phi_3, eta_4,phi_4) >3.9){ continue;} 
+				cutflow->Fill(2);
+				if (abs((LepV(1)+LepV(3)).M()-mZ) < 85 or abs((LepV(1)+LepV(4)).M()-mZ) < 85 or abs((LepV(2)+LepV(3)).M()-mZ) < 85 or abs((LepV(2)+LepV(4)).M()-mZ) < 85){ continue;}
+				cutflow->Fill(3);
+				if (mll <150 or mll2 <150 ){ continue;}
+				cutflow->Fill(4);
+				h_Xmass_34t->Fill(mll+mll2);
+			}			
 		}
 		cutflow->Write();
 		h_mll->Write();
@@ -246,8 +264,12 @@ void DCH_presel(const char* ext = ".root"){
 		h_dR->Write();
 		h_dRll->Write();
 		h_dRll2->Write();
+		h_Xmass_0t->Write();
+		h_Xmass_1t->Write();
+		h_Xmass_2t->Write();
+		h_Xmass_34t->Write();
 		//cout<< j <<"\t"<< oname <<endl;
-		printf("%s %f\n", oname, cutflow->GetBinContent(2));
+		printf("%s %f\n", oname, cutflow->GetBinContent(1));
 		delete tree;
 	}
 	gSystem->FreeDirectory(dirp);

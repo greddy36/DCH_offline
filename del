@@ -1,8 +1,0 @@
-scp greddy@cmslpc-sl7.fnal.gov:/eos/uscms/store/user/greddy/DCH_files/DCH_out/GluGluZH_2018/*root .
-scp greddy@cmslpc-sl7.fnal.gov:/eos/uscms/store/user/greddy/DCH_files/DCH_out/ZHToMuMu_2018/*root .
-scp greddy@cmslpc-sl7.fnal.gov:/eos/uscms/store/user/greddy/DCH_files/DCH_out/ZHToTauTau_2018/*root .
-scp greddy@cmslpc-sl7.fnal.gov:/eos/uscms/store/user/greddy/DCH_files/DCH_out/ZHToTauTau_ext_2018/*root .
-scp greddy@cmslpc-sl7.fnal.gov:/eos/uscms/store/user/greddy/DCH_files/DCH_out/ttHToEE_2018/*root .
-scp greddy@cmslpc-sl7.fnal.gov:/eos/uscms/store/user/greddy/DCH_files/DCH_out/ttHToMuMu_2018/*root .
-scp greddy@cmslpc-sl7.fnal.gov:/eos/uscms/store/user/greddy/DCH_files/DCH_out/ttHToTauTau_2018/*root .
-scp greddy@cmslpc-sl7.fnal.gov:/eos/uscms/store/user/greddy/DCH_files/DCH_out/ttZJets_2018/*root .

@@ -47,7 +47,7 @@ void StackHist() {
 	
 	const char *stack_names[] = {"Cutflow", "DCH-1 mass", "DCH-2 mass", "ST", "Z mass from pair (1,3)", "Z mass from pair (1,4)","Z mass from pair (2,3)","Z mass from pair (2,4)","MET","Leading pT","Sub-Leading pT","3rd pT","4th pT","dR (+-) leptons","dR between 1st pair", "dR between 2nd pair"};
 	TCanvas* canvas = new TCanvas("canvas", "Stacked Histograms", 800, 600);	
-
+// make changes to take in xs from a csv file
 	for(int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++){
 		TH1F *h_sig = (TH1F*)ifile_sig->Get(hist_list[i]);h_sig->Scale(315*lumi_2018*0.0001487/176000); h_sig->SetLineWidth(2);h_sig->SetLineColor(2);
 		
