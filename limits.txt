@@ -1,0 +1,57 @@
+#combine -t -1 -M AsymptoticLimits -d  HC-DCH.txt -m 1300  --rAbsAcc=0.0001  --noFitAsimov
+500
+Observed Limit: r < 0.6455
+Expected  2.5%: r < 0.1964
+Expected 16.0%: r < 0.3434
+Expected 50.0%: r < 0.6445
+Expected 84.0%: r < 1.2149
+Expected 97.5%: r < 1.9541
+
+600
+Observed Limit: r < 0.5834
+Expected  2.5%: r < 0.1751
+Expected 16.0%: r < 0.3086
+Expected 50.0%: r < 0.5820
+Expected 84.0%: r < 1.1064
+Expected 97.5%: r < 1.7647
+
+900
+Observed Limit: r < 0.5050
+Expected  2.5%: r < 0.1502
+Expected 16.0%: r < 0.2641
+Expected 50.0%: r < 0.5059
+Expected 84.0%: r < 0.9696
+Expected 97.5%: r < 1.5338
+
+1000
+Observed Limit: r < 0.4950
+Expected  2.5%: r < 0.1473
+Expected 16.0%: r < 0.2590
+Expected 50.0%: r < 0.4961
+Expected 84.0%: r < 0.9549
+Expected 97.5%: r < 1.5042
+
+1100
+Observed Limit: r < 0.4902
+Expected  2.5%: r < 0.1455
+Expected 16.0%: r < 0.2559
+Expected 50.0%: r < 0.4902
+Expected 84.0%: r < 0.9475
+Expected 97.5%: r < 1.4865
+
+1200
+Observed Limit: r < 0.4870
+Expected  2.5%: r < 0.1431
+Expected 16.0%: r < 0.2536
+Expected 50.0%: r < 0.4883
+Expected 84.0%: r < 0.9398
+Expected 97.5%: r < 1.4805
+
+1300
+Observed Limit: r < 0.4852
+Expected  2.5%: r < 0.1438
+Expected 16.0%: r < 0.2529
+Expected 50.0%: r < 0.4844
+Expected 84.0%: r < 0.9362
+Expected 97.5%: r < 1.4687
+

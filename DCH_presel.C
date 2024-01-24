@@ -210,7 +210,7 @@ void DCH_presel(const char* ext = ".root"){
 				cutflow->Fill(2);
 				if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(1)+LepV(4)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(4)).M()-mZ) < 10){ continue;}
 				cutflow->Fill(3);
-				if (mll <400  or mll2 <400 ){ continue;}  
+				//if (mll <400  or mll2 <400 ){ continue;}  
 				cutflow->Fill(4);
 				h_Xmass_0t->Fill(mll+mll2);
 			}	
@@ -221,7 +221,7 @@ void DCH_presel(const char* ext = ".root"){
 				cutflow->Fill(2);	
 				if (abs((LepV(1)+LepV(3)).M()-mZ) < 25 or abs((LepV(1)+LepV(4)).M()-mZ) < 25 or abs((LepV(2)+LepV(3)).M()-mZ) < 25 or abs((LepV(2)+LepV(4)).M()-mZ) < 25){ continue;}
 				cutflow->Fill(3);
-				if (mll <250  or mll2 <250 ){ continue;}
+				//if (mll <250  or mll2 <250 ){ continue;}
 				cutflow->Fill(4);
 				h_Xmass_1t->Fill(mll+mll2);
 			}
@@ -232,7 +232,7 @@ void DCH_presel(const char* ext = ".root"){
 				cutflow->Fill(2);
 				if (abs((LepV(1)+LepV(3)).M()-mZ) < 85 or abs((LepV(1)+LepV(4)).M()-mZ) < 85 or abs((LepV(2)+LepV(3)).M()-mZ) < 85 or abs((LepV(2)+LepV(4)).M()-mZ) < 85){ continue;}
 				cutflow->Fill(3);
-				if (mll <150  or mll2 <150 ){ continue;}
+				//if (mll <150  or mll2 <150 ){ continue;}
 				cutflow->Fill(4);
 				h_Xmass_2t->Fill(mll+mll2);
 			}
@@ -243,7 +243,7 @@ void DCH_presel(const char* ext = ".root"){
 				cutflow->Fill(2);
 				if (abs((LepV(1)+LepV(3)).M()-mZ) < 85 or abs((LepV(1)+LepV(4)).M()-mZ) < 85 or abs((LepV(2)+LepV(3)).M()-mZ) < 85 or abs((LepV(2)+LepV(4)).M()-mZ) < 85){ continue;}
 				cutflow->Fill(3);
-				if (mll <150 or mll2 <150 ){ continue;}
+				//if (mll <150 or mll2 <150 ){ continue;}
 				cutflow->Fill(4);
 				h_Xmass_34t->Fill(mll+mll2);
 			}			
@@ -269,7 +269,7 @@ void DCH_presel(const char* ext = ".root"){
 		h_Xmass_2t->Write();
 		h_Xmass_34t->Write();
 		//cout<< j <<"\t"<< oname <<endl;
-		printf("%s %f\n", oname, cutflow->GetBinContent(1));
+		printf("%s %f\n", oname, cutflow->GetBinContent(5));
 		delete tree;
 	}
 	gSystem->FreeDirectory(dirp);

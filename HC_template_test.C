@@ -195,9 +195,7 @@ void HC_template_test(const char* ext = ".root"){
 		TH1F *h26 = (TH1F*)ifile26->Get(hist_list[i]);h26->Scale(lumi_2018*0.7891/14971244);
 		TH1F *h27 = (TH1F*)ifile27->Get(hist_list[i]);h27->Scale(lumi_2018*0.7891/14971244);
 
-		h_prompt->Add(h7);h_prompt->Add(h10);h_prompt->Add(h11);h_prompt->Add(h1201);h_prompt->Add(h13);h_prompt->Add(h14);h_prompt->Add(h15);h_prompt->Add(h25);h_prompt->Add(h26);h_prompt->Add(h27);h_prompt->Add(h21);h_prompt->Add(h22);h_prompt->Add(h23);h_prompt->Add(h24);
-		
-		h_other->Add(h6);h_other->Add(h8);h_other->Add(h9);h_other->Add(h12); h_other->Add(h1);h_other->Add(h2);h_other->Add(h3);h_other->Add(h4);h_other->Add(h5);h_other->Add(h16);h_other->Add(h17);h_other->Add(h18);h_other->Add(h19);h_other->Add(h20);
+		h_prompt->Add(h7);h_prompt->Add(h10);h_prompt->Add(h11);h_prompt->Add(h1201);h_prompt->Add(h13);h_prompt->Add(h14);h_prompt->Add(h15);h_prompt->Add(h25);h_prompt->Add(h26);h_prompt->Add(h27);h_prompt->Add(h21);h_prompt->Add(h22);h_prompt->Add(h23);h_prompt->Add(h24);h_prompt->Add(h6);h_prompt->Add(h8);h_prompt->Add(h9);h_prompt->Add(h12); h_prompt->Add(h1);h_prompt->Add(h2);h_prompt->Add(h3);h_prompt->Add(h4);h_prompt->Add(h5);h_prompt->Add(h16);h_prompt->Add(h17);h_prompt->Add(h18);h_prompt->Add(h19);h_prompt->Add(h20);
 		
 		ofile->cd();
 		h_data_t0->Write();
@@ -214,7 +212,7 @@ void HC_template_test(const char* ext = ".root"){
 		h_prompt->Write();
 		//h_one_fake->Write();
 		//h_prompt_red->Write();
-		h_other->Write();
+		//h_other->Write();
 	}
 
     std::cout << "Histograms added and saved" <<std::endl;
