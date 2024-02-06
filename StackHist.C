@@ -31,9 +31,11 @@ void StackHist() {
 	TFile *ifile19 = new TFile("hist/ST_tW_antitop_2018.root","READ");  
 	TFile *ifile20 = new TFile("hist/ST_tW_top_2018.root","READ");            
 
-	TFile *ifile21 = new TFile("hist/ttHTo2L2Nu_2018.root","READ");
+	//TFile *ifile21 = new TFile("hist/ttHTo2L2Nu_2018.root","READ");
+	TFile *ifile21 = new TFile("hist/ttHToEE_2018.root","READ");
 	TFile *ifile22 = new TFile("hist/ttHToEE_2018.root","READ");
-	TFile *ifile23 = new TFile("hist/ttHToMuMu_2018.root","READ");
+	//TFile *ifile23 = new TFile("hist/ttHToMuMu_2018.root","READ");
+	TFile *ifile23 = new TFile("hist/ttHToEE_2018.root","READ");
 	TFile *ifile24 = new TFile("hist/ttHToTauTau_2018.root","READ");
 	
 	TFile *ifile25 = new TFile("hist/ZHToMuMu_2018.root","READ");

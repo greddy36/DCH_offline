@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#need to put mass and the sysmtotic limit print below that line into limits.txt
 # Input file
 input_file="limits.txt"
 

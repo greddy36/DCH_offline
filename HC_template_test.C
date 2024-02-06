@@ -51,7 +51,7 @@ void HC_template_test(const char* ext = ".root"){
     TFile* ofile = new TFile("nuisance_hist.root", "RECREATE");
 	ofile->cd();
 	const char *hist_list[] = {"h_Xmass_0t","h_Xmass_1t","h_Xmass_2t","h_Xmass_34t"};
-	float mDCH=500, lumi_2018 = 59600;
+	float mDCH=500, lumi_2018 = 139000;
 	for(int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++){
 		const char *signal500__channel;
 		const char *signal600__channel;
@@ -131,34 +131,35 @@ void HC_template_test(const char* ext = ".root"){
 			prompt_red__channel = "prompt_red__t34";
 			other__channel = "other__t34";
 		}
-		TH1F* h_data_t0 = new TH1F("data_obs__t0", "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);	
-		TH1F* h_data_t1 = new TH1F("data_obs__t1", "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);			
-		TH1F* h_data_t2 = new TH1F("data_obs__t2", "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);			
-		TH1F* h_data_t34 = new TH1F("data_obs__t34", "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
+		int nbins = 1000; float xmin = 0, xmax = 3000;
+		TH1F* h_data_t0 = new TH1F("data_obs__t0", "mDCH1", nbins, xmin, xmax);	
+		TH1F* h_data_t1 = new TH1F("data_obs__t1", "mDCH1", nbins, xmin, xmax);			
+		TH1F* h_data_t2 = new TH1F("data_obs__t2", "mDCH1", nbins, xmin, xmax);			
+		TH1F* h_data_t34 = new TH1F("data_obs__t34", "mDCH1", nbins, xmin, xmax);
 		
-		TH1F* h_signal500 = new TH1F(signal500__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
-		TH1F* h_signal600 = new TH1F(signal600__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
-		TH1F* h_signal700 = new TH1F(signal700__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
-		TH1F* h_signal800 = new TH1F(signal800__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
-		TH1F* h_signal900 = new TH1F(signal900__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
-		TH1F* h_signal1000 = new TH1F(signal1000__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
-		TH1F* h_signal1100 = new TH1F(signal1100__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
-		TH1F* h_signal1200 = new TH1F(signal1200__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
-		TH1F* h_signal1300 = new TH1F(signal1300__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
-		TH1F* h_signal1400 = new TH1F(signal1400__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);
-		TH1F* h_prompt = new TH1F(prompt__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);						
-		TH1F* h_one_fake = new TH1F(one_fake__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);			
-		TH1F* h_prompt_red = new TH1F(prompt_red__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);			
-		TH1F* h_other = new TH1F(other__channel, "mDCH1+mDCH2", 1000, 0, 2*mDCH+3000);			
+		TH1F* h_signal500 = new TH1F(signal500__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_signal600 = new TH1F(signal600__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_signal700 = new TH1F(signal700__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_signal800 = new TH1F(signal800__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_signal900 = new TH1F(signal900__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_signal1000 = new TH1F(signal1000__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_signal1100 = new TH1F(signal1100__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_signal1200 = new TH1F(signal1200__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_signal1300 = new TH1F(signal1300__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_signal1400 = new TH1F(signal1400__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_prompt = new TH1F(prompt__channel, "mDCH1", nbins, xmin, xmax);						
+		TH1F* h_one_fake = new TH1F(one_fake__channel, "mDCH1", nbins, xmin, xmax);			
+		TH1F* h_prompt_red = new TH1F(prompt_red__channel, "mDCH1", nbins, xmin, xmax);			
+		TH1F* h_other = new TH1F(other__channel, "mDCH1", nbins, xmin, xmax);			
 
 
-		TH1F *h_sig1 = (TH1F*)ifile_sig1->Get(hist_list[i]);h_sig1->Scale(1/h_sig1->Integral()); h_sig1->SetName(signal500__channel);
-		TH1F *h_sig2 = (TH1F*)ifile_sig2->Get(hist_list[i]);h_sig2->Scale(1/h_sig2->Integral()); h_sig2->SetName(signal600__channel);
-		TH1F *h_sig3 = (TH1F*)ifile_sig3->Get(hist_list[i]);h_sig3->Scale(1/h_sig3->Integral()); h_sig3->SetName(signal900__channel);
-		TH1F *h_sig4 = (TH1F*)ifile_sig4->Get(hist_list[i]);h_sig4->Scale(1/h_sig4->Integral()); h_sig4->SetName(signal1000__channel);
-		TH1F *h_sig5 = (TH1F*)ifile_sig5->Get(hist_list[i]);h_sig5->Scale(1/h_sig5->Integral()); h_sig5->SetName(signal1100__channel);
-		TH1F *h_sig6 = (TH1F*)ifile_sig6->Get(hist_list[i]);h_sig6->Scale(1/h_sig6->Integral()); h_sig6->SetName(signal1200__channel);
-		TH1F *h_sig7 = (TH1F*)ifile_sig7->Get(hist_list[i]);h_sig7->Scale(1/h_sig7->Integral()); h_sig7->SetName(signal1300__channel);
+		TH1F *h_sig1 = (TH1F*)ifile_sig1->Get(hist_list[i]);h_sig1->Scale(lumi_2018*0.001/176000); h_sig1->SetName(signal500__channel);
+		TH1F *h_sig2 = (TH1F*)ifile_sig2->Get(hist_list[i]);h_sig2->Scale(lumi_2018*0.001/171000); h_sig2->SetName(signal600__channel);
+		TH1F *h_sig3 = (TH1F*)ifile_sig3->Get(hist_list[i]);h_sig3->Scale(lumi_2018*0.001/171000); h_sig3->SetName(signal900__channel);
+		TH1F *h_sig4 = (TH1F*)ifile_sig4->Get(hist_list[i]);h_sig4->Scale(lumi_2018*0.001/175000); h_sig4->SetName(signal1000__channel);
+		TH1F *h_sig5 = (TH1F*)ifile_sig5->Get(hist_list[i]);h_sig5->Scale(lumi_2018*0.001/170000); h_sig5->SetName(signal1100__channel);
+		TH1F *h_sig6 = (TH1F*)ifile_sig6->Get(hist_list[i]);h_sig6->Scale(lumi_2018*0.001/176000); h_sig6->SetName(signal1200__channel);
+		TH1F *h_sig7 = (TH1F*)ifile_sig7->Get(hist_list[i]);h_sig7->Scale(lumi_2018*0.001/110000); h_sig7->SetName(signal1300__channel);
 
 	
 		TH1F *h1 = (TH1F*)ifile1->Get(hist_list[i]);h1->Scale(lumi_2018*18610/94452816);
@@ -196,7 +197,25 @@ void HC_template_test(const char* ext = ".root"){
 		TH1F *h27 = (TH1F*)ifile27->Get(hist_list[i]);h27->Scale(lumi_2018*0.7891/14971244);
 
 		h_prompt->Add(h7);h_prompt->Add(h10);h_prompt->Add(h11);h_prompt->Add(h1201);h_prompt->Add(h13);h_prompt->Add(h14);h_prompt->Add(h15);h_prompt->Add(h25);h_prompt->Add(h26);h_prompt->Add(h27);h_prompt->Add(h21);h_prompt->Add(h22);h_prompt->Add(h23);h_prompt->Add(h24);h_prompt->Add(h6);h_prompt->Add(h8);h_prompt->Add(h9);h_prompt->Add(h12); h_prompt->Add(h1);h_prompt->Add(h2);h_prompt->Add(h3);h_prompt->Add(h4);h_prompt->Add(h5);h_prompt->Add(h16);h_prompt->Add(h17);h_prompt->Add(h18);h_prompt->Add(h19);h_prompt->Add(h20);
+		//setting overflow bins
+		h_sig1->SetBinContent(nbins, h_sig1->GetBinContent(nbins+1));
+		h_sig2->SetBinContent(nbins, h_sig2->GetBinContent(nbins+1));
+		h_sig3->SetBinContent(nbins, h_sig3->GetBinContent(nbins+1));
+		h_sig4->SetBinContent(nbins, h_sig4->GetBinContent(nbins+1));
+		h_sig5->SetBinContent(nbins, h_sig5->GetBinContent(nbins+1));
+		h_sig6->SetBinContent(nbins, h_sig6->GetBinContent(nbins+1));
+		h_sig7->SetBinContent(nbins, h_sig7->GetBinContent(nbins+1));
+		h_prompt->SetBinContent(nbins, h_prompt->GetBinContent(nbins+1));
+		h_sig1->Rebin(50);
+		h_sig2->Rebin(50);
+		h_sig3->Rebin(50);
+		h_sig4->Rebin(50);
+		h_sig5->Rebin(50);
+		h_sig6->Rebin(50);
+		h_sig7->Rebin(50);
+		h_prompt->Rebin(50);
 		
+
 		ofile->cd();
 		h_data_t0->Write();
 		h_data_t1->Write();

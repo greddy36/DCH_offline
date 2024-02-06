@@ -62,27 +62,27 @@ void significance() {
 	TFile *ifile10 = new TFile("hist_0t/WZZ_2018.root","READ");
 	TFile *ifile11 = new TFile("hist_0t/ZZZ_2018.root","READ");
 
-	TFile *ifile12 = new TFile("hist/ttWJets_2018.root","READ");
-	TFile *ifile1201 = new TFile("hist/ttZJets_2018.root","READ");
+	TFile *ifile12 = new TFile("hist_0t/ttWJets_2018.root","READ");
+	TFile *ifile1201 = new TFile("hist_0t/ttZJets_2018.root","READ");
 	
-	TFile *ifile13 = new TFile("hist/ZZTo2L2Nu_2018.root","READ");
-	TFile *ifile14 = new TFile("hist/ZZTo2Q2L_2018.root","READ");
-	TFile *ifile15 = new TFile("hist/ZZTo4L_2018.root","READ");
+	TFile *ifile13 = new TFile("hist_0t/ZZTo2L2Nu_2018.root","READ");
+	TFile *ifile14 = new TFile("hist_0t/ZZTo2Q2L_2018.root","READ");
+	TFile *ifile15 = new TFile("hist_0t/ZZTo4L_2018.root","READ");
 
-	TFile *ifile16 = new TFile("hist/ST_s-channel_2018.root","READ");          
-	TFile *ifile17 = new TFile("hist/ST_t-channel_antitop_2018.root","READ");  
-	TFile *ifile18 = new TFile("hist/ST_t-channel_top_2018.root","READ");  
-	TFile *ifile19 = new TFile("hist/ST_tW_antitop_2018.root","READ");  
-	TFile *ifile20 = new TFile("hist/ST_tW_top_2018.root","READ");            
+	TFile *ifile16 = new TFile("hist_0t/ST_s-channel_2018.root","READ");          
+	TFile *ifile17 = new TFile("hist_0t/ST_t-channel_antitop_2018.root","READ");  
+	TFile *ifile18 = new TFile("hist_0t/ST_t-channel_top_2018.root","READ");  
+	TFile *ifile19 = new TFile("hist_0t/ST_tW_antitop_2018.root","READ");  
+	TFile *ifile20 = new TFile("hist_0t/ST_tW_top_2018.root","READ");            
 
-	TFile *ifile21 = new TFile("hist/ttHTo2L2Nu_2018.root","READ");
-	TFile *ifile22 = new TFile("hist/ttHToEE_2018.root","READ");
-	TFile *ifile23 = new TFile("hist/ttHToMuMu_2018.root","READ");
-	TFile *ifile24 = new TFile("hist/ttHToTauTau_2018.root","READ");
+	TFile *ifile21 = new TFile("hist_0t/ttHTo2L2Nu_2018.root","READ");
+	TFile *ifile22 = new TFile("hist_0t/ttHToEE_2018.root","READ");
+	TFile *ifile23 = new TFile("hist_0t/ttHToMuMu_2018.root","READ");
+	TFile *ifile24 = new TFile("hist_0t/ttHToTauTau_2018.root","READ");
 	
-	TFile *ifile25 = new TFile("hist/ZHToMuMu_2018.root","READ");
-	TFile *ifile26 = new TFile("hist/ZHToTauTau_2018.root","READ");
-	TFile *ifile27 = new TFile("hist/GluGluZH_2018.root","READ");
+	TFile *ifile25 = new TFile("hist_0t/ZHToMuMu_2018.root","READ");
+	TFile *ifile26 = new TFile("hist_0t/ZHToTauTau_2018.root","READ");
+	TFile *ifile27 = new TFile("hist_0t/GluGluZH_2018.root","READ");
 	float lumi_2018 = 59600;
 	//float nEvents = 
 
@@ -160,7 +160,7 @@ void significance() {
 		stack->Add(h18);
 		stack->Add(h19);
 		stack->Add(h20);*/
-		const char* trend = "inc";
+		const char* trend = "dec";
 		cummilative_hist(h1, tot_bkg,  signi_hist, stack, trend);
 	    cummilative_hist(h2, tot_bkg,  signi_hist, stack, trend);
 	    cummilative_hist(h3, tot_bkg,  signi_hist, stack, trend);

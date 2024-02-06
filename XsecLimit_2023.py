@@ -48,15 +48,15 @@ tgp.SetLineWidth(3)
 
 
 #HC-TopTagVeto_Syst.txt, Asymptotic, uncorrelated pdf uncertainties, added shape pdf and scale uncetainties for SM backgrouns
-limit_bands = np.array([
+limit_bands = np.array([#use make_limitBand.sh script to make the below table
 		# mass, obs, exp -2sigma, exp -1sigma, exp nom, exp +1sigma, exp +2sigma
-	[500, 0.6455, 0.1964, 0.3434, 0.6445, 1.2149, 1.9541 ],
-	[600, 0.5834, 0.1751, 0.3086, 0.5820, 1.1064, 1.7647 ],
-	[900, 0.5050, 0.1502, 0.2641, 0.5059, 0.9696, 1.5338 ],
-	[1000, 0.4950, 0.1473, 0.2590, 0.4961, 0.9549, 1.5042 ],
-	[1100, 0.4902, 0.1455, 0.2559, 0.4902, 0.9475, 1.4865 ],
-	[1200, 0.4870, 0.1431, 0.2536, 0.4883, 0.9398, 1.4805 ],
-	[1300, 0.4852, 0.1438, 0.2529, 0.4844, 0.9362, 1.4687 ]])
+[500, 0.1248, 0.0532, 0.0785, 0.1250, 0.2037, 0.3167 ],
+[600, 0.1088, 0.0459, 0.0686, 0.1089, 0.1757, 0.2716 ],
+[900, 0.0533, 0.0175, 0.0292, 0.0532, 0.0978, 0.1613 ],
+[1000, 0.0502, 0.0168, 0.0277, 0.0500, 0.0919, 0.1517 ],
+[1100, 0.0446, 0.0136, 0.0238, 0.0447, 0.0842, 0.1355 ],
+[1200, 0.0431, 0.0132, 0.0228, 0.0432, 0.0818, 0.1310 ],
+[1300, 0.0263, 0.0080, 0.0138, 0.0262, 0.0499, 0.0796]])
 
 mass2 = limit_bands[:,0]
 mass2r = np.flip(mass2)
@@ -95,7 +95,7 @@ xaxis.SetLimits(mass[0]-1,mass[-1]+1)
 yaxis = exp2g.GetYaxis()
 yaxis.SetTitle("Cross Section [fb]")
 yaxis.SetTitleSize(0.045)
-yaxis.SetRangeUser(0.05,15)
+yaxis.SetRangeUser(0.01,15)
 	
 exp2g.SetTitle("")
 exp2g.Draw("AF")
@@ -114,7 +114,7 @@ tex1.SetTextSize(0.05)
 tex1.SetLineWidth(2)
 tex1.Draw()
 
-tex2 = TLatex(0.67,0.92,"59.6 fb^{-1} (13 TeV)")
+tex2 = TLatex(0.67,0.92,"139 fb^{-1} (13 TeV)")
 tex2.SetNDC()
 tex2.SetTextFont(42)
 tex2.SetLineWidth(2)
