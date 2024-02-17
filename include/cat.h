@@ -1,4 +1,4 @@
-//#include "cat.h"
+
 const char* numberToCat(int number){
     static const char* cat_name[] = {
         "eeee", "eeem", "eeet", "eemm", "eemt", "eett",
@@ -19,7 +19,7 @@ const char* numberToCat(int number){
         return "Invalid";
 }
 
-int cat_lepCount(string cat, char lep1, char lep2){
+int cat_lepCount(string cat, char lep1, char lep2){//usully I count only e and m. 
     int count = 0;
     for (int i = 0; i<cat.length(); i++){
         if (cat[i] == lep1 or cat[i] == lep2 )

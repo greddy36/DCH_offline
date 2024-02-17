@@ -50,7 +50,7 @@ void HC_template_test(const char* ext = ".root"){
     // Create output file
     TFile* ofile = new TFile("nuisance_hist.root", "RECREATE");
 	ofile->cd();
-	const char *hist_list[] = {"h_Xmass_0t","h_Xmass_1t","h_Xmass_2t","h_Xmass_34t"};
+	const char *hist_list[] = {"h_Xmass_0t","h_Xmass_1t","h_Xmass_2t","h_Xmass_34t","h_Xmass_3lep"};
 	float mDCH=500, lumi_2018 = 139000;
 	for(int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++){
 		const char *signal500__channel;
@@ -131,11 +131,28 @@ void HC_template_test(const char* ext = ".root"){
 			prompt_red__channel = "prompt_red__t34";
 			other__channel = "other__t34";
 		}
-		int nbins = 1000; float xmin = 0, xmax = 3000;
+		if (i == 4){
+			signal500__channel = "signal500__t3lep";
+			signal600__channel = "signal600__t3lep";
+			signal700__channel = "signal700__t3lep";
+			signal800__channel = "signal800__t3lep";
+			signal900__channel = "signal900__t3lep";
+			signal1000__channel = "signal1000__t3lep";
+			signal1100__channel = "signal1100__t3lep";
+			signal1200__channel = "signal1200__t3lep";
+			signal1300__channel = "signal1300__t3lep";
+			signal1400__channel = "signal1400__t3lep";
+			prompt__channel = "prompt__t3lep";
+			one_fake__channel = "one_fake__t3lep";
+			prompt_red__channel = "prompt_red__t3lep";
+			other__channel = "other__t3lep";
+		}
+		int nbins = 3000; float xmin = 0, xmax = 3000;
 		TH1F* h_data_t0 = new TH1F("data_obs__t0", "mDCH1", nbins, xmin, xmax);	
 		TH1F* h_data_t1 = new TH1F("data_obs__t1", "mDCH1", nbins, xmin, xmax);			
 		TH1F* h_data_t2 = new TH1F("data_obs__t2", "mDCH1", nbins, xmin, xmax);			
 		TH1F* h_data_t34 = new TH1F("data_obs__t34", "mDCH1", nbins, xmin, xmax);
+		TH1F* h_data_t3lep = new TH1F("data_obs__t3lep", "mDCH1", nbins, xmin, xmax);
 		
 		TH1F* h_signal500 = new TH1F(signal500__channel, "mDCH1", nbins, xmin, xmax);
 		TH1F* h_signal600 = new TH1F(signal600__channel, "mDCH1", nbins, xmin, xmax);
@@ -195,8 +212,11 @@ void HC_template_test(const char* ext = ".root"){
 		TH1F *h25 = (TH1F*)ifile25->Get(hist_list[i]);h25->Scale(lumi_2018*0.7891/998626);
 		TH1F *h26 = (TH1F*)ifile26->Get(hist_list[i]);h26->Scale(lumi_2018*0.7891/14971244);
 		TH1F *h27 = (TH1F*)ifile27->Get(hist_list[i]);h27->Scale(lumi_2018*0.7891/14971244);
-
-		h_prompt->Add(h7);h_prompt->Add(h10);h_prompt->Add(h11);h_prompt->Add(h1201);h_prompt->Add(h13);h_prompt->Add(h14);h_prompt->Add(h15);h_prompt->Add(h25);h_prompt->Add(h26);h_prompt->Add(h27);h_prompt->Add(h21);h_prompt->Add(h22);h_prompt->Add(h23);h_prompt->Add(h24);h_prompt->Add(h6);h_prompt->Add(h8);h_prompt->Add(h9);h_prompt->Add(h12); h_prompt->Add(h1);h_prompt->Add(h2);h_prompt->Add(h3);h_prompt->Add(h4);h_prompt->Add(h5);h_prompt->Add(h16);h_prompt->Add(h17);h_prompt->Add(h18);h_prompt->Add(h19);h_prompt->Add(h20);
+		
+		h_other->Add(h1);h_other->Add(h2);h_other->Add(h3);h_other->Add(h4);h_other->Add(h5);h_other->Add(h6);h_other->Add(h7);h_other->Add(h8);h_other->Add(h9);h_other->Add(h12);h_other->Add(h16);h_other->Add(h17);h_other->Add(h18);h_other->Add(h19);h_other->Add(h20);
+		
+		h_prompt->Add(h10);h_prompt->Add(h11);h_prompt->Add(h1201);h_prompt->Add(h13);h_prompt->Add(h14);h_prompt->Add(h15);h_prompt->Add(h21);h_prompt->Add(h22);h_prompt->Add(h23);h_prompt->Add(h24);h_prompt->Add(h25);h_prompt->Add(h26);h_prompt->Add(h27);
+		
 		//setting overflow bins
 		h_sig1->SetBinContent(nbins, h_sig1->GetBinContent(nbins+1));
 		h_sig2->SetBinContent(nbins, h_sig2->GetBinContent(nbins+1));
@@ -206,21 +226,23 @@ void HC_template_test(const char* ext = ".root"){
 		h_sig6->SetBinContent(nbins, h_sig6->GetBinContent(nbins+1));
 		h_sig7->SetBinContent(nbins, h_sig7->GetBinContent(nbins+1));
 		h_prompt->SetBinContent(nbins, h_prompt->GetBinContent(nbins+1));
-		h_sig1->Rebin(50);
-		h_sig2->Rebin(50);
-		h_sig3->Rebin(50);
-		h_sig4->Rebin(50);
-		h_sig5->Rebin(50);
-		h_sig6->Rebin(50);
-		h_sig7->Rebin(50);
-		h_prompt->Rebin(50);
-		
+		h_other->SetBinContent(nbins, h_other->GetBinContent(nbins+1));
+		h_sig1->Rebin(100);
+		h_sig2->Rebin(100);
+		h_sig3->Rebin(100);
+		h_sig4->Rebin(100);
+		h_sig5->Rebin(100);
+		h_sig6->Rebin(100);
+		h_sig7->Rebin(100);
+		h_prompt->Rebin(100);
+		h_other->Rebin(100);
 
 		ofile->cd();
 		h_data_t0->Write();
 		h_data_t1->Write();
 		h_data_t2->Write();
 		h_data_t34->Write();
+		h_data_t3lep->Write();
 		h_sig1->Write();
 		h_sig2->Write();
 		h_sig3->Write();
@@ -231,7 +253,7 @@ void HC_template_test(const char* ext = ".root"){
 		h_prompt->Write();
 		//h_one_fake->Write();
 		//h_prompt_red->Write();
-		//h_other->Write();
+		h_other->Write();
 	}
 
     std::cout << "Histograms added and saved" <<std::endl;

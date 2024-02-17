@@ -187,8 +187,8 @@ void MyBranch(TTree* tree){
 	tree->SetBranchAddress("weight",&weight);
 	tree->SetBranchAddress("weightPU",&weightPU);
 	tree->SetBranchAddress("weightPUtrue",&weightPUtrue);
-	tree->SetBranchAddress("LHEweight",&LHEweight);
-	tree->SetBranchAddress("LHE_Njets",&LHE_Njets);
+	//tree->SetBranchAddress("LHEweight",&LHEweight);
+	//tree->SetBranchAddress("LHE_Njets",&LHE_Njets);
 	tree->SetBranchAddress("LHEScaleWeights",LHEScaleWeights);
 	tree->SetBranchAddress("Generator_weight",&Generator_weight);
 	tree->SetBranchAddress("electronTriggerWord",&electronTriggerWord);
