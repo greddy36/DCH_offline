@@ -64,10 +64,19 @@ TLegend *leg = new TLegend(0.7, 0.7, .9, .9);
 		if (mll > mll2) tmp = 1-factor;
 		else tmp = factor;
 
-		neutr_leg1.SetPtEtaPhiM(MET.Pt()*tmp, DCH1.Eta(), DCH1.Phi(), abs(mll-mll2)*tmp);//in Transverse DCH basis
-		neutr_leg2.SetPtEtaPhiM(MET.Pt()*(1-tmp), DCH2.Eta(), DCH2.Phi(),abs(mll-mll2)*(1-tmp));//in Transverse DCH basis
-		//neutr_leg1.SetPtEtaPhiM(total_neutr(0,0), TMath::ASinH(-DCH1.Pz()/total_neutr(0,0)), DCH1.Phi(),0);//in Transverse DCH basis
-		//neutr_leg2.SetPtEtaPhiM(total_neutr(1,0), TMath::ASinH(-DCH2.Pz()/total_neutr(1,0)), DCH2.Phi(),0);//in Transverse DCH basis
+		/*neutr_leg1.SetPtEtaPhiM(MET.Pt()*tmp, DCH1.Eta(), DCH1.Phi(), abs(mll-mll2)*tmp);//in Transverse DCH basis
+		neutr_leg2.SetPtEtaPhiM(MET.Pt()*(1-tmp), DCH2.Eta(), DCH2.Phi(),abs(mll-mll2)*(1-tmp));//in Transverse DCH basis*/
+		
+		double sh = TMath::SinH(DCH1.Eta())/TMath::SinH(DCH2.Eta());
+		double nu_pt1 = MET.Pt()/(TMath::Sqrt(1+sh*sh+2*sh*TMath::Cos(DCH1.Phi()-DCH2.Phi())));
+		double nu_pt2 = sh*nu_pt1;
+		neutr_leg1.SetPtEtaPhiM(nu_pt1, DCH1.Eta(), DCH1.Phi(), abs(mll-mll2)*tmp);//in Transverse DCH basis
+		neutr_leg2.SetPtEtaPhiM(nu_pt2, DCH2.Eta(), DCH2.Phi(), abs(mll-mll2)*(1-tmp));//in Transverse DCH basis
+		
+		
+		
+		/*neutr_leg1.SetPtEtaPhiM(total_neutr(0,0), TMath::ASinH(-DCH1.Pz()/total_neutr(0,0)), DCH1.Phi(),0);//in Transverse DCH basis
+		neutr_leg2.SetPtEtaPhiM(total_neutr(1,0), TMath::ASinH(-DCH2.Pz()/total_neutr(1,0)), DCH2.Phi(),0);//in Transverse DCH basis*/
 		/*##########################################
 		Assumptions: 
 		1) neutr_leg1 and neutr_leg2 are the full neutrino vectors of each DCH leg. 
@@ -86,8 +95,8 @@ TLegend *leg = new TLegend(0.7, 0.7, .9, .9);
 		
 		//##########################################
 		cout<<neutr_leg1.Pz()<<"\t"<<neutr_leg2.Pz()<<endl;
-		cout<<neutr_leg1.Eta()<<"\t"<<neutr_leg2.Eta()<<endl;
-		//cout<< (neutr_leg1+neutr_leg2).Pt() <<"\t"<< (MET).Pt() <<endl;
+		//cout<<neutr_leg1.Eta()<<"\t"<<neutr_leg2.Eta()<<endl;
+		cout<< (neutr_leg1+neutr_leg2).Pz() <<"\t"<< (MET).Pz() <<endl;
 		
 		h_mll->Fill(mll); h_mll2->Fill(mll2);
 		h_mDCH1->Fill((DCH1+neutr_leg1).M());
