@@ -3,6 +3,7 @@
 #include <TCanvas.h>
 
 //////////////////////////////////////////////////////////
+// Made using tree->MakeClass("MyBranch"); Creates MyBranch.C and MyBranch.h 
 //This file has been automatically generated 
 //  (Mon Dec 11 17:10:06 2023 by ROOT version6.26/10)
 //from TTree tree/Output tree

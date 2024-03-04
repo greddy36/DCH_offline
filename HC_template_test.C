@@ -4,12 +4,13 @@
 
 void HC_template_test(const char* ext = ".root"){
  	TFile *ifile_sig1 = new TFile("hist/HppM500_2018.root","READ"); 
- 	TFile *ifile_sig2 = new TFile("hist/HppM600_2018.root","READ");               
- 	TFile *ifile_sig3 = new TFile("hist/HppM900_2018.root","READ");               
- 	TFile *ifile_sig4 = new TFile("hist/HppM1000_2018.root","READ");               
- 	TFile *ifile_sig5 = new TFile("hist/HppM1100_2018.root","READ");               
- 	TFile *ifile_sig6 = new TFile("hist/HppM1200_2018.root","READ");               
- 	TFile *ifile_sig7 = new TFile("hist/HppM1300_2018.root","READ");             
+ 	TFile *ifile_sig2 = new TFile("hist/HppM600_2018.root","READ"); 
+ 	TFile *ifile_sig3 = new TFile("hist/HppM800_2018.root","READ"); 
+ 	TFile *ifile_sig4 = new TFile("hist/HppM900_2018.root","READ");               
+ 	TFile *ifile_sig5 = new TFile("hist/HppM1000_2018.root","READ");               
+ 	TFile *ifile_sig6 = new TFile("hist/HppM1100_2018.root","READ");               
+ 	TFile *ifile_sig7 = new TFile("hist/HppM1200_2018.root","READ");               
+ 	TFile *ifile_sig8 = new TFile("hist/HppM1300_2018.root","READ");             
  	             
 	TFile *ifile1 = new TFile("hist/DYJetsToLLM10to50_2018.root","READ");     
 	TFile *ifile2 = new TFile("hist/DYJetsToLLM50_2018.root","READ"); 
@@ -66,7 +67,7 @@ void HC_template_test(const char* ext = ".root"){
 		const char *prompt__channel;
 		const char *one_fake__channel;
 		const char *prompt_red__channel;
-		const char *other__channel;
+		const char *fake__channel;
 		if (i == 0){
 			signal500__channel = "signal500__t0";
 			signal600__channel = "signal600__t0";
@@ -81,7 +82,7 @@ void HC_template_test(const char* ext = ".root"){
 			prompt__channel = "prompt__t0";
 			one_fake__channel = "one_fake__t0";
 			prompt_red__channel = "prompt_red__t0";
-			other__channel = "other__t0";
+			fake__channel = "fake__t0";
 		}
 		if (i == 1){
 			signal500__channel = "signal500__t1";
@@ -97,7 +98,7 @@ void HC_template_test(const char* ext = ".root"){
 			prompt__channel = "prompt__t1";
 			one_fake__channel = "one_fake__t1";
 			prompt_red__channel = "prompt_red__t1";
-			other__channel = "other__t1";
+			fake__channel = "fake__t1";
 		}
 		if (i == 2){
 			signal500__channel = "signal500__t2";
@@ -113,7 +114,7 @@ void HC_template_test(const char* ext = ".root"){
 			prompt__channel = "prompt__t2";
 			one_fake__channel = "one_fake__t2";
 			prompt_red__channel = "prompt_red__t2";
-			other__channel = "other__t2";
+			fake__channel = "fake__t2";
 		}
 		if (i == 3){
 			signal500__channel = "signal500__t34";
@@ -129,7 +130,7 @@ void HC_template_test(const char* ext = ".root"){
 			prompt__channel = "prompt__t34";
 			one_fake__channel = "one_fake__t34";
 			prompt_red__channel = "prompt_red__t34";
-			other__channel = "other__t34";
+			fake__channel = "fake__t34";
 		}
 		if (i == 4){
 			signal500__channel = "signal500__t3lep";
@@ -145,9 +146,9 @@ void HC_template_test(const char* ext = ".root"){
 			prompt__channel = "prompt__t3lep";
 			one_fake__channel = "one_fake__t3lep";
 			prompt_red__channel = "prompt_red__t3lep";
-			other__channel = "other__t3lep";
+			fake__channel = "fake__t3lep";
 		}
-		int nbins = 3000; float xmin = 0, xmax = 3000;
+		int nbins = 3000; float xmin = 0, xmax = 6000;
 		TH1F* h_data_t0 = new TH1F("data_obs__t0", "mDCH1", nbins, xmin, xmax);	
 		TH1F* h_data_t1 = new TH1F("data_obs__t1", "mDCH1", nbins, xmin, xmax);			
 		TH1F* h_data_t2 = new TH1F("data_obs__t2", "mDCH1", nbins, xmin, xmax);			
@@ -165,18 +166,19 @@ void HC_template_test(const char* ext = ".root"){
 		TH1F* h_signal1300 = new TH1F(signal1300__channel, "mDCH1", nbins, xmin, xmax);
 		TH1F* h_signal1400 = new TH1F(signal1400__channel, "mDCH1", nbins, xmin, xmax);
 		TH1F* h_prompt = new TH1F(prompt__channel, "mDCH1", nbins, xmin, xmax);						
-		TH1F* h_one_fake = new TH1F(one_fake__channel, "mDCH1", nbins, xmin, xmax);			
-		TH1F* h_prompt_red = new TH1F(prompt_red__channel, "mDCH1", nbins, xmin, xmax);			
-		TH1F* h_other = new TH1F(other__channel, "mDCH1", nbins, xmin, xmax);			
+		//TH1F* h_one_fake = new TH1F(one_fake__channel, "mDCH1", nbins, xmin, xmax);			
+		//TH1F* h_prompt_red = new TH1F(prompt_red__channel, "mDCH1", nbins, xmin, xmax);			
+		TH1F* h_fake = new TH1F(fake__channel, "mDCH1", nbins, xmin, xmax);			
 
 
 		TH1F *h_sig1 = (TH1F*)ifile_sig1->Get(hist_list[i]);h_sig1->Scale(lumi_2018*0.001/176000); h_sig1->SetName(signal500__channel);
 		TH1F *h_sig2 = (TH1F*)ifile_sig2->Get(hist_list[i]);h_sig2->Scale(lumi_2018*0.001/171000); h_sig2->SetName(signal600__channel);
-		TH1F *h_sig3 = (TH1F*)ifile_sig3->Get(hist_list[i]);h_sig3->Scale(lumi_2018*0.001/171000); h_sig3->SetName(signal900__channel);
-		TH1F *h_sig4 = (TH1F*)ifile_sig4->Get(hist_list[i]);h_sig4->Scale(lumi_2018*0.001/175000); h_sig4->SetName(signal1000__channel);
-		TH1F *h_sig5 = (TH1F*)ifile_sig5->Get(hist_list[i]);h_sig5->Scale(lumi_2018*0.001/170000); h_sig5->SetName(signal1100__channel);
-		TH1F *h_sig6 = (TH1F*)ifile_sig6->Get(hist_list[i]);h_sig6->Scale(lumi_2018*0.001/176000); h_sig6->SetName(signal1200__channel);
-		TH1F *h_sig7 = (TH1F*)ifile_sig7->Get(hist_list[i]);h_sig7->Scale(lumi_2018*0.001/110000); h_sig7->SetName(signal1300__channel);
+		TH1F *h_sig3 = (TH1F*)ifile_sig3->Get(hist_list[i]);h_sig3->Scale(lumi_2018*0.001/176000); h_sig3->SetName(signal800__channel);
+		TH1F *h_sig4 = (TH1F*)ifile_sig4->Get(hist_list[i]);h_sig4->Scale(lumi_2018*0.001/171000); h_sig4->SetName(signal900__channel);
+		TH1F *h_sig5 = (TH1F*)ifile_sig5->Get(hist_list[i]);h_sig5->Scale(lumi_2018*0.001/175000); h_sig5->SetName(signal1000__channel);
+		TH1F *h_sig6 = (TH1F*)ifile_sig6->Get(hist_list[i]);h_sig6->Scale(lumi_2018*0.001/170000); h_sig6->SetName(signal1100__channel);
+		TH1F *h_sig7 = (TH1F*)ifile_sig7->Get(hist_list[i]);h_sig7->Scale(lumi_2018*0.001/176000); h_sig7->SetName(signal1200__channel);
+		TH1F *h_sig8 = (TH1F*)ifile_sig8->Get(hist_list[i]);h_sig8->Scale(lumi_2018*0.001/110000); h_sig8->SetName(signal1300__channel);
 
 	
 		TH1F *h1 = (TH1F*)ifile1->Get(hist_list[i]);h1->Scale(lumi_2018*18610/94452816);
@@ -213,9 +215,16 @@ void HC_template_test(const char* ext = ".root"){
 		TH1F *h26 = (TH1F*)ifile26->Get(hist_list[i]);h26->Scale(lumi_2018*0.7891/14971244);
 		TH1F *h27 = (TH1F*)ifile27->Get(hist_list[i]);h27->Scale(lumi_2018*0.7891/14971244);
 		
-		h_other->Add(h1);h_other->Add(h2);h_other->Add(h3);h_other->Add(h4);h_other->Add(h5);h_other->Add(h6);h_other->Add(h7);h_other->Add(h8);h_other->Add(h9);h_other->Add(h12);h_other->Add(h16);h_other->Add(h17);h_other->Add(h18);h_other->Add(h19);h_other->Add(h20);
+		bool isFourCh = false;
+		if (isFourCh == true){
+			h_fake->Add(h1);h_fake->Add(h2);h_fake->Add(h3);h_fake->Add(h4);h_fake->Add(h5);h_fake->Add(h6);h_fake->Add(h7);h_fake->Add(h8);h_fake->Add(h9);h_fake->Add(h12);h_fake->Add(h16);h_fake->Add(h17);h_fake->Add(h18);h_fake->Add(h19);h_fake->Add(h20);			
+			h_prompt->Add(h10);h_prompt->Add(h11);h_prompt->Add(h1201);h_prompt->Add(h13);h_prompt->Add(h14);h_prompt->Add(h15);h_prompt->Add(h21);h_prompt->Add(h22);h_prompt->Add(h23);h_prompt->Add(h24);h_prompt->Add(h25);h_prompt->Add(h26);h_prompt->Add(h27);
+		}
+		else{
+			h_fake->Add(h1);h_fake->Add(h2);h_fake->Add(h3);h_fake->Add(h4);h_fake->Add(h5);h_fake->Add(h7);h_fake->Add(h12);h_fake->Add(h16);h_fake->Add(h17);h_fake->Add(h18);h_fake->Add(h19);h_fake->Add(h20);		
+			h_prompt->Add(h6);h_prompt->Add(h8);h_prompt->Add(h9);h_prompt->Add(h10);h_prompt->Add(h11);h_prompt->Add(h12);h_prompt->Add(h1201);h_prompt->Add(h13);h_prompt->Add(h14);h_prompt->Add(h15);h_prompt->Add(h21);h_prompt->Add(h22);h_prompt->Add(h23);h_prompt->Add(h24);h_prompt->Add(h25);h_prompt->Add(h26);h_prompt->Add(h27);
+		}
 		
-		h_prompt->Add(h10);h_prompt->Add(h11);h_prompt->Add(h1201);h_prompt->Add(h13);h_prompt->Add(h14);h_prompt->Add(h15);h_prompt->Add(h21);h_prompt->Add(h22);h_prompt->Add(h23);h_prompt->Add(h24);h_prompt->Add(h25);h_prompt->Add(h26);h_prompt->Add(h27);
 		
 		//setting overflow bins
 		h_sig1->SetBinContent(nbins, h_sig1->GetBinContent(nbins+1));
@@ -225,17 +234,19 @@ void HC_template_test(const char* ext = ".root"){
 		h_sig5->SetBinContent(nbins, h_sig5->GetBinContent(nbins+1));
 		h_sig6->SetBinContent(nbins, h_sig6->GetBinContent(nbins+1));
 		h_sig7->SetBinContent(nbins, h_sig7->GetBinContent(nbins+1));
+		h_sig8->SetBinContent(nbins, h_sig8->GetBinContent(nbins+1));
 		h_prompt->SetBinContent(nbins, h_prompt->GetBinContent(nbins+1));
-		h_other->SetBinContent(nbins, h_other->GetBinContent(nbins+1));
-		h_sig1->Rebin(100);
-		h_sig2->Rebin(100);
-		h_sig3->Rebin(100);
-		h_sig4->Rebin(100);
-		h_sig5->Rebin(100);
-		h_sig6->Rebin(100);
-		h_sig7->Rebin(100);
-		h_prompt->Rebin(100);
-		h_other->Rebin(100);
+		h_fake->SetBinContent(nbins, h_fake->GetBinContent(nbins+1));
+		h_sig1->Rebin(200);
+		h_sig2->Rebin(200);
+		h_sig3->Rebin(200);
+		h_sig4->Rebin(200);
+		h_sig5->Rebin(200);
+		h_sig6->Rebin(200);
+		h_sig7->Rebin(200);
+		h_sig8->Rebin(200);
+		h_prompt->Rebin(200);
+		h_fake->Rebin(200);
 
 		ofile->cd();
 		h_data_t0->Write();
@@ -250,10 +261,11 @@ void HC_template_test(const char* ext = ".root"){
 		h_sig5->Write();
 		h_sig6->Write();
 		h_sig7->Write();
+		h_sig8->Write();
 		h_prompt->Write();
 		//h_one_fake->Write();
 		//h_prompt_red->Write();
-		h_other->Write();
+		h_fake->Write();
 	}
 
     std::cout << "Histograms added and saved" <<std::endl;
