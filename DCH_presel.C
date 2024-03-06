@@ -6,6 +6,7 @@
 #include "TFile.h"
 #include "include/MyBranch.C"//branch definitons
 #include "include/Kinematics.C"//Kine fns
+#include "include/MET_split.C"
 	
 void DCH_presel(const char* ext = ".root"){
 	const char* inDir = ".";
@@ -31,8 +32,10 @@ void DCH_presel(const char* ext = ".root"){
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
 		TH1F* cutflow = new TH1F("cutflow", "cutflow", 6, 0, 6);     
-		TH1F* h_mll = new TH1F("h_mll", "mll", 1000, 0, mDCH+1500);
-		TH1F* h_mll2 = new TH1F("h_mll2", "mll2", 1000, 0, mDCH+1500);
+		TH1F* h_mll = new TH1F("h_mll", "mll_1", 1000, 0, mDCH+1500);
+		TH1F* h_mll_2 = new TH1F("h_mll_2", "mll_2", 1000, 0, mDCH+1500);
+		TH1F* h_mDCH1 = new TH1F("h_mDCH1", "mDCH1", 1000, 0, mDCH+1500);
+		TH1F* h_mDCH2 = new TH1F("h_mDCH2", "mDCH2", 1000, 0, mDCH+1500);
 		TH1F* h_ST = new TH1F("h_ST", "ST", 1000, 0, mDCH+2000);
 		TH1F* h_mZ1 = new TH1F("h_mZ1", "Z mass 1", 1000, 0, mDCH+1500);
 		TH1F* h_mZ2 = new TH1F("h_mZ2", "Z mass 2", 1000, 0, mDCH+1500);
@@ -59,22 +62,43 @@ void DCH_presel(const char* ext = ".root"){
 			tree->GetEntry(i);			
 			float *lep_pt, *tau_pt;
 			const char *cat_name = numberToCat(cat);
-			int lep_count = cat_lepCount(cat_name,'e','m'); 
+			int Nlep = cat_lepCount(cat_name,'e','m'); 
+			int Ntau = strlen(cat_name)-Nlep;  
 
-			//if (lep_count != 4) continue;// 0 tau
-			//if (lep_count != 3) continue;// 1 tau
-			//if (lep_count != 2) continue;// 2 tau
-			if (lep_count > 1) continue;// 3-4 tau
-			//if (lep_count != 0) continue;// 4 tau
+			//if (Ntau != 0) continue;
+			//if (Ntau != 1) continue;
+			//if (Ntau != 2) continue;
+			//if (Ntau > 3) continue;
+			//if (Ntau != 4) continue;
 			
 			h_ST->Fill(pt_1+pt_2+pt_3+pt_4);
-			h_mll->Fill(mll);
-			h_mll2->Fill(mll2);
+			
 			h_mZ1->Fill(abs((LepV(1)+LepV(3)).M()));
 			h_mZ2->Fill(abs((LepV(1)+LepV(4)).M()));
 			h_mZ3->Fill(abs((LepV(2)+LepV(3)).M()));
 			h_mZ4->Fill(abs((LepV(2)+LepV(4)).M()));
 			h_met->Fill(met);
+
+			
+			auto [nu_leg1, nu_leg2] = MET_split(LepV(1),LepV(2),LepV(3),LepV(4),met,metphi);
+			double mll_1, mll_2, m_dch1, m_dch2;
+			if (pt_1+pt_2 > pt_3+pt_4){
+				mll_1 = mll;
+				mll_2 = mll2;
+				m_dch1 = (nu_leg1+LepV(1)+LepV(2)).M();
+				m_dch2 = (nu_leg2+LepV(3)+LepV(4)).M();
+			}
+			else{
+				mll_1 = mll2;
+				mll_2 = mll;
+				m_dch1 = (nu_leg2+LepV(3)+LepV(4)).M();
+				m_dch2 = (nu_leg1+LepV(1)+LepV(2)).M();
+			}
+			h_mll->Fill(mll_1);
+			h_mll_2->Fill(mll_2);
+			h_mDCH1->Fill(m_dch1);
+			h_mDCH2->Fill(m_dch2);
+			
 			h_dR->Fill(getDR(eta_1,phi_1, eta_3,phi_3));h_dR->Fill(getDR(eta_1,phi_1, eta_4,phi_4));h_dR->Fill(getDR(eta_2,phi_2, eta_3,phi_3));h_dR->Fill(getDR(eta_2,phi_2, eta_4,phi_4));
 			h_dRll->Fill(getDR(eta_1,phi_1, eta_2,phi_2));
 			h_dRll2->Fill(getDR(eta_3,phi_3, eta_4,phi_4));
@@ -82,7 +106,7 @@ void DCH_presel(const char* ext = ".root"){
 			h_dR2_met->Fill(getDR(0, metphi, 0, (LepV(3)+LepV(4)).Phi()));		
 			cutflow->Fill(0);
 //################# Pre-Selection AN #####################################################			
-	/*		 if(lep_count == 0){
+	/*		 if(Ntau == 4){
 				tau_pt  = SortPt(cat_name,"t");
 				h_pT1->Fill(tau_pt[0]);
 				h_pT2->Fill(tau_pt[1]);
@@ -97,110 +121,111 @@ void DCH_presel(const char* ext = ".root"){
 				h_pT2->Fill(lep_pt[1]);
 				h_pT3->Fill(lep_pt[2]);
 				h_pT4->Fill(lep_pt[3]);
-				//if(lep_count == 1 and lep_pt[0] < 30){ continue;}
-			   	//if(lep_count >= 2 and (lep_pt[0] < 30 or lep_pt[2]< 20)){ continue;}
+				//if(Ntau == 3 and lep_pt[0] < 30){ continue;}
+			   	//if(Ntau <= 2 and (lep_pt[0] < 30 or lep_pt[2]< 20)){ continue;}
 			   	cutflow->Fill(1);
 			}
 			//if( getDR(eta_1,phi_1, eta_2,phi_2) < 0.02 or getDR(eta_1,phi_1, eta_3,phi_3) < 0.02 or getDR(eta_1,phi_1, eta_4,phi_4) < 0.02 or getDR(eta_2,phi_2, eta_3,phi_3) < 0.02 or getDR(eta_2,phi_2, eta_4,phi_4) < 0.02 or getDR(eta_3,phi_3, eta_4,phi_4) < 0.02 ){ continue;}
 			cutflow->Fill(2);
 //############## AN Mass-Based Selection ##################################################			
 			//cutflow->Fill(1);cutflow->Fill(2);
-			if (lep_count == 4){
+			if (Ntau == 0){
 				if (pt_1+pt_2+pt_3+pt_4 < 1.63*mDCH-270){ continue;}//ST
 				cutflow->Fill(3);cutflow->Fill(4);
 				if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(1)+LepV(4)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(4)).M()-mZ) < 10){ continue;}
 				cutflow->Fill(5);
-				if (mll <0.9*mDCH or mll >1.1*mDCH or mll2 <0.9*mDCH or mll2 >1.1*mDCH){ continue;}  
+				if (mll_1 <0.9*mDCH or mll_1 >1.1*mDCH or mll_2 <0.9*mDCH or mll_2 >1.1*mDCH){ continue;}  
 				cutflow->Fill(6);
 			}	
-			else if (lep_count == 3){
+			else if (Ntau == 1){
 				if (pt_1+pt_2+pt_3+pt_4 < 1.30*mDCH-34){ continue;}//ST
 				cutflow->Fill(3);		
 				if (getDR(eta_1,phi_1, eta_2,phi_2) >3.3 or getDR(eta_3,phi_3, eta_4,phi_4) >3.3){ continue;}
 				cutflow->Fill(4);	
 				if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(1)+LepV(4)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(4)).M()-mZ) < 10){ continue;}
 				cutflow->Fill(5);
-				if (mll <0.4*mDCH or mll >1.1*mDCH or mll2 <0.4*mDCH or mll2 >1.1*mDCH){ continue;}
+				if (mll_1 <0.4*mDCH or mll_1 >1.1*mDCH or mll_2 <0.4*mDCH or mll_2 >1.1*mDCH){ continue;}
 				cutflow->Fill(6);
 			}
-			else if (lep_count == 2){
+			else if (Ntau == 2){
 				if (pt_1+pt_2+pt_3+pt_4 < 0.56*mDCH+194){ continue;}//ST
 				cutflow->Fill(3);
 				if (getDR(eta_1,phi_1, eta_2,phi_2) >2.5 or getDR(eta_3,phi_3, eta_4,phi_4) >2.5){ continue;} 
 				cutflow->Fill(4);
 				if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(1)+LepV(4)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(4)).M()-mZ) < 10){ continue;}
 				cutflow->Fill(5);
-				if (mll <0.3*mDCH or mll >1.1*mDCH or mll2 <0.3*mDCH or mll2 >1.1*mDCH){ continue;}
+				if (mll_1 <0.3*mDCH or mll_1 >1.1*mDCH or mll_2 <0.3*mDCH or mll_2 >1.1*mDCH){ continue;}
 				cutflow->Fill(6);
 			}*/
 //##################################My selections#########################################	 
 			if (cat <=21){//4-lep
-				if (lep_count == 4){
+				if (Ntau == 0){
 					if (pt_1+pt_2+pt_3+pt_4 < 450){ continue;}//ST
 					cutflow->Fill(1);
 					if (getDR(eta_1,phi_1, eta_2,phi_2) >4 or getDR(eta_3,phi_3, eta_4,phi_4) >4){ continue;}
 					cutflow->Fill(2);
 					if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(1)+LepV(4)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(4)).M()-mZ) < 10){ continue;}
 					cutflow->Fill(3);
-					if (mll <100  or mll2 <100 ){ continue;}  
+					if (mll_1 <100  or mll_2 <100 ){ continue;}  
 					cutflow->Fill(4);
-					h_Xmass_0t->Fill(mll);
-					h_Xmass_0t->Fill(mll2 + xmax/2);
+					h_Xmass_0t->Fill(m_dch1);
+					h_Xmass_0t->Fill(m_dch2 + xmax/2);
 				}	
-				else if (lep_count == 3){
+				else if (Ntau == 1){
 					if (pt_1+pt_2+pt_3+pt_4 < 450){ continue;}//ST
 					cutflow->Fill(1);		
 					if (getDR(eta_1,phi_1, eta_2,phi_2) >3.6 or getDR(eta_3,phi_3, eta_4,phi_4) >3.6){ continue;}
 					cutflow->Fill(2);	
 					if (abs((LepV(1)+LepV(3)).M()-mZ) < 25 or abs((LepV(1)+LepV(4)).M()-mZ) < 25 or abs((LepV(2)+LepV(3)).M()-mZ) < 25 or abs((LepV(2)+LepV(4)).M()-mZ) < 25){ continue;}
 					cutflow->Fill(3);
-					if (mll <100  or mll2 <100 ){ continue;}
+					if (mll_1 <100  or mll_2 <100 ){ continue;}
 					cutflow->Fill(4);
-					h_Xmass_1t->Fill(mll);
-					h_Xmass_1t->Fill(mll2 + xmax/2);
+					h_Xmass_1t->Fill(m_dch1);
+					h_Xmass_1t->Fill(m_dch2 + xmax/2);
 				}
-				else if (lep_count <= 2){
+				else if (Ntau == 2){
 					if (pt_1+pt_2+pt_3+pt_4 < 300){ continue;}//ST
 					cutflow->Fill(1);
 					if (getDR(eta_1,phi_1, eta_2,phi_2) >3.9 or getDR(eta_3,phi_3, eta_4,phi_4) >3.9){ continue;} 
 					cutflow->Fill(2);
 					if (abs((LepV(1)+LepV(3)).M()-mZ) < 85 or abs((LepV(1)+LepV(4)).M()-mZ) < 85 or abs((LepV(2)+LepV(3)).M()-mZ) < 85 or abs((LepV(2)+LepV(4)).M()-mZ) < 85){ continue;}
 					cutflow->Fill(3);
-					if (mll <100  or mll2 <100 ){ continue;}
+					if (mll_1 <100  or mll_2 <100 ){ continue;}
 					cutflow->Fill(4);
-					h_Xmass_2t->Fill(mll);
-					h_Xmass_2t->Fill(mll2 + xmax/2);
+					h_Xmass_2t->Fill(m_dch1);
+					h_Xmass_2t->Fill(m_dch2 + xmax/2);
 				}
-				/*if (lep_count < 2){
+				/*if (Ntau > 2){
 					if (pt_1+pt_2+pt_3+pt_4 < 450){ continue;}//ST
 					cutflow->Fill(1);
 					if (getDR(eta_1,phi_1, eta_2,phi_2) >3.9 or getDR(eta_3,phi_3, eta_4,phi_4) >3.9){ continue;} 
 					cutflow->Fill(2);
 					if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(1)+LepV(4)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(4)).M()-mZ) < 10){ continue;}
 					cutflow->Fill(3);
-					if (mll <100 or mll2 <100 ){ continue;}
+					if (mll_1 <100 or mll_2 <100 ){ continue;}
 					cutflow->Fill(4);
-					h_Xmass_34t->Fill(mll);
+					h_Xmass_34t->Fill(mll_1);
 				}*/
 			}//4-lep	
 			else if(cat >= 22 ){//3-lep	
-				if (lep_count == 3){//0tau for 3lep
+				if (Ntau == 0){//0tau for 3lep
 					if (pt_1+pt_2+pt_3 < 300){ continue;}//ST
 					cutflow->Fill(1);
 					if (getDR(eta_1,phi_1, eta_2,phi_2) >4){ continue;}
 					cutflow->Fill(2);
 					if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10){ continue;}
 					cutflow->Fill(3);
-					if (mll <100){ continue;}  
+					if (mll_1 <100){ continue;}  
 					cutflow->Fill(4);
-					h_Xmass_3lep->Fill(mll);
-					//h_Xmass_3lep->Fill(mll2 + xmax/2);
+					h_Xmass_3lep->Fill(m_dch1);
 				}			
 			}//3-lep
 		}
 		cutflow->Write();
 		h_mll->Write();
-		h_mll2->Write();
+		h_mll_2->Write();
+		h_mDCH1->Write();
+		h_mDCH2->Write();
 		h_ST->Write();
 		h_mZ1->Write();
 		h_mZ2->Write();

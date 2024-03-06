@@ -237,16 +237,16 @@ void HC_template_test(const char* ext = ".root"){
 		h_sig8->SetBinContent(nbins, h_sig8->GetBinContent(nbins+1));
 		h_prompt->SetBinContent(nbins, h_prompt->GetBinContent(nbins+1));
 		h_fake->SetBinContent(nbins, h_fake->GetBinContent(nbins+1));
-		h_sig1->Rebin(200);
-		h_sig2->Rebin(200);
-		h_sig3->Rebin(200);
-		h_sig4->Rebin(200);
-		h_sig5->Rebin(200);
-		h_sig6->Rebin(200);
-		h_sig7->Rebin(200);
-		h_sig8->Rebin(200);
-		h_prompt->Rebin(200);
-		h_fake->Rebin(200);
+		h_sig1->Rebin(100);
+		h_sig2->Rebin(100);
+		h_sig3->Rebin(100);
+		h_sig4->Rebin(100);
+		h_sig5->Rebin(100);
+		h_sig6->Rebin(100);
+		h_sig7->Rebin(100);
+		h_sig8->Rebin(100);
+		h_prompt->Rebin(100);
+		h_fake->Rebin(100);
 
 		ofile->cd();
 		h_data_t0->Write();

@@ -8,10 +8,10 @@
 #include "TMatrix.h"
 #include "include/MyBranch.C"
 #include "include/cat.h"
-void MET_incl_new() {
+void MET_split() {
 TCanvas *can= new TCanvas("can","can",700,500);gStyle->SetOptStat(0); 
 TLegend *leg = new TLegend(0.7, 0.7, .9, .9);
-	TFile *ifile = new TFile("HppM500_2018.root","READ");
+	TFile *ifile = new TFile("HppM1000_2018.root","READ");
 	TTree *tree = (TTree*)ifile->Get("Events");
 	MyBranch(tree);
 	TFile* ofile = new TFile("MET_exercise.root", "RECREATE");
@@ -22,9 +22,11 @@ TLegend *leg = new TLegend(0.7, 0.7, .9, .9);
 	for (int i =0; i < tree->GetEntries(); i++){
 		tree->GetEntry(i);
 		const char *cat_name = numberToCat(cat);
-		int lep_count = cat_lepCount(cat_name,'e','m'); 
+		int Nlep = cat_lepCount(cat_name,'e','m'); 
+		int Ntau = strlen(cat_name)-Nlep; 
 		if (strlen(cat_name) != 4) continue;
-		if (lep_count >2) continue;
+		if (Ntau < 2 ) continue;
+		
 		//if (cat !=1) continue; 
 		TLorentzVector Lep1, Lep2, Lep3, Lep4, MET, Vis1, Vis2; //TLV for CMS frame particles
 		MET.SetPtEtaPhiM(met, 0, metphi, 0);
@@ -36,54 +38,59 @@ TLegend *leg = new TLegend(0.7, 0.7, .9, .9);
 		Vis2 = Lep3+Lep4;
 		TLorentzVector vis_total = Vis1+Vis2; 
 		//cout<<MET.Pt()<<endl;
-
-		cout<<"Vis1 Pt: "<<Vis1.Pt()<< "\t" <<"Vis1 Eta: "<<Vis1.Eta()<<"\t" <<"Vis1 Phi: "<<Vis1.Phi()<<"\t" <<"Vis1 M: "<<Vis1.M()<<endl;		
-		cout<<"Vis2 Pt: "<<Vis2.Pt()<< "\t" <<"Vis2 Eta: "<<Vis2.Eta()<<"\t" <<"Vis2 Phi: "<<Vis2.Phi()<<"\t" <<"Vis2 M: "<<Vis2.M()<<endl;
+		
+		
+/*		cout<<"Vis1 Pt: "<<Vis1.Pt()<< "\t" <<"Vis1 Eta: "<<Vis1.Eta()<<"\t" <<"Vis1 Phi: "<<Vis1.Phi()<<"\t" <<"Vis1 M: "<<Vis1.M()<<endl;		
+		cout<<"Vis2 Pt: "<<Vis2.Pt()<< "\t" <<"Vis2 Eta: "<<Vis2.Eta()<<"\t" <<"Vis2 Phi: "<<Vis2.Phi()<<"\t" <<"Vis2 M: "<<Vis2.M()<<endl;*/
 		
 		TLorentzVector neutr_leg1, neutr_leg2;
-		
-		double ptleg1 = MET.Pt()*0.5;//assumption 1
-		//constraint 1: ptleg1+ptleg2 = MET by vector addition
-		double A=1, B = 2*ptleg1*TMath::Cos(Vis1.Phi()-Vis2.Phi()), C = ptleg1*ptleg1 - MET.Pt()*MET.Pt(); 
-		double ptleg2 = (-B + TMath::Sqrt( B*B-4*A*C ))/(2*A);
-		if (ptleg2 < 0){
-			ptleg2 = (-B - TMath::Sqrt( B*B-4*A*C ))/(2*A);
-		}
-		
-		float MDCH = (mll+mll2)/2;
-		double mleg2 = abs(MDCH-mll2);//assumption 2 
-		//constraint 2: mDCH1 = mDCH2 
-		double Eleg2 = TMath::Sqrt(mleg2*mleg2 + ptleg2*ptleg2*TMath::CosH(Vis2.Eta())*TMath::CosH(Vis2.Eta()));//E = sqrt(m^2+Pt^2*Cosh^2(eta))
-		double J = (Eleg2+Vis2.E()), K = (ptleg2+Vis2.Pt())*TMath::CosH(Vis2.Eta()), L = (ptleg1+Vis1.Pt())*TMath::CosH(Vis1.Eta()); 
-		double Eleg1 = -Vis1.E()+TMath::Sqrt(J*J - K*K + L*L);
-		if (Eleg1 < 0){
-			Eleg1 = -Vis1.E()-TMath::Sqrt(J*J - K*K + L*L);
-		}
-		
-		neutr_leg1.SetPtEtaPhiE(ptleg1, Vis1.Eta(), Vis1.Phi(), Eleg1);
-		neutr_leg2.SetPtEtaPhiE(ptleg2, Vis2.Eta(), Vis2.Phi(), Eleg2);	
+		if (mll2 < 0){//if only one vis pair is found
+			neutr_leg1 = MET;
+		}		
+		else {
+			double ptleg1 = MET.Pt()*0.5;//assumption 1
+			//constraint 1: ptleg1+ptleg2 = MET by vector addition
+			double A=1, B = 2*ptleg1*TMath::Cos(Vis1.Phi()-Vis2.Phi()), C = ptleg1*ptleg1 - MET.Pt()*MET.Pt(); 
+			double ptleg2 = (-B + TMath::Sqrt( B*B-4*A*C ))/(2*A);
+			if (ptleg2 < 0){
+				ptleg2 = (-B - TMath::Sqrt( B*B-4*A*C ))/(2*A);
+			}
 			
+			float MDCH = (mll+mll2)/2;
+			double mleg2 = abs(MDCH-mll2);//assumption 2 
+			//constraint 2: mDCH1 = mDCH2 
+			double Eleg2 = TMath::Sqrt(mleg2*mleg2 + ptleg2*ptleg2*TMath::CosH(Vis2.Eta())*TMath::CosH(Vis2.Eta()));//E = sqrt(m^2+Pt^2*Cosh^2(eta))
+			double J = (Eleg2+Vis2.E()), K = (ptleg2+Vis2.Pt())*TMath::CosH(Vis2.Eta()), L = (ptleg1+Vis1.Pt())*TMath::CosH(Vis1.Eta()); 
+			double Eleg1 = -Vis1.E()+TMath::Sqrt(J*J - K*K + L*L);
+			if (Eleg1 < 0){
+				Eleg1 = -Vis1.E()-TMath::Sqrt(J*J - K*K + L*L);
+			}
 			
-		if(neutr_leg1.M() < 0 || neutr_leg1.E() < 0){//for only one leg 
-			ptleg1 = 0; ptleg2 = MET.Pt(); 
-			Eleg1 = 0;
-			mleg2 = abs(mll-mll2);
-			Eleg2 = TMath::Sqrt(mleg2*mleg2 + ptleg2*ptleg2*TMath::CosH(Vis2.Eta())*TMath::CosH(Vis2.Eta()));
 			neutr_leg1.SetPtEtaPhiE(ptleg1, Vis1.Eta(), Vis1.Phi(), Eleg1);
 			neutr_leg2.SetPtEtaPhiE(ptleg2, Vis2.Eta(), Vis2.Phi(), Eleg2);	
-			cout<<"HAHAHA"<<endl;
-		}
-		
-		//##########################################
+				
+				
+			if(neutr_leg1.M() < 0 || neutr_leg1.E() < 0){//for only one leg 
+				ptleg1 = 0; ptleg2 = MET.Pt(); 
+				Eleg1 = 0;
+				mleg2 = abs(mll-mll2);
+				Eleg2 = TMath::Sqrt(mleg2*mleg2 + ptleg2*ptleg2*TMath::CosH(Vis2.Eta())*TMath::CosH(Vis2.Eta()));
+				neutr_leg1.SetPtEtaPhiE(ptleg1, Vis1.Eta(), Vis1.Phi(), Eleg1);
+				neutr_leg2.SetPtEtaPhiE(ptleg2, Vis2.Eta(), Vis2.Phi(), Eleg2);	
+				cout<<"HAHAHA"<<endl;
+			}
+			
+			//##########################################
+		}//else
 		//cout<<met<<"\t"<< (neutr_leg1+neutr_leg2).Pt()<<endl;
 		cout<< "Nu1 Pt: "<< (neutr_leg1).Pt() <<"\t"<< " Eta: " << (neutr_leg1).Eta() <<"\t" <<" Phi: "<<(neutr_leg1).Phi()<<"\t" <<" M: "<<(neutr_leg1).M()<< endl;
 		cout<< "Nu2 Pt: "<< (neutr_leg2).Pt() <<"\t"<< " Eta: " << (neutr_leg2).Eta() <<"\t" <<" Phi: "<<(neutr_leg2).Phi()<<"\t" <<" M: "<<(neutr_leg2).M()<< endl<<endl;
-		
-		
+				
 		h_mll->Fill(mll); h_mll2->Fill(mll2);
 		h_mDCH1->Fill((Vis1+neutr_leg1).M());
 		h_mDCH2->Fill((Vis2+neutr_leg2).M());
-	}
+	}//for
+	
 	h_mll->Write();
 	h_mll2->Write();
 	h_mDCH1->Write();
