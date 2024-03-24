@@ -33,7 +33,7 @@ void plotAllHistograms(const char* filename) {
             // Retrieve and plot the histogram
             canvas->cd(padIndex);
             TH1 *histogram = dynamic_cast<TH1*>(key->ReadObj());
-            cout<<name<<endl;
+            cout<<name<< "\t" << histogram->Integral() <<endl;
             if (name.find("signal") < name.length()) histogram->SetTitle(const_cast<char*>(name.c_str()));
             else if (name.find("prompt") < name.length()) histogram->SetTitle(const_cast<char*>(name.c_str()));
             else if (name.find("fake") < name.length()) histogram->SetTitle(const_cast<char*>(name.c_str()));
@@ -51,7 +51,7 @@ void plotAllHistograms(const char* filename) {
 
 void plot_hist() {
     // Replace "your_file.root" with the actual path to your ROOT file
-    const char* filename = "nuisance_hist_3lep_2bkg.root";
+    const char* filename = "hist/nuisance_hist.root";
 
     // Call the function to plot all histograms in the file
     plotAllHistograms(filename);

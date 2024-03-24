@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "HC_template_test.C": "cpp",
+        "HC_template.C": "cpp",
+        "DCH_presel.C": "cpp",
+        "Kinematics.C": "cpp"
+    },
+    "editor.fontFamily": "monospace"
+}

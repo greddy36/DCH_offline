@@ -93,8 +93,8 @@
 	Float_t    pt_tt;
 	Float_t    mt_tot;
 	Float_t    m_vis;
-	Float_t    m_sv;
-	Float_t    mt_sv;
+	//Float_t    m_sv;
+	//Float_t    mt_sv;
 	Float_t    H_DR;
 	Float_t    AMass;
 	Float_t    H_LT;
@@ -255,8 +255,8 @@ void MyBranch(TTree* tree){
 	tree->SetBranchAddress("pt_tt",&pt_tt);
 	tree->SetBranchAddress("mt_tot",&mt_tot);
 	tree->SetBranchAddress("m_vis",&m_vis);
-	tree->SetBranchAddress("m_sv",&m_sv);
-	tree->SetBranchAddress("mt_sv",&mt_sv);
+	//tree->SetBranchAddress("m_sv",&m_sv);
+	//tree->SetBranchAddress("mt_sv",&mt_sv);
 	tree->SetBranchAddress("H_DR",&H_DR);
 	tree->SetBranchAddress("AMass",&AMass);
 	tree->SetBranchAddress("H_LT",&H_LT);

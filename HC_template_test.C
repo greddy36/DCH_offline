@@ -49,10 +49,10 @@ void HC_template_test(const char* ext = ".root"){
 	TFile *ifile27 = new TFile("hist/GluGluZH_2018.root","READ");
 
     // Create output file
-    TFile* ofile = new TFile("nuisance_hist.root", "RECREATE");
+    TFile* ofile = new TFile("hist/nuisance_hist.root", "RECREATE");
 	ofile->cd();
 	const char *hist_list[] = {"h_Xmass_0t","h_Xmass_1t","h_Xmass_2t","h_Xmass_34t","h_Xmass_3lep"};
-	float mDCH=500, lumi_2018 = 139000;
+	float mDCH=500;
 	for(int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++){
 		const char *signal500__channel;
 		const char *signal600__channel;
@@ -148,7 +148,7 @@ void HC_template_test(const char* ext = ".root"){
 			prompt_red__channel = "prompt_red__t3lep";
 			fake__channel = "fake__t3lep";
 		}
-		int nbins = 3000; float xmin = 0, xmax = 6000;
+		int nbins = 3000; float xmin = 0, xmax = 3000;
 		TH1F* h_data_t0 = new TH1F("data_obs__t0", "mDCH1", nbins, xmin, xmax);	
 		TH1F* h_data_t1 = new TH1F("data_obs__t1", "mDCH1", nbins, xmin, xmax);			
 		TH1F* h_data_t2 = new TH1F("data_obs__t2", "mDCH1", nbins, xmin, xmax);			
@@ -171,49 +171,49 @@ void HC_template_test(const char* ext = ".root"){
 		TH1F* h_fake = new TH1F(fake__channel, "mDCH1", nbins, xmin, xmax);			
 
 
-		TH1F *h_sig1 = (TH1F*)ifile_sig1->Get(hist_list[i]);h_sig1->Scale(lumi_2018*0.001/176000); h_sig1->SetName(signal500__channel);
-		TH1F *h_sig2 = (TH1F*)ifile_sig2->Get(hist_list[i]);h_sig2->Scale(lumi_2018*0.001/171000); h_sig2->SetName(signal600__channel);
-		TH1F *h_sig3 = (TH1F*)ifile_sig3->Get(hist_list[i]);h_sig3->Scale(lumi_2018*0.001/176000); h_sig3->SetName(signal800__channel);
-		TH1F *h_sig4 = (TH1F*)ifile_sig4->Get(hist_list[i]);h_sig4->Scale(lumi_2018*0.001/171000); h_sig4->SetName(signal900__channel);
-		TH1F *h_sig5 = (TH1F*)ifile_sig5->Get(hist_list[i]);h_sig5->Scale(lumi_2018*0.001/175000); h_sig5->SetName(signal1000__channel);
-		TH1F *h_sig6 = (TH1F*)ifile_sig6->Get(hist_list[i]);h_sig6->Scale(lumi_2018*0.001/170000); h_sig6->SetName(signal1100__channel);
-		TH1F *h_sig7 = (TH1F*)ifile_sig7->Get(hist_list[i]);h_sig7->Scale(lumi_2018*0.001/176000); h_sig7->SetName(signal1200__channel);
-		TH1F *h_sig8 = (TH1F*)ifile_sig8->Get(hist_list[i]);h_sig8->Scale(lumi_2018*0.001/110000); h_sig8->SetName(signal1300__channel);
+		TH1F *h_sig1 = (TH1F*)ifile_sig1->Get(hist_list[i]);h_sig1->SetName(signal500__channel);
+		TH1F *h_sig2 = (TH1F*)ifile_sig2->Get(hist_list[i]);h_sig2->SetName(signal600__channel);
+		TH1F *h_sig3 = (TH1F*)ifile_sig3->Get(hist_list[i]);h_sig3->SetName(signal800__channel);
+		TH1F *h_sig4 = (TH1F*)ifile_sig4->Get(hist_list[i]);h_sig4->SetName(signal900__channel);
+		TH1F *h_sig5 = (TH1F*)ifile_sig5->Get(hist_list[i]);h_sig5->SetName(signal1000__channel);
+		TH1F *h_sig6 = (TH1F*)ifile_sig6->Get(hist_list[i]);h_sig6->SetName(signal1100__channel);
+		TH1F *h_sig7 = (TH1F*)ifile_sig7->Get(hist_list[i]);h_sig7->SetName(signal1200__channel);
+		TH1F *h_sig8 = (TH1F*)ifile_sig8->Get(hist_list[i]);h_sig8->SetName(signal1300__channel);
 
 	
-		TH1F *h1 = (TH1F*)ifile1->Get(hist_list[i]);h1->Scale(lumi_2018*18610/94452816);
-		TH1F *h2 = (TH1F*)ifile2->Get(hist_list[i]);h2->Scale(lumi_2018*6225.42/96233328);
+		TH1F *h1 = (TH1F*)ifile1->Get(hist_list[i]);
+		TH1F *h2 = (TH1F*)ifile2->Get(hist_list[i]);
 		
-		TH1F *h3 = (TH1F*)ifile3->Get(hist_list[i]);h3->Scale(lumi_2018*489/9850083);
-		TH1F *h4 = (TH1F*)ifile4->Get(hist_list[i]);h4->Scale(lumi_2018*75.8/15679000);
-		TH1F *h5 = (TH1F*)ifile5->Get(hist_list[i]);h5->Scale(lumi_2018*12.178/9994000);
-		TH1F *h6 = (TH1F*)ifile6->Get(hist_list[i]);h6->Scale(lumi_2018*27.6/7940000);
-		TH1F *h7 = (TH1F*)ifile7->Get(hist_list[i]);h7->Scale(lumi_2018*6.204/28576996);
-		TH1F *h8 = (TH1F*)ifile8->Get(hist_list[i]);h8->Scale(lumi_2018*5.052/9821283);
+		TH1F *h3 = (TH1F*)ifile3->Get(hist_list[i]);
+		TH1F *h4 = (TH1F*)ifile4->Get(hist_list[i]);
+		TH1F *h5 = (TH1F*)ifile5->Get(hist_list[i]);
+		TH1F *h6 = (TH1F*)ifile6->Get(hist_list[i]);
+		TH1F *h7 = (TH1F*)ifile7->Get(hist_list[i]);
+		TH1F *h8 = (TH1F*)ifile8->Get(hist_list[i]);
 		
-		TH1F *h9 = (TH1F*)ifile9->Get(hist_list[i]);h9->Scale(lumi_2018*0.2086/240000);
-		TH1F *h10 = (TH1F*)ifile10->Get(hist_list[i]);h10->Scale(lumi_2018*0.05565/300000);
-		TH1F *h11 = (TH1F*)ifile11->Get(hist_list[i]);h11->Scale(lumi_2018*0.01398/250000);
+		TH1F *h9 = (TH1F*)ifile9->Get(hist_list[i]);
+		TH1F *h10 = (TH1F*)ifile10->Get(hist_list[i]);
+		TH1F *h11 = (TH1F*)ifile11->Get(hist_list[i]);
 		
-		TH1F *h12 = (TH1F*)ifile12->Get(hist_list[i]);h12->Scale(lumi_2018*0.2043/26918526);
-		TH1F *h1201 = (TH1F*)ifile1201->Get(hist_list[i]);h1201->Scale(lumi_2018*0.5407/32793815);
+		TH1F *h12 = (TH1F*)ifile12->Get(hist_list[i]);
+		TH1F *h1201 = (TH1F*)ifile1201->Get(hist_list[i]);
 				
-		TH1F *h13 = (TH1F*)ifile13->Get(hist_list[i]);h13->Scale(lumi_2018*1.325/56886000);
-		TH1F *h14 = (TH1F*)ifile14->Get(hist_list[i]);h14->Scale(lumi_2018*3.22/26962069);
-		TH1F *h15 = (TH1F*)ifile15->Get(hist_list[i]);h15->Scale(lumi_2018*1.325/97570000);
+		TH1F *h13 = (TH1F*)ifile13->Get(hist_list[i]);
+		TH1F *h14 = (TH1F*)ifile14->Get(hist_list[i]);
+		TH1F *h15 = (TH1F*)ifile15->Get(hist_list[i]);
 		
-		TH1F *h16 = (TH1F*)ifile16->Get(hist_list[i]);h16->Scale(lumi_2018*3.74/19365999);
-		TH1F *h17 = (TH1F*)ifile17->Get(hist_list[i]);h17->Scale(lumi_2018*69.09/95627000);
-		TH1F *h18 = (TH1F*)ifile18->Get(hist_list[i]);h18->Scale(lumi_2018*115.3/178336000);
-		TH1F *h19 = (TH1F*)ifile19->Get(hist_list[i]);h19->Scale(lumi_2018*35.85/7749000);
-		TH1F *h20 = (TH1F*)ifile20->Get(hist_list[i]);h20->Scale(lumi_2018*35.85/7956000);
-		TH1F *h21 = (TH1F*)ifile21->Get(hist_list[i]);h21->Scale(lumi_2018*0.5418/6828000);
-		TH1F *h22 = (TH1F*)ifile22->Get(hist_list[i]);h22->Scale(lumi_2018*0.4975/854760);
-		TH1F *h23 = (TH1F*)ifile23->Get(hist_list[i]);h23->Scale(lumi_2018*0.5269/989000);
-		TH1F *h24 = (TH1F*)ifile24->Get(hist_list[i]);h24->Scale(lumi_2018*0.5269/2478000);
-		TH1F *h25 = (TH1F*)ifile25->Get(hist_list[i]);h25->Scale(lumi_2018*0.7891/998626);
-		TH1F *h26 = (TH1F*)ifile26->Get(hist_list[i]);h26->Scale(lumi_2018*0.7891/14971244);
-		TH1F *h27 = (TH1F*)ifile27->Get(hist_list[i]);h27->Scale(lumi_2018*0.7891/14971244);
+		TH1F *h16 = (TH1F*)ifile16->Get(hist_list[i]);
+		TH1F *h17 = (TH1F*)ifile17->Get(hist_list[i]);
+		TH1F *h18 = (TH1F*)ifile18->Get(hist_list[i]);
+		TH1F *h19 = (TH1F*)ifile19->Get(hist_list[i]);
+		TH1F *h20 = (TH1F*)ifile20->Get(hist_list[i]);
+		TH1F *h21 = (TH1F*)ifile21->Get(hist_list[i]);
+		TH1F *h22 = (TH1F*)ifile22->Get(hist_list[i]);
+		TH1F *h23 = (TH1F*)ifile23->Get(hist_list[i]);
+		TH1F *h24 = (TH1F*)ifile24->Get(hist_list[i]);
+		TH1F *h25 = (TH1F*)ifile25->Get(hist_list[i]);
+		TH1F *h26 = (TH1F*)ifile26->Get(hist_list[i]);
+		TH1F *h27 = (TH1F*)ifile27->Get(hist_list[i]);
 		
 		bool isFourCh = false;
 		if (isFourCh == true){
@@ -223,6 +223,38 @@ void HC_template_test(const char* ext = ".root"){
 		else{
 			h_fake->Add(h1);h_fake->Add(h2);h_fake->Add(h3);h_fake->Add(h4);h_fake->Add(h5);h_fake->Add(h7);h_fake->Add(h12);h_fake->Add(h16);h_fake->Add(h17);h_fake->Add(h18);h_fake->Add(h19);h_fake->Add(h20);		
 			h_prompt->Add(h6);h_prompt->Add(h8);h_prompt->Add(h9);h_prompt->Add(h10);h_prompt->Add(h11);h_prompt->Add(h12);h_prompt->Add(h1201);h_prompt->Add(h13);h_prompt->Add(h14);h_prompt->Add(h15);h_prompt->Add(h21);h_prompt->Add(h22);h_prompt->Add(h23);h_prompt->Add(h24);h_prompt->Add(h25);h_prompt->Add(h26);h_prompt->Add(h27);
+			
+			if (hist_list[i] == "h_Xmass_3lep" || hist_list[i] == "h_Xmass_0t" ){
+				cout<< h_sig4->Integral()<<endl;
+				cout<< h1->Integral()<<endl;
+				cout<< h2->Integral()<<endl;
+				cout<< h3->Integral()<<endl;
+				cout<< h4->Integral()<<endl;
+				cout<< h5->Integral()<<endl;
+				cout<< h6->Integral()<<endl;
+				cout<< h7->Integral()<<endl;
+				cout<< h8->Integral()<<endl;
+				cout<< h9->Integral()<<endl;
+				cout<< h10->Integral()<<endl;
+				cout<< h11->Integral()<<endl;
+				cout<< h12->Integral()<<endl;
+				cout<< h1201->Integral()<<endl;
+				cout<< h13->Integral()<<endl;
+				cout<< h14->Integral()<<endl;
+				cout<< h15->Integral()<<endl;
+				cout<< h16->Integral()<<endl;
+				cout<< h17->Integral()<<endl;
+				cout<< h18->Integral()<<endl;
+				cout<< h19->Integral()<<endl;
+				cout<< h20->Integral()<<endl;
+				cout<< h21->Integral()<<endl;
+				cout<< h22->Integral()<<endl;
+				cout<< h23->Integral()<<endl;
+				cout<< h24->Integral()<<endl;
+				cout<< h25->Integral()<<endl;
+				cout<< h26->Integral()<<endl;
+				cout<< h27->Integral()<<endl;
+			}
 		}
 		
 		

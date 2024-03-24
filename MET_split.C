@@ -14,7 +14,7 @@ TLegend *leg = new TLegend(0.7, 0.7, .9, .9);
 	TFile *ifile = new TFile("HppM1000_2018.root","READ");
 	TTree *tree = (TTree*)ifile->Get("Events");
 	MyBranch(tree);
-	TFile* ofile = new TFile("MET_exercise.root", "RECREATE");
+	//TFile* ofile = new TFile("MET_exercise.root", "RECREATE");
 	TH1F* h_mll = new TH1F("h_mll", "mll", 100, 0, 3000);
 	TH1F* h_mll2 = new TH1F("h_mll2", "mll2", 100, 0, 3000);
 	TH1F* h_mDCH1 = new TH1F("h_mDCH1", "mDCH1", 100, 0, 3000);
@@ -91,10 +91,10 @@ TLegend *leg = new TLegend(0.7, 0.7, .9, .9);
 		h_mDCH2->Fill((Vis2+neutr_leg2).M());
 	}//for
 	
-	h_mll->Write();
+	/*h_mll->Write();
 	h_mll2->Write();
 	h_mDCH1->Write();
-	h_mDCH2->Write();
+	h_mDCH2->Write();*/
 	h_mll->SetLineColor(4);h_mll2->SetLineColor(4);h_mDCH1->SetLineColor(2);h_mDCH2->SetLineColor(2);
 	h_mll->SetLineWidth(2);h_mll2->SetLineWidth(2);h_mDCH1->SetLineWidth(2);h_mDCH2->SetLineWidth(2);
 	
