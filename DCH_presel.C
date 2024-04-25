@@ -1,3 +1,4 @@
+//To apply various kinematics selections right after online analysis.
 #include "TMath.h"
 #include <cmath>
 #include <vector>
@@ -36,7 +37,10 @@ float XSec(std::string fname){
 	else if(fname.find("ST_t-channel_top_") < fname.length()) return 115.3;
 	else if(fname.find("ST_tW_antitop_") < fname.length()) return 35.85;
 	else if(fname.find("ST_tW_top_") < fname.length()) return 35.85;
-	else if(fname.find("HppM") < fname.length()) return 0.001;
+	else if(fname.find("HppM") < fname.length()) return 0.001;//Signal
+	else if(fname.find("EGamma") < fname.length()) return 1;//Data
+	else if(fname.find("Muon") < fname.length()) return 1;//Data
+	else if(fname.find("Tau") < fname.length()) return 1;//Data
 	else{
 		std::cout<<"DON'T KNOW X-SEC FOR FILE "<<fname<<endl;
 		return 0;
@@ -57,39 +61,63 @@ void DCH_presel(const char* ext = ".root"){
 	  	}
 	}
 	gROOT->Reset();
+	
+	const char* selection = "test";
+
 	float mDCH = 500, mZ = 91.2, lumi_2018 = 139000;
 	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
 		TH1D* hnevts = (TH1D*)ifile->Get("hNEvts");
-		float weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
+		float weight = 1;
+		if(XSec(filename[j])!=1) weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
+		
+		std::string fname = filename[j];
+		//if (fname.find("DYJets") > fname.length()) continue;
+		
 		//cout<<filename[j]<<endl;
-		char *oname = gSystem->ConcatFileName("hist_CR", filename[j]);
+		const char* o_name;
+		if (selection =="none") o_name = "hist";
+		else if (selection =="Pre") o_name = "hist_MY";
+		else if (selection =="APre") o_name = "hist_APre";
+		else if (selection =="CR") o_name = "hist_CR";
+		else if (selection =="VR") o_name = "hist_VR";
+		else if (selection =="test") o_name = "hist_test";
+		else cout<< "SELECTION NOT DEFINED!!!"<<endl;
+		char *oname = gSystem->ConcatFileName(o_name, filename[j]);
 		TFile* ofile = new TFile(oname, "RECREATE"); 
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
+		float xmin = 0, xmax = 3000; int binw = 100; int nbins = (xmax-xmin)/binw; 
 		TH1F* cutflow = new TH1F("cutflow", "cutflow", 6, 0, 6);     
-		TH1F* h_mll_1 = new TH1F("h_mll_1", "mll_1", 1000, 0, mDCH+1500);
-		TH1F* h_mll_2 = new TH1F("h_mll_2", "mll_2", 1000, 0, mDCH+1500);
-		TH1F* h_mDCH1 = new TH1F("h_mDCH1", "mDCH1", 1000, 0, mDCH+1500);
-		TH1F* h_mDCH2 = new TH1F("h_mDCH2", "mDCH2", 1000, 0, mDCH+1500);
-		TH1F* h_ST = new TH1F("h_ST", "ST", 1000, 0, mDCH+2000);
-		TH1F* h_mZ1 = new TH1F("h_mZ1", "Z mass 1", 1000, 0, mDCH+1500);
-		TH1F* h_mZ2 = new TH1F("h_mZ2", "Z mass 2", 1000, 0, mDCH+1500);
-		TH1F* h_mZ3 = new TH1F("h_mZ3", "Z mass 3", 1000, 0, mDCH+1500);
-		TH1F* h_mZ4 = new TH1F("h_mZ4", "Z mass 4", 1000, 0, mDCH+1500);
-		TH1F* h_met = new TH1F("h_met", "MET", 1000, 0, mDCH+1500);
-		TH1F* h_pT1 = new TH1F("h_pT1", "Leading pT", 1000, 0, mDCH+1500);
-		TH1F* h_pT2 = new TH1F("h_pT2", "Sub-leading pT", 1000, 0, mDCH+1500);
-		TH1F* h_pT3 = new TH1F("h_pT3", "3rd pT", 1000, 0, mDCH+1500);
-		TH1F* h_pT4 = new TH1F("h_pT4", "4th pT", 1000, 0, mDCH+1500);
-		TH1F* h_dR = new TH1F("h_dR", "dR (+-) leptons ", 1000, 0, 5);
-		TH1F* h_dRll = new TH1F("h_dRll", "dR between 1st pair", 1000, 0, 5);
-		TH1F* h_dRll2 = new TH1F("h_dRll2", "dR between 2nd pair", 1000, 0, 5);
-		TH1F* h_dR1_met = new TH1F("h_dR1_met", "dR between 1st pair and MET ", 1000, 0, 5);
-		TH1F* h_dR2_met = new TH1F("h_dR2_met", "dR between 2nd pair and MET ", 1000, 0, 5);				
+		TH1F* h_mll_1 = new TH1F("h_mll_1", "mll_1", nbins, xmin, xmax);
+		TH1F* h_mll_2 = new TH1F("h_mll_2", "mll_2", nbins, xmin, xmax);
+		TH1F* h_mDCH1 = new TH1F("h_mDCH1", "mDCH1", nbins, xmin, xmax);
+		TH1F* h_mDCH2 = new TH1F("h_mDCH2", "mDCH2", nbins, xmin, xmax);
+		TH1F* h_ll1_pt_4L = new TH1F("h_ll1_pt_4L", "Leading pair pT 4L channel", nbins, xmin, xmax);
+		TH1F* h_ll1_pt_3L = new TH1F("h_ll1_pt_3L", "Leading pair pT 3L channel", nbins, xmin, xmax);
+		TH1F* h_mZ1_3L = new TH1F("h_mZ1_3L", "Z1 mass in 3L channel", 50, 0, mDCH);
+		TH1F* h_mZ2_3L = new TH1F("h_mZ2_3L", "Z2 mass in 3L channel", 50, 0, mDCH);
+		TH1F* h_mZ3_3L = new TH1F("h_mZ3_3L", "Z3 mass in 3L channel", 50, 0, mDCH);
+		TH1F* h_mZ4_3L = new TH1F("h_mZ4_3L", "Z4 mass in 3L channel", 50, 0, mDCH);
+
+		TH1F* h_ST = new TH1F("h_ST", "ST", 100, 0, mDCH+2000);
+		TH1F* h_mZ1 = new TH1F("h_mZ1", "Z1 mass in 4L channel", 50, 0, mDCH);
+		TH1F* h_mZ2 = new TH1F("h_mZ2", "Z2 mass in 4L channel", 50, 0, mDCH);
+		TH1F* h_mZ3 = new TH1F("h_mZ3", "Z3 mass in 4L channel", 50, 0, mDCH);
+		TH1F* h_mZ4 = new TH1F("h_mZ4", "Z4 mass in 4L channel", 50, 0, mDCH);
+		TH1F* h_met = new TH1F("h_met", "MET", 100, 0, mDCH+1500);
+		TH1F* h_pT1 = new TH1F("h_pT1", "Leading pT", 100, 0, mDCH+1500);
+		TH1F* h_pT2 = new TH1F("h_pT2", "Sub-leading pT", 100, 0, mDCH+1500);
+		TH1F* h_pT3 = new TH1F("h_pT3", "3rd pT", 100, 0, mDCH+1500);
+		TH1F* h_pT4 = new TH1F("h_pT4", "4th pT", 100, 0, mDCH+1500);
+		TH1F* h_dR = new TH1F("h_dR", "dR (+-) leptons ", 50, 0, 5);
+		TH1F* h_dRll = new TH1F("h_dRll", "dR between 1st pair", 50, 0, 5);
+		TH1F* h_dRll2 = new TH1F("h_dRll2", "dR between 2nd pair", 50, 0, 5);
+		TH1F* h_dR1_met = new TH1F("h_dR1_met", "dR between 1st pair and MET ", 50, 0, 5);
+		TH1F* h_dR2_met = new TH1F("h_dR2_met", "dR between 2nd pair and MET ", 50, 0, 5);				
 		TH1F* h_cat = new TH1F("h_cat", "cat", 40,0,40);
-		int nbins = 3000; float xmin = 0, xmax = 3000;
+
 		TH1F* h_Xmass_0t = new TH1F("h_Xmass_0t", "mDCH1", nbins, xmin, xmax);
 		TH1F* h_Xmass_1t = new TH1F("h_Xmass_1t", "mDCH1", nbins, xmin, xmax);
 		TH1F* h_Xmass_2t = new TH1F("h_Xmass_2t", "mDCH1", nbins, xmin, xmax);
@@ -110,11 +138,11 @@ void DCH_presel(const char* ext = ".root"){
 			double st = st;
 			h_ST->Fill(st);
 			
-			h_mZ1->Fill(abs((LepV(1)+LepV(3)).M()));
+			/*h_mZ1->Fill(abs((LepV(1)+LepV(3)).M()));
 			h_mZ2->Fill(abs((LepV(1)+LepV(4)).M()));
 			h_mZ3->Fill(abs((LepV(2)+LepV(3)).M()));
 			h_mZ4->Fill(abs((LepV(2)+LepV(4)).M()));
-			h_met->Fill(met);
+			h_met->Fill(met);*/
 
 			
 			auto [nu_leg1, nu_leg2] = MET_split(LepV(1),LepV(2),LepV(3),LepV(4),met,metphi);
@@ -200,17 +228,17 @@ void DCH_presel(const char* ext = ".root"){
 				cutflow->Fill(6);
 			}*/
 //===================================================================================
-			bool doMyPresel = false, doAtlasPresel = false, doAtlasCR = true, doAtlasVR = false;
-			if(doMyPresel){//######My selections##########
+			if(selection == "Pre"){//######My selections##########
 				if (cat <=21){//4-lep
 					if (Ntau == 0){
 						if (st < 700){ continue;}//ST
 						cutflow->Fill(1);
-						if (getDR(eta_1,phi_1, eta_2,phi_2) >4 or getDR(eta_3,phi_3, eta_4,phi_4) >4){ continue;}
+						//if (getDR(eta_1,phi_1, eta_2,phi_2) >4 or getDR(eta_3,phi_3, eta_4,phi_4) >4){ continue;}
 						cutflow->Fill(2);
 						if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(1)+LepV(4)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(4)).M()-mZ) < 10){ continue;}
 						cutflow->Fill(3);
-						if (mll_1 <400  or mll_2 <400 ){ continue;}  
+						//if (mll_1 <400 or mll_2 <400 ){ continue;}  
+						if ((mll_1+mll_2)/2 <400 ){ continue;}  
 						cutflow->Fill(4);
 						h_Xmass_0t->Fill(mll_1);
 						//h_Xmass_0t->Fill(mll_2 + xmax/2);
@@ -218,11 +246,12 @@ void DCH_presel(const char* ext = ".root"){
 					else if (Ntau == 1){
 						if (st < 600){ continue;}//ST
 						cutflow->Fill(1);		
-						if (getDR(eta_1,phi_1, eta_2,phi_2) >3.6 or getDR(eta_3,phi_3, eta_4,phi_4) >3.6){ continue;}
+						//if (getDR(eta_1,phi_1, eta_2,phi_2) >3.6 or getDR(eta_3,phi_3, eta_4,phi_4) >3.6){ continue;}
 						cutflow->Fill(2);	
 						if (abs((LepV(1)+LepV(3)).M()-mZ) < 25 or abs((LepV(1)+LepV(4)).M()-mZ) < 25 or abs((LepV(2)+LepV(3)).M()-mZ) < 25 or abs((LepV(2)+LepV(4)).M()-mZ) < 25){ continue;}
 						cutflow->Fill(3);
-						if (mll_1 <250  or mll_2 <250 ){ continue;}
+						//if (mll_1 <250 or mll_2 <250 ){ continue;}
+						if ((mll_1+mll_2)/2 <250 ){ continue;}
 						cutflow->Fill(4);
 						h_Xmass_1t->Fill(mll_1);
 						//h_Xmass_1t->Fill(mll_2 + xmax/2);
@@ -230,11 +259,12 @@ void DCH_presel(const char* ext = ".root"){
 					else if (Ntau >= 2){
 						if (st < 450){ continue;}//ST
 						cutflow->Fill(1);
-						if (getDR(eta_1,phi_1, eta_2,phi_2) >3.9 or getDR(eta_3,phi_3, eta_4,phi_4) >3.9){ continue;} 
+						//if (getDR(eta_1,phi_1, eta_2,phi_2) >3.9 or getDR(eta_3,phi_3, eta_4,phi_4) >3.9){ continue;} 
 						cutflow->Fill(2);
 						if (abs((LepV(1)+LepV(3)).M()-mZ) < 5 or abs((LepV(1)+LepV(4)).M()-mZ) < 5 or abs((LepV(2)+LepV(3)).M()-mZ) < 5 or abs((LepV(2)+LepV(4)).M()-mZ) < 5){ continue;}
 						cutflow->Fill(3);
-						if (mll_1 <100  or mll_2 <100 ){ continue;}
+						//if (mll_1 <100 or mll_2 <100 ){ continue;}
+						if ((mll_1+mll_2)/2 <100 ){ continue;}
 						cutflow->Fill(4);
 						h_Xmass_2t->Fill(mll_1);
 						//h_Xmass_2t->Fill(mll_2 + xmax/2);
@@ -246,7 +276,8 @@ void DCH_presel(const char* ext = ".root"){
 						cutflow->Fill(2);
 						if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(1)+LepV(4)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(4)).M()-mZ) < 10){ continue;}
 						cutflow->Fill(3);
-						if (mll_1 <100 or mll_2 <100 ){ continue;}
+						//if (mll_1 <100 or mll_2 <100 ){ continue;}
+						if ((mll_1+mll_2)/2 <100 ){ continue;}
 						cutflow->Fill(4);
 						h_Xmass_34t->Fill(mll_1);
 					}*/
@@ -255,7 +286,7 @@ void DCH_presel(const char* ext = ".root"){
 					if (Ntau == 0){//0tau for 3lep
 						if (pt_1+pt_2+pt_3 < 525){ continue;}//ST
 						cutflow->Fill(1);
-						if (getDR(eta_1,phi_1, eta_2,phi_2) >4){ continue;}
+						//if (getDR(eta_1,phi_1, eta_2,phi_2) >4){ continue;}
 						cutflow->Fill(2);
 						if (abs((LepV(1)+LepV(3)).M()-mZ) < 10 or abs((LepV(2)+LepV(3)).M()-mZ) < 10){ continue;}
 						cutflow->Fill(3);
@@ -265,46 +296,110 @@ void DCH_presel(const char* ext = ".root"){
 					}			
 				}//3-lep
 			}//MyPresel
-			if(not doMyPresel && doAtlasPresel){
+//###################### ATLAS #########################
+			if (Ntau != 0) continue;
+			if(selection == "APre"){//ATLAS Signal region
 				if (mll_1 < 300)continue;
-				if (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(1)+LepV(4)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)continue;
 				if ( cat <= 21 ){
+					if (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(1)+LepV(4)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)continue;
 					if ( (mll_1+mll_2)/2 < 300 ) continue;
 					h_Xmass_0t->Fill(mll_1);
 					h_Xmass_1t->Fill(mll_1);
 					h_Xmass_2t->Fill(mll_1);
+
+					h_ll1_pt_4L->Fill(LL1.Pt());
+					h_mZ1->Fill(abs((LepV(1)+LepV(3)).M()));
+					h_mZ2->Fill(abs((LepV(1)+LepV(4)).M()));
+					h_mZ3->Fill(abs((LepV(2)+LepV(3)).M()));
+					h_mZ4->Fill(abs((LepV(2)+LepV(4)).M()));
 				}
 				else if ( cat >= 22){
+					if (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20)continue;
 					if (LL1.Pt() < 300)continue;
 					h_Xmass_3lep->Fill(mll_1);
+
+					h_ll1_pt_3L->Fill(LL1.Pt());
+					h_mZ1_3L->Fill(abs((LepV(1)+LepV(3)).M()));
+					h_mZ2_3L->Fill(abs((LepV(2)+LepV(3)).M()));
+
 				}				
-			}//Atlas Presel
-			if(not doMyPresel && doAtlasCR){
+			}
+			else if(selection == "CR"){//Atlas CR for Di-bosons
 				if ( cat <= 21 ){
 					if (mll_1 >= 200 or mll_1 < 100)continue;
 					h_Xmass_0t->Fill(mll_1);
 					h_Xmass_1t->Fill(mll_1);
 					h_Xmass_2t->Fill(mll_1);
+
+					h_ll1_pt_4L->Fill(LL1.Pt());
+					h_mZ1->Fill(abs((LepV(1)+LepV(3)).M()));
+					h_mZ2->Fill(abs((LepV(1)+LepV(4)).M()));
+					h_mZ3->Fill(abs((LepV(2)+LepV(3)).M()));
+					h_mZ4->Fill(abs((LepV(2)+LepV(4)).M()));
 				}
 				else if ( cat >= 22){
 					if (mll_1 < 300)continue;
-					if (abs((LepV(1)+LepV(3)).M()-mZ) > 20 and abs((LepV(1)+LepV(4)).M()-mZ) > 20 and abs((LepV(2)+LepV(3)).M()-mZ) > 20 and abs((LepV(2)+LepV(4)).M()-mZ) > 20)continue;
+					if (abs((LepV(1)+LepV(3)).M()-mZ) > 20 and abs((LepV(2)+LepV(3)).M()-mZ) > 20)continue;
 					h_Xmass_3lep->Fill(mll_1);
+					
+					h_ll1_pt_3L->Fill(LL1.Pt());
+					h_mZ1_3L->Fill(abs((LepV(1)+LepV(3)).M()));
+					h_mZ2_3L->Fill(abs((LepV(2)+LepV(3)).M()));
 				}
-			}//Atlas CR for Di-bosons
-			if(not doMyPresel && doAtlasVR){
+			}
+			else if(selection == "VR"){//Atlas VR
 				if ( cat <= 21 ){
 					if (mll_1 >= 300 or mll_1 < 200)continue;
 					h_Xmass_0t->Fill(mll_1);
 					h_Xmass_1t->Fill(mll_1);
 					h_Xmass_2t->Fill(mll_1);
+
+					h_ll1_pt_4L->Fill(LL1.Pt());
+					h_mZ1->Fill(abs((LepV(1)+LepV(3)).M()));
+					h_mZ2->Fill(abs((LepV(1)+LepV(4)).M()));
+					h_mZ3->Fill(abs((LepV(2)+LepV(3)).M()));
+					h_mZ4->Fill(abs((LepV(2)+LepV(4)).M()));
+					//cout<<i <<" "<<pt_4<<" "<<pt_3<<" "<<endl;
 				}
 				else if ( cat >= 22){
 					if (mll_1 >= 300 or mll_1 < 100)continue;
-					if (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(1)+LepV(4)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)continue;
+					if (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20)continue;
 					h_Xmass_3lep->Fill(mll_1);
+
+					h_ll1_pt_3L->Fill(LL1.Pt());
+					h_mZ1_3L->Fill(abs((LepV(1)+LepV(3)).M()));
+					h_mZ2_3L->Fill(abs((LepV(2)+LepV(3)).M()));
 				}
-			}//Atlas VR
+			}
+			else if(selection == "test"){//My tests
+				if (cat_name == "eee" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20)) h_Xmass_0t->Fill(mll_1);
+				else if (cat_name == "eme" and abs((LepV(1)+LepV(3)).M()-mZ) < 20) h_Xmass_1t->Fill(mll_1);
+				else if( cat_name == "mmm" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20)) h_Xmass_2t->Fill(mll_1);
+				else if (cat_name == "emm" and abs((LepV(2)+LepV(3)).M()-mZ) < 20) h_Xmass_34t->Fill(mll_1);
+				
+				/*else if (cat_name == "eee" and (abs((LepV(1)+LepV(3)).M()-mZ) > 20 and abs((LepV(2)+LepV(3)).M()-mZ) > 20)) h_Xmass_2t->Fill(mll_1);
+				else if (cat_name == "eme" and abs((LepV(1)+LepV(3)).M()-mZ) > 20) h_Xmass_2t->Fill(mll_1);
+				else if( cat_name == "mmm" and (abs((LepV(1)+LepV(3)).M()-mZ) > 20 or abs((LepV(2)+LepV(3)).M()-mZ) > 20)) h_Xmass_34t->Fill(mll_1);
+				else if (cat_name == "emm" and abs((LepV(2)+LepV(3)).M()-mZ) > 20) h_Xmass_34t->Fill(mll_1);*/
+			}
+			else{
+				if ( cat <= 21 ){
+					h_Xmass_0t->Fill(mll_1);
+					h_Xmass_1t->Fill(mll_1);
+					h_Xmass_2t->Fill(mll_1);
+					h_ll1_pt_4L->Fill(LL1.Pt());
+					h_mZ1->Fill(abs((LepV(1)+LepV(3)).M()));
+					h_mZ2->Fill(abs((LepV(1)+LepV(4)).M()));
+					h_mZ3->Fill(abs((LepV(2)+LepV(3)).M()));
+					h_mZ4->Fill(abs((LepV(2)+LepV(4)).M()));
+				}
+				else if ( cat >= 22){
+					h_Xmass_3lep->Fill(mll_1);
+					h_ll1_pt_3L->Fill(LL1.Pt());
+					h_mZ1_3L->Fill(abs((LepV(1)+LepV(3)).M()));
+					h_mZ2_3L->Fill(abs((LepV(2)+LepV(3)).M()));
+				}
+			}
 			
 		}//evt loop
 		cutflow->Scale(weight);
@@ -313,10 +408,16 @@ void DCH_presel(const char* ext = ".root"){
 		h_mDCH1->Scale(weight);
 		h_mDCH2->Scale(weight);
 		h_ST->Scale(weight);
+		h_ll1_pt_4L->Scale(weight);
+		h_ll1_pt_3L->Scale(weight);
 		h_mZ1->Scale(weight);
 		h_mZ2->Scale(weight);
 		h_mZ3->Scale(weight);
 		h_mZ4->Scale(weight);
+		h_mZ1_3L->Scale(weight);
+		h_mZ2_3L->Scale(weight);
+		h_mZ3_3L->Scale(weight);
+		h_mZ4_3L->Scale(weight);
 		h_met->Scale(weight);
 		h_pT1->Scale(weight);
 		h_pT2->Scale(weight);
@@ -334,16 +435,22 @@ void DCH_presel(const char* ext = ".root"){
 		h_Xmass_3lep->Scale(weight);
 		
 		hnevts->Write();		
-		cutflow->Write();
+		/*cutflow->Write();
 		h_mll_1->Write();
 		h_mll_2->Write();
 		h_mDCH1->Write();
 		h_mDCH2->Write();
 		h_ST->Write();
+		h_ll1_pt_4L->Write();
+		h_ll1_pt_3L->Write();
 		h_mZ1->Write();
 		h_mZ2->Write();
 		h_mZ3->Write();
 		h_mZ4->Write();
+		h_mZ1_3L->Write();
+		h_mZ2_3L->Write();
+		h_mZ3_3L->Write();
+		h_mZ4_3L->Write();
 		h_met->Write();
 		h_pT1->Write();
 		h_pT2->Write();
@@ -353,14 +460,14 @@ void DCH_presel(const char* ext = ".root"){
 		h_dRll->Write();
 		h_dRll2->Write();
 		h_dR1_met->Write();
-		h_dR2_met->Write();
+		h_dR2_met->Write();*/
 		h_Xmass_0t->Write();
 		h_Xmass_1t->Write();
 		h_Xmass_2t->Write();
 		h_Xmass_34t->Write();
 		h_Xmass_3lep->Write();
 		//cout<< j <<"\t"<< oname <<endl;
-		printf("%s %f\n", oname, hnevts->Integral() );
+		printf("%s %f\n", oname, XSec(filename[j])*lumi_2018/hnevts->Integral() );
 		delete tree;
 	}
 	gSystem->FreeDirectory(dirp);

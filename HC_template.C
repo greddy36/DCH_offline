@@ -1,3 +1,4 @@
+//Makes nuisance histograms for HC
 #include <TFile.h>
 #include <TH1.h>
 #include <TList.h>
@@ -37,7 +38,7 @@ const char* sampleKind_3Ch(std::string fname){
 }
 
 void HC_template(const char* ext = ".root"){
-	const char* inDir = "hist_CR";
+	const char* inDir = "hist_APre";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
 	const char* entry;
@@ -52,10 +53,11 @@ void HC_template(const char* ext = ".root"){
 	gROOT->Reset();
 
     // Create output file
-    TFile* ofile = new TFile("hist_CR/nuisance_hist.root", "RECREATE");
+    TFile* ofile = new TFile("hist_APre/nuisance_hist.root", "RECREATE");
 	const char* prompt__channel;
 	const char* fake__channel;
-	int nbins = 3000; float xmin = 0, xmax = 3000;	
+	
+	float xmin = 0, xmax = 3000; int binw = 100; int nbins = (xmax-xmin)/binw; 
 	TH1F* h_data_t0 = new TH1F("data_obs__t0", "mll1", nbins, xmin, xmax);	
 	TH1F* h_data_t1 = new TH1F("data_obs__t1", "mll1", nbins, xmin, xmax);			
 	TH1F* h_data_t2 = new TH1F("data_obs__t2", "mll1", nbins, xmin, xmax);			
@@ -182,25 +184,25 @@ void HC_template(const char* ext = ".root"){
 			TFile *ifile = new TFile(filename[j],"READ");
 			TH1F *h = (TH1F*)ifile->Get(hist_list[i]);
 			
-			if (sampleKind_3Ch(filename[j])== "M500") h_M500 = (TH1F*)h->Clone();
-			else if (sampleKind_3Ch(filename[j])== "M600") h_M600 = (TH1F*)h->Clone();
-			else if (sampleKind_3Ch(filename[j])== "M700") h_M700 = (TH1F*)h->Clone();
-			else if (sampleKind_3Ch(filename[j])== "M800") h_M800 = (TH1F*)h->Clone();
-			else if (sampleKind_3Ch(filename[j])== "M900") h_M900 = (TH1F*)h->Clone();
-			else if (sampleKind_3Ch(filename[j])== "M1000") h_M1000 = (TH1F*)h->Clone();
-			else if (sampleKind_3Ch(filename[j])== "M1100") h_M1100 = (TH1F*)h->Clone();
-			else if (sampleKind_3Ch(filename[j])== "M1200") h_M1200 = (TH1F*)h->Clone();
-			else if (sampleKind_3Ch(filename[j])== "M1300") h_M1300 = (TH1F*)h->Clone();
-			else if (sampleKind_3Ch(filename[j])== "M1400") h_M1400 = (TH1F*)h->Clone();
+			if (sampleKind_3Ch(filename[j])== "M500") h_M500->Add(h);
+			else if (sampleKind_3Ch(filename[j])== "M600") h_M600->Add(h);
+			else if (sampleKind_3Ch(filename[j])== "M700") h_M700->Add(h);
+			else if (sampleKind_3Ch(filename[j])== "M800") h_M800->Add(h);
+			else if (sampleKind_3Ch(filename[j])== "M900") h_M900->Add(h);
+			else if (sampleKind_3Ch(filename[j])== "M1000") h_M1000->Add(h);
+			else if (sampleKind_3Ch(filename[j])== "M1100") h_M1100->Add(h);
+			else if (sampleKind_3Ch(filename[j])== "M1200") h_M1200->Add(h);
+			else if (sampleKind_3Ch(filename[j])== "M1300") h_M1300->Add(h);
+			else if (sampleKind_3Ch(filename[j])== "M1400") h_M1400->Add(h);
 			else if (sampleKind_3Ch(filename[j])== "fake") h_fake->Add(h);
 			else if (sampleKind_3Ch(filename[j])== "prompt") h_prompt->Add(h);
 			else continue;
-			cout<<sampleKind_3Ch(filename[j])<<"\t"<<filename[j]<<"\t"<<h->Integral()<<endl;
+			cout<<sampleKind_3Ch(filename[j])<<";"<<filename[j]<<";"<<h->Integral()<<endl;
 		}
 		//setting overflow bins
 		h_prompt->SetBinContent(nbins, h_prompt->GetBinContent(nbins+1));
 		h_fake->SetBinContent(nbins, h_fake->GetBinContent(nbins+1));
-		h_M500->Rebin(100);
+		/*h_M500->Rebin(100);
 		h_M600->Rebin(100);
 		h_M700->Rebin(100);
 		h_M800->Rebin(100);
@@ -211,9 +213,19 @@ void HC_template(const char* ext = ".root"){
 		h_M1300->Rebin(100);
 		h_M1400->Rebin(100);
 		h_prompt->Rebin(100);
-		h_fake->Rebin(100);
+		h_fake->Rebin(100);*/
 		
 		ofile->cd();
+		h_M500->Write();
+		h_M600->Write();
+		//h_M700->Write();
+		h_M800->Write();
+		h_M900->Write();
+		h_M1000->Write();
+		h_M1100->Write();
+		h_M1200->Write();
+		h_M1300->Write();
+		//h_M1400->Write();		
 		h_prompt->Write();
 		//h_one_fake->Write();
 		//h_prompt_red->Write();

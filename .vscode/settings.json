@@ -3,7 +3,10 @@
         "HC_template_test.C": "cpp",
         "HC_template.C": "cpp",
         "DCH_presel.C": "cpp",
-        "Kinematics.C": "cpp"
+        "Kinematics.C": "cpp",
+        "plot_hist.C": "cpp",
+        "StackHist.C": "cpp"
     },
-    "editor.fontFamily": "monospace"
+    "editor.fontFamily": "monospace",
+    "C_Cpp.errorSquiggles": "disabled"
 }

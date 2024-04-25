@@ -1,3 +1,4 @@
+//THis is to print out all the input shape hists of HC input file
 #include <iostream>
 #include <TFile.h>
 #include <TKey.h>
@@ -51,7 +52,7 @@ void plotAllHistograms(const char* filename) {
 
 void plot_hist() {
     // Replace "your_file.root" with the actual path to your ROOT file
-    const char* filename = "hist/nuisance_hist.root";
+    const char* filename = "hist_APre/nuisance_hist.root";
 
     // Call the function to plot all histograms in the file
     plotAllHistograms(filename);

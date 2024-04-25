@@ -53,4 +53,112 @@ TLorentzVector LepV(int n){
 	if (n==4)
 		lepV.SetPtEtaPhiM(pt_4, eta_4, phi_4, m_4);
 	return lepV;
-}			
+}	
+
+TLorentzVector *ZCandMaker(string cat, TLorentzVector l1, TLorentzVector l2, TLorentzVector l3, TLorentzVector l4, float Zwindow){
+	float mZ = 91.2;
+	TLorentzVector *Zpaired_lep = new TLorentzVector[4] ;
+	TLorentzVector L1, L2, L3, L4;
+	
+	if(cat.length() == 3){
+		if( cat[0]==cat[2] and abs((l1+l3).M()-mZ) < Zwindow){
+			if(l1.Pt() >= l3.Pt()){
+				L1 = l1; L2 = l3;
+				L3 = l2; L4 = l4;
+			}
+			else{
+				L1 = l3; L2 = l1;
+				L3 = l2; L4 = l4;
+			}
+		}
+		else if( cat[1]==cat[2] and abs((l2+l3).M()-mZ) < Zwindow){
+			if(l2.Pt() >= l3.Pt()){
+				L1 = l2; L2 = l3;
+				L3 = l1; L4 = l4;
+			}
+			else{
+				L1 = l3; L2 = l2;
+				L3 = l1; L4 = l4;	
+			}
+		}
+		if( cat[0]==cat[2] and cat[1]==cat[2] and abs((l1+l3).M()-mZ) < Zwindow and abs((l2+l3).M()-mZ) < Zwindow){
+			if( l1.Pt() >= l3.Pt() and l3.Pt() >= l2.Pt()){
+				L1 = l1; L2 = l3;
+				L3 = l2; L4 = l4;
+			}
+			else if( l2.Pt() >= l3.Pt() and l3.Pt() >= l1.Pt()){
+				L1 = l2; L2 = l3;
+				L3 = l1; L4 = l4;	
+			}
+			else if( l3.Pt() >= l1.Pt() and l1.Pt() >= l1.Pt()){
+				L1 = l3; L2 = l1;
+				L3 = l2; L4 = l4;	
+			}
+			else if( l3.Pt() >= l2.Pt() and l2.Pt() >= l1.Pt()){
+				L1 = l3; L2 = l2;
+				L3 = l1; L4 = l4;	
+			}
+		}
+	}
+	//else if(cat.length() == 4){
+	
+	Zpaired_lep[0] = L1;
+	Zpaired_lep[1] = L2;
+	Zpaired_lep[2] = L3;
+	Zpaired_lep[3] = L4;
+	return Zpaired_lep;
+}		
+
+TLorentzVector *ZVetoMaker(string cat, TLorentzVector l1, TLorentzVector l2, TLorentzVector l3, TLorentzVector l4, float Zwindow){
+	float mZ = 91.2;
+	TLorentzVector *Zveto_lep = new TLorentzVector[4] ;
+	TLorentzVector L1, L2, L3, L4;
+	
+	if(cat.length() == 3){
+		if( cat[0]==cat[2] and abs((l1+l3).M()-mZ) > Zwindow){
+			if(l1.Pt() >= l3.Pt()){
+				L1 = l1; L2 = l3;
+				L3 = l2; L4 = l4;
+			}
+			else{
+				L1 = l3; L2 = l1;
+				L3 = l2; L4 = l4;
+			}
+		}
+		else if( cat[1]==cat[2] and abs((l2+l3).M()-mZ) > Zwindow){
+			if(l2.Pt() >= l3.Pt()){
+				L1 = l2; L2 = l3;
+				L3 = l1; L4 = l4;
+			}
+			else{
+				L1 = l3; L2 = l2;
+				L3 = l1; L4 = l4;	
+			}
+		}
+		if( cat[0]==cat[2] and cat[1]==cat[2] and abs((l1+l3).M()-mZ) > Zwindow and abs((l2+l3).M()-mZ) > Zwindow){
+			if( l1.Pt() >= l3.Pt() and l3.Pt() >= l2.Pt()){
+				L1 = l1; L2 = l3;
+				L3 = l2; L4 = l4;
+			}
+			else if( l2.Pt() >= l3.Pt() and l3.Pt() >= l1.Pt()){
+				L1 = l2; L2 = l3;
+				L3 = l1; L4 = l4;	
+			}
+			else if( l3.Pt() >= l1.Pt() and l1.Pt() >= l1.Pt()){
+				L1 = l3; L2 = l1;
+				L3 = l2; L4 = l4;	
+			}
+			else if( l3.Pt() >= l2.Pt() and l2.Pt() >= l1.Pt()){
+				L1 = l3; L2 = l2;
+				L3 = l1; L4 = l4;	
+			}
+		}
+	}
+	//else if(cat.length() == 4){
+	
+	Zveto_lep[0] = L1;
+	Zveto_lep[1] = L2;
+	Zveto_lep[2] = L3;
+	Zveto_lep[3] = L4;
+	return Zveto_lep;
+}
