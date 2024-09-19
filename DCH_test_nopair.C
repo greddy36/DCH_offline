@@ -9,6 +9,7 @@
 #include "include/Kinematics.C"//Kine fns
 #include "include/MET_split.C"
 
+
 float XSec(std::string fname){
 	if(fname.find("ttHTo2L2Nu") < fname.length()) return 0.5418;
 	else if(fname.find("ttHToEE") < fname.length()) return 0;
@@ -43,12 +44,37 @@ float XSec(std::string fname){
 	else if(fname.find("Tau") < fname.length()) return 1;//Data
 	else if(fname.find("Single") < fname.length()) return 1;//Data
 	else{
-		std::cout<<"DON'T KNOW X-SEC FOR FILE "<<fname<<endl;
+		//std::cout<<"DON'T KNOW X-SEC FOR FILE "<<fname<<endl;
 		return 0;
 	}
 }
 
-void DCH_test(const char* ext = ".root"){
+std::string getCatName(int index) {
+    std::vector<std::string> catNames = {
+        "eeee", "eeem", "eeet", "eemm", "eemt", "eett",
+        "emem", "emet", "emmm", "emmt", "emtt",
+        "etet", "etmm", "etmt", "ettt",
+        "mmmm", "mmmt", "mmtt",
+        "mtmt", "mttt",
+        "tttt",
+        "eee", "eem", "eet",
+        "eme", "emm", "emt",
+        "ete", "etm", "ett",
+        "mme", "mmm", "mmt",
+        "mte", "mtm", "mtt",
+        "tte", "ttm", "ttt"
+    };
+
+    // Check if the index is within the valid range
+    if (index < 1 || index > catNames.size()) {
+        return "Invalid index";
+    }
+
+    // Return the corresponding cat name
+    return catNames[index - 1];
+}
+
+void DCH_test_nopair(const char* ext = "root"){
 	const char* inDir = ".";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
@@ -74,7 +100,7 @@ void DCH_test(const char* ext = ".root"){
 		if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
 		
 		std::string fname = filename[j];
-		//if (fname.find("WZ") > fname.length()) continue;
+		//if (fname.find("DY") > fname.length()) continue;
 		
 		//cout<<filename[j]<<endl;
 		const char* o_name;
@@ -83,14 +109,14 @@ void DCH_test(const char* ext = ".root"){
 		else if (selection =="APre") o_name = "hist_APre";
 		else if (selection =="CR") o_name = "hist_CR";
 		else if (selection =="VR") o_name = "hist_VR";
-		else if (selection =="test") o_name = "hist_test";
+		else if (selection =="test") o_name = "hist_test_nopair";
 		else cout<< "SELECTION NOT DEFINED!!!"<<endl;
 		char *oname = gSystem->ConcatFileName(o_name, filename[j]);
 		TFile* ofile = new TFile(oname, "RECREATE"); 
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
 		
-
+	
 		TH1F* h_mZ1 = new TH1F("h_mZ1", "mZ (e+e- & e)", 25, 0, 200);
 		TH1F* h_mZ2 = new TH1F("h_mZ2", "mZ (e+e- & m)", 25, 0, 200);
 		TH1F* h_mZ3 = new TH1F("h_mZ3", "mZ (m+m- & e)", 25, 0, 200);
@@ -206,29 +232,17 @@ void DCH_test(const char* ext = ".root"){
 		TH1F* h_MTv8 = new TH1F("h_MTv8", "MT in Z-veto (m+m- & ee)", 25, 0, 500);
 		TH1F* h_MTv9 = new TH1F("h_MTv9", "MT in Z-veto (m+m- & em)", 25, 0, 500);			
 		TH1F* h_MTv10 = new TH1F("h_MTv10", "MT in Z-veto (m+m- & mm)", 25, 0, 500);
+		
 		for (int i =0; i < tree->GetEntries(); i++){
 			tree->GetEntry(i);			
 			float *lep_pt, *tau_pt;
-			const char *cat_name = numberToCat(cat);
+			string cat_string = getCatName(cat);
+			char* cat_name = const_cast<char*>(cat_string.c_str());
 			int Nlep = cat_lepCount(cat_name,'e','m'); 
-			int Ntau = strlen(cat_name)-Nlep;  
-			//if (cat <= 21) continue;
-			/*float brWeight = 1;
-			if (fname.find("HppM") < fname.length()){
-				std::string Gencat_str = numberToCat(gen_cat);
-				if (Gencat_str.substr(0,2) == "ee" || Gencat_str.substr(0,2) == "mm" || Gencat_str.substr(0,2) == "tt")
-					brWeight = brWeight*3/2;
-				else if (Gencat_str.substr(0,2) == "em" || Gencat_str.substr(0,2) == "et" || Gencat_str.substr(0,2) == "mt")
-					brWeight = brWeight*3/4;
-				if (Gencat_str.substr(2,2) == "ee" || Gencat_str.substr(2,2) == "mm" || Gencat_str.substr(0,2) == "tt")
-					brWeight = brWeight*3/2;
-				else if (Gencat_str.substr(2,2) == "em" || Gencat_str.substr(2,2) == "et" || Gencat_str.substr(0,2) == "mt")
-					brWeight = brWeight*3/4;
-					
-				//if (Gencat_str.substr(0,2) == Gencat_str.substr(2,2))
-					//brWeight = brWeight*2;
-				//cout<<brWeight<<"\t"<<Gencat_str<<endl;
-			}*/
+			int Ntau = strlen(cat_name)-Nlep; 			
+			//cout<<"BEFORE"<<"\t"<<q_1<<"\t"<<q_2<<"\t"<<q_3<<"\t"<<q_4<<"\t"<<cat_name<<endl;			
+			// (strlen(cat_name) == 3 and (abs(q_1+q_2+q_3)!=1 or abs(q_1) !=1 or abs(q_2) != 1 or abs(q_3)!=1))continue;
+			// (strlen(cat_name) == 4 and (abs(q_1+q_2+q_3+q_4)!=0 or abs(q_1) !=1 or abs(q_2) != 1 or abs(q_3)!=1 or abs(q_4)!=1))continue;
 			
 			float evtwt_nom = 1;
 			if (XSec(filename[j])!=1){
@@ -245,18 +259,8 @@ void DCH_test(const char* ext = ".root"){
 					evtwt_nom *= TrigSF_4;
 				else if (isTrig_1 == 2 and isTrig_2 == 2)
 					evtwt_nom *= TrigSF_1;
-			}//cout<<LHEweight<< filename[j]<<endl;
-									
-			float mll_1, mll_2;
-			if ((LepV(1)+LepV(2)).Pt() > (LepV(3)+LepV(4)).Pt()){
-				mll_1 = mll;
-				mll_2 = mll2;	
-			}
-			else{
-				mll_1 = mll2;
-				mll_2 = mll;
-			}
-			
+			}//cout<<evtwt_nom<< filename[j]<<endl;		 			
+
 			if(selection == "test"){//My tests
 				bool foundDup = false;
 				Lepton lepton1 = {pt_1, eta_1, phi_1, m_1, q_1};
@@ -268,18 +272,47 @@ void DCH_test(const char* ext = ".root"){
 					for (int x = w + 1; x < 4; ++x) {
 						if (isDuplicate(leptons[w], leptons[x])){
 						foundDup = true;
-						//cout<<leptons[w].eta <<"\t"<< leptons[w].phi<<endl;
-						//cout<<leptons[x].eta <<"\t"<< leptons[x].phi<<endl;
-						//cout<<endl;
+						cout<<leptons[w].mass <<"\t"<< leptons[w].pt <<"\t"<<leptons[w].eta <<"\t"<< leptons[w].phi<<endl;
+						cout<<leptons[x].mass <<"\t"<< leptons[x].pt <<"\t"<<leptons[x].eta <<"\t"<< leptons[x].phi<<endl;
+						cout<<cat<<" xx"<<endl;
 						break;
 						}
 					}
 				}
 				if (foundDup == true) continue;
 				
-				TLorentzVector *Zcands = ZCandMaker_pair(cat_name, LepV(1), LepV(2), LepV(3), LepV(4), 20);	
-				TLorentzVector L1 = Zcands[0], L2 = Zcands[1], L3 = Zcands[2], L4 = Zcands[3];
-				if (cat_name == "eee" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20)){ 
+			
+				std::vector<int> Zcands = ZCandMaker(cat_name, 20);	
+				TLorentzVector L1 = LepV(Zcands[0]), L2 = LepV(Zcands[1]), L3 = LepV(Zcands[2]), L4 = LepV(Zcands[3]);
+				int Q[] = {-99, -99, -99, -99};
+				for(int iq = 0; iq <= 3; iq++){
+					if (Zcands[iq] == 1) Q[iq] = q_1;
+					else if (Zcands[iq] == 2) Q[iq] = q_2;
+					else if (Zcands[iq] == 3) Q[iq] = q_3;
+					else if (Zcands[iq] == 4) Q[iq] = q_4;
+				}
+				int q1=Q[0],q2=Q[1],q3=Q[2],q4=Q[3];
+				float mll_1=-99/*leading H mass*/, mll_2=-99, mllt_2=-99;
+				if (q1==q3 and (L1+L3).Pt() >= (L2+L4).Pt()){
+					mll_1 = (L1+L3).M();
+					mllt_2 = (L2+L4).Mt();
+				}
+				else if (q1==q3 and (L2+L4).Pt() >= (L1+L3).Pt()){
+					mll_1 = (L2+L4).M();
+					mllt_2 = (L1+L3).Mt();
+				}
+				else if (q1==q4 and (L1+L4).Pt() >= (L2+L3).Pt()){
+					mll_1 = (L1+L4).M();
+					mllt_2 = (L2+L3).Mt();
+				}
+				else if (q1==q4 and (L2+L3).Pt() >= (L1+L4).Pt()){
+					mll_1 = (L2+L3).M();
+					mllt_2 = (L1+L4).Mt();
+				}
+	
+				//cout<<"AFTER "<<"\t"<<q1<<"\t"<<q2<<"\t"<<q3<<"\t"<<q4<<"\t"<<Zcands[0]<<Zcands[1]<<Zcands[2]<<Zcands[3]<<"\t"<<cat_name<<endl;
+				if (cat_string== "eee" and abs((L1+L2).M()-mZ) < 20 ){ 
+					//cout<<cat_name<<"\t"<<abs((L1+L3).M()-mZ)<<endl;
 					h_mZ1->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mH1->Fill(mll_1, brWeight*evtwt_nom);
 					h_pt1_1->Fill(L1.Pt(), brWeight*evtwt_nom);
@@ -288,7 +321,7 @@ void DCH_test(const char* ext = ".root"){
 					h_met1->Fill(met, brWeight*evtwt_nom);
 					h_MT1->Fill(met+L3.Mt(), brWeight*evtwt_nom);
 				}
-				else if (cat_name == "eme" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20)){ 
+				else if ((cat_string== "eme" or cat_string== "eem" or cat_string == "mee") and abs((L1+L2).M()-mZ) < 20 ){ 
 					h_mZ2->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mH2->Fill(mll_1, brWeight*evtwt_nom);
 					h_pt1_2->Fill(L1.Pt(), brWeight*evtwt_nom);
@@ -297,7 +330,7 @@ void DCH_test(const char* ext = ".root"){
 					h_met2->Fill(met, brWeight*evtwt_nom);
 					h_MT2->Fill(met+L3.Mt(), brWeight*evtwt_nom);
 				}
-				else if (cat_name == "emm" and (abs((LepV(2)+LepV(3)).M()-mZ) < 20)){ 
+				else if ((cat_string== "emm" or cat_string== "mme" or cat_string == "mem") and abs((L1+L2).M()-mZ) < 20 ){ 
 					h_mZ3->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mH3->Fill(mll_1, brWeight*evtwt_nom);
 					h_pt1_3->Fill(L1.Pt(), brWeight*evtwt_nom);
@@ -306,7 +339,7 @@ void DCH_test(const char* ext = ".root"){
 					h_met3->Fill(met, brWeight*evtwt_nom);
 					h_MT3->Fill(met+L3.Mt(), brWeight*evtwt_nom);
 				}
-				else if( cat_name == "mmm" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20)){ 
+				else if( cat_string== "mmm" and abs((L1+L2).M()-mZ) < 20 ){ 
 					h_mZ4->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mH4->Fill(mll_1, brWeight*evtwt_nom);
 					h_pt1_4->Fill(L1.Pt(), brWeight*evtwt_nom);
@@ -315,47 +348,71 @@ void DCH_test(const char* ext = ".root"){
 					h_met4->Fill(met, brWeight*evtwt_nom);
 					h_MT4->Fill(met+L3.Mt(), brWeight*evtwt_nom);
 				}
-				else if( cat_name == "eeee" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(1)+LepV(4)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)){ 
+				else if( cat_string== "eeee" and abs((L1+L2).M()-mZ) < 20 ){ 
 					h_mZ5->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mH5->Fill(mll_1, brWeight*evtwt_nom);
 					h_met5->Fill(met, brWeight*evtwt_nom);
-					h_MT5->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_MT5->Fill(met+mllt_2, brWeight*evtwt_nom);
 				}
-				else if( cat_name == "eeem" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 )){ 
+				else if( cat_lepCount(cat_name,'e','g') == 3 and cat_lepCount(cat_name,'m','g') == 1 and abs((L1+L2).M()-mZ) < 20 ){ 
 					h_mZ6->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mH6->Fill(mll_1, brWeight*evtwt_nom);
 					h_met6->Fill(met, brWeight*evtwt_nom);
-					h_MT6->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_MT6->Fill(met+mllt_2, brWeight*evtwt_nom);
 				}
-				else if( cat_name == "eemm" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20)){ 
+				else if( cat_lepCount(cat_name,'e','g') == 2 and cat_lepCount(cat_name,'m','g') == 2 and abs((L1+L2).M()-mZ) < 20 ){ 
 					h_mZ7->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mH7->Fill(mll_1, brWeight*evtwt_nom);
 					h_met7->Fill(met, brWeight*evtwt_nom);
-					h_MT7->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_MT7->Fill(met+mllt_2, brWeight*evtwt_nom);
 				}
-				else if( cat_name == "emem" and (abs((LepV(2)+LepV(4)).M()-mZ) < 20)){ 
+				else if( cat_string =="blabla" and abs((L1+L2).M()-mZ) < 20 ){ 
 					h_mZ8->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mH8->Fill(mll_1, brWeight*evtwt_nom);
 					h_met8->Fill(met, brWeight*evtwt_nom);
-					h_MT8->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_MT8->Fill(met+mllt_2, brWeight*evtwt_nom);
 				}
-				else if( cat_name == "emmm" and (abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)){ 
+				else if( cat_lepCount(cat_name,'e','g') == 1 and cat_lepCount(cat_name,'m','g') == 3 and abs((L1+L2).M()-mZ) < 20 ){ 
 					h_mZ9->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mH9->Fill(mll_1, brWeight*evtwt_nom);
 					h_met9->Fill(met, brWeight*evtwt_nom);
-					h_MT9->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_MT9->Fill(met+mllt_2, brWeight*evtwt_nom);
 				}
-				else if( cat_name == "mmmm" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(1)+LepV(4)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)){ 
+				else if( cat_string== "mmmm" and abs((L1+L2).M()-mZ) < 20 ){ 
 					h_mZ10->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mH10->Fill(mll_1, brWeight*evtwt_nom);
 					h_met10->Fill(met, brWeight*evtwt_nom);
-					h_MT10->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_MT10->Fill(met+mllt_2, brWeight*evtwt_nom);
+				}	
+				
+				/*std::vector<int> ZcandsV = ZVetoMaker(cat_name, 20);	
+				L1 = LepV(ZcandsV[0]), L2 = LepV(ZcandsV[1]), L3 = LepV(ZcandsV[2]), L4 = LepV(ZcandsV[3]);
+				for(int iq = 0; iq <= 3; iq++){
+					if (Zcands[iq] == 1) Q[iq] = q_1;
+					else if (Zcands[iq] == 2) Q[iq] = q_2;
+					else if (Zcands[iq] == 3) Q[iq] = q_3;
+					else if (Zcands[iq] == 4) Q[iq] = q_4;
 				}
+				q1=Q[0]; q2=Q[1]; q3=Q[2]; q4=Q[3]
+				mll_1=-99, mll_2=-99, mllt_2=-99;
+				if (q1==q3 and (L1+L3).Pt() >= (L2+L4).Pt()){
+					mll_1 = (L1+L3).M();
+					mllt_2 = (L2+L4).Mt();
+				}
+				else if (q1==q3 and (L2+L4).Pt() >= (L1+L3).Pt()){
+					mll_1 = (L2+L4).M();
+					mllt_2 = (L1+L3).Mt();
+				}
+				else if (q1==q4 and (L1+L4).Pt() >= (L2+L3).Pt()){
+					mll_1 = (L1+L4).M();
+					mllt_2 = (L2+L3).Mt();
+				}
+				else if (q1==q4 and (L2+L3).Pt() >= (L1+L4).Pt()){
+					mll_1 = (L2+L3).M();
+					mllt_2 = (L1+L4).Mt();
+				}*/
 				
-				/*TLorentzVector *ZcandsV = ZVetoMaker_pair(cat_name, LepV(1), LepV(2), LepV(3), LepV(4), 20);	
-				L1 = ZcandsV[0], L2 = ZcandsV[1], L3 = ZcandsV[2], L4 = ZcandsV[3];*/
-				
-				if (cat_name == "eee" and (abs((LepV(1)+LepV(3)).M()-mZ) > 20 and abs((LepV(2)+LepV(3)).M()-mZ) > 20)){ 
+				if (cat_string== "eee" and abs((L1+L2).M()-mZ) >= 20 ){ 
 					h_mZv1->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mHv1->Fill(mll_1, brWeight*evtwt_nom);
 					h_pt1_v1->Fill(L1.Pt(), brWeight*evtwt_nom);
@@ -364,7 +421,7 @@ void DCH_test(const char* ext = ".root"){
 					h_metv1->Fill(met, brWeight*evtwt_nom);
 					h_MTv1->Fill(met+L3.Mt(), brWeight*evtwt_nom);
 				}
-				else if (cat_name == "eme" and (abs((LepV(1)+LepV(3)).M()-mZ) > 20)){  
+				else if ((cat_string== "eme" or cat_string== "eem" or cat_string == "mee")and abs((L1+L2).M()-mZ) >= 20 ){  
 					h_mZv2->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mHv2->Fill(mll_1, brWeight*evtwt_nom);
 					h_pt1_v2->Fill(L1.Pt(), brWeight*evtwt_nom);
@@ -373,7 +430,7 @@ void DCH_test(const char* ext = ".root"){
 					h_metv2->Fill(met, brWeight*evtwt_nom);
 					h_MTv2->Fill(met+L3.Mt(), brWeight*evtwt_nom);
 				}
-				else if (cat_name == "emm" and (abs((LepV(2)+LepV(3)).M()-mZ) > 20)){ 
+				else if ((cat_string== "emm" or cat_string== "mme" or cat_string == "mem") and abs((L1+L2).M()-mZ) >= 20 ){ 
 					h_mZv3->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mHv3->Fill(mll_1, brWeight*evtwt_nom);
 					h_pt1_v3->Fill(L1.Pt(), brWeight*evtwt_nom);
@@ -382,7 +439,7 @@ void DCH_test(const char* ext = ".root"){
 					h_metv3->Fill(met, brWeight*evtwt_nom);
 					h_MTv3->Fill(met+L3.Mt(), brWeight*evtwt_nom);
 				}
-				else if( cat_name == "mmm" and (abs((LepV(1)+LepV(3)).M()-mZ) > 20 and abs((LepV(2)+LepV(3)).M()-mZ) > 20)){ 
+				else if( cat_string== "mmm" and abs((L1+L2).M()-mZ) >= 20 ){ 
 					h_mZv4->Fill((L1+L2).M(), brWeight*evtwt_nom);
 					h_mHv4->Fill(mll_1, brWeight*evtwt_nom);
 					h_pt1_v4->Fill(L1.Pt(), brWeight*evtwt_nom);
@@ -390,6 +447,42 @@ void DCH_test(const char* ext = ".root"){
 					h_pt3_v4->Fill(L3.Pt(), brWeight*evtwt_nom);
 					h_metv4->Fill(met, brWeight*evtwt_nom);
 					h_MTv4->Fill(met+L3.Mt(), brWeight*evtwt_nom);
+				}
+				else if( cat_string== "eeee" and abs((L1+L2).M()-mZ) >= 20 ){ 
+					h_mZv5->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mHv5->Fill(mll_1, brWeight*evtwt_nom);
+					h_metv5->Fill(met, brWeight*evtwt_nom);
+					h_MT5->Fill(met+mllt_2, brWeight*evtwt_nom);
+				}
+				else if( cat_lepCount(cat_name,'e','g') == 3 and cat_lepCount(cat_name,'m','g') == 1 and abs((L1+L2).M()-mZ) >= 20 ){ 
+					h_mZv6->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mHv6->Fill(mll_1, brWeight*evtwt_nom);
+					h_metv6->Fill(met, brWeight*evtwt_nom);
+					h_MTv6->Fill(met+mllt_2, brWeight*evtwt_nom);
+				}
+				else if( cat_lepCount(cat_name,'e','g') == 2 and cat_lepCount(cat_name,'m','g') == 2 and abs((L1+L2).M()-mZ) >= 20 ){ 
+					h_mZv7->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mHv7->Fill(mll_1, brWeight*evtwt_nom);
+					h_metv7->Fill(met, brWeight*evtwt_nom);
+					h_MTv7->Fill(met+mllt_2, brWeight*evtwt_nom);
+				}
+				else if( cat_string =="blabla" and abs((L1+L2).M()-mZ) >= 20 ){ 
+					h_mZv8->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mHv8->Fill(mll_1, brWeight*evtwt_nom);
+					h_metv8->Fill(met, brWeight*evtwt_nom);
+					h_MTv8->Fill(met+mllt_2, brWeight*evtwt_nom);
+				}
+				else if( cat_lepCount(cat_name,'e','g') == 1 and cat_lepCount(cat_name,'m','g') == 3 and abs((L1+L2).M()-mZ) >= 20 ){ 
+					h_mZv9->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mHv9->Fill(mll_1, brWeight*evtwt_nom);
+					h_metv9->Fill(met, brWeight*evtwt_nom);
+					h_MTv9->Fill(met+mllt_2, brWeight*evtwt_nom);
+				}
+				else if( cat_string== "mmmm" and abs((L1+L2).M()-mZ) >= 20 ){ 
+					h_mZv10->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mHv10->Fill(mll_1, brWeight*evtwt_nom);
+					h_metv10->Fill(met, brWeight*evtwt_nom);
+					h_MTv10->Fill(met+mllt_2, brWeight*evtwt_nom);
 				}
 			}
 		}//evt loop 
@@ -530,6 +623,12 @@ void DCH_test(const char* ext = ".root"){
 		h_mZ8->Scale(xs_weight);
 		h_mZ9->Scale(xs_weight);
 		h_mZ10->Scale(xs_weight);
+		h_mZv5->Scale(xs_weight);
+		h_mZv6->Scale(xs_weight);
+		h_mZv7->Scale(xs_weight);
+		h_mZv8->Scale(xs_weight);
+		h_mZv9->Scale(xs_weight);
+		h_mZv10->Scale(xs_weight);
 
 		h_mH5->Scale(xs_weight);
 		h_mH6->Scale(xs_weight);
@@ -537,41 +636,77 @@ void DCH_test(const char* ext = ".root"){
 		h_mH8->Scale(xs_weight);
 		h_mH9->Scale(xs_weight);
 		h_mH10->Scale(xs_weight);
-
+		h_mHv5->Scale(xs_weight);
+		h_mHv6->Scale(xs_weight);
+		h_mHv7->Scale(xs_weight);
+		h_mHv8->Scale(xs_weight);
+		h_mHv9->Scale(xs_weight);
+		h_mHv10->Scale(xs_weight);
+		
 		h_met5->Scale(xs_weight);
 		h_met6->Scale(xs_weight);
 		h_met7->Scale(xs_weight);
 		h_met8->Scale(xs_weight);
 		h_met9->Scale(xs_weight);
 		h_met10->Scale(xs_weight);		
-
+		h_metv5->Scale(xs_weight);
+		h_metv6->Scale(xs_weight);
+		h_metv7->Scale(xs_weight);
+		h_metv8->Scale(xs_weight);
+		h_metv9->Scale(xs_weight);
+		h_metv10->Scale(xs_weight);	
+		
 		h_MT5->Write();
 		h_MT6->Write();
 		h_MT7->Write();
 		h_MT8->Write();
 		h_MT9->Write();
 		h_MT10->Write();
-		
+		h_MTv5->Write();
+		h_MTv6->Write();
+		h_MTv7->Write();
+		h_MTv8->Write();
+		h_MTv9->Write();
+		h_MTv10->Write();
+				
 		h_mZ5->Write();
 		h_mZ6->Write();
 		h_mZ7->Write();
 		h_mZ8->Write();
 		h_mZ9->Write();
 		h_mZ10->Write();
-
+		h_mZv5->Write();
+		h_mZv6->Write();
+		h_mZv7->Write();
+		h_mZv8->Write();
+		h_mZv9->Write();
+		h_mZv10->Write();
+		
 		h_mH5->Write();
 		h_mH6->Write();
 		h_mH7->Write();
 		h_mH8->Write();
 		h_mH9->Write();
 		h_mH10->Write();
-
+		h_mHv5->Write();
+		h_mHv6->Write();
+		h_mHv7->Write();
+		h_mHv8->Write();
+		h_mHv9->Write();
+		h_mHv10->Write();
+		
 		h_met5->Write();
 		h_met6->Write();
 		h_met7->Write();
 		h_met8->Write();
 		h_met9->Write();
 		h_met10->Write();		
+		h_metv5->Write();
+		h_metv6->Write();
+		h_metv7->Write();
+		h_metv8->Write();
+		h_metv9->Write();
+		h_metv10->Write();		
 
 		h_MT5->Write();
 		h_MT6->Write();
@@ -579,6 +714,12 @@ void DCH_test(const char* ext = ".root"){
 		h_MT8->Write();
 		h_MT9->Write();
 		h_MT10->Write();
+		h_MTv5->Write();
+		h_MTv6->Write();
+		h_MTv7->Write();
+		h_MTv8->Write();
+		h_MTv9->Write();
+		h_MTv10->Write();
 		//cout<< j <<"\t"<< oname <<endl;
 		printf("%s %f\n", oname, XSec(filename[j])*lumi_2018/hnevts->Integral() );
 		delete tree;

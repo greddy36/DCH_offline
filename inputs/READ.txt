@@ -1,0 +1,2 @@
+THis contatins samples with Gen Info saved for Signal, 
+Single lepton trigger applied for all samples and that info is also saved. (but check it) 

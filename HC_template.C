@@ -16,16 +16,16 @@ const char* sampleKind_3Ch(std::string fname){
 	else if (fname.find("HppM1200_") < len) return "M1200";
 	else if (fname.find("HppM1300_") < len) return "M1300";
 	else if (fname.find("HppM1400_") < len) return "M1400";
-	else if (fname.find("WZ_") < len ||
-		fname.find("WZTo3LNu") < len ||
-		fname.find("WWW_") < len ||
-		fname.find("ZZ_") < len ||
+	else if (fname.find("ZZ_") < len ||
 		fname.find("ZZTo4L") < len ||
 		fname.find("ttH") < len ||
 		fname.find("ttZ") < len ||
 		fname.find("ZH") < len )
 		return "prompt";
-	else if (fname.find("DY") < len ||
+	else if (fname.find("WWW_") < len ||
+		fname.find("WZ_") < len ||
+		fname.find("WZTo3LNu") < len ||
+		fname.find("DY") < len ||
 		fname.find("WGToLNuG") < len ||
 		fname.find("WWTo2L2Nu") < len ||
 		fname.find("ZZTo2L2Nu") < len ||
@@ -34,11 +34,13 @@ const char* sampleKind_3Ch(std::string fname){
 		fname.find("ttW") < len ||
 		fname.find("ST_") < len)
 		return "fake";
+	else if (fname.find("EGamma") < len || fname.find("Single") < len)
+		return "data";
 	else return "BLABLA";
 }
 
 void HC_template(const char* ext = ".root"){
-	const char* inDir = "hist_APre";
+	const char* inDir = "hist_MY";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
 	const char* entry;
@@ -53,7 +55,7 @@ void HC_template(const char* ext = ".root"){
 	gROOT->Reset();
 
     // Create output file
-    TFile* ofile = new TFile("hist_APre/nuisance_hist.root", "RECREATE");
+    TFile* ofile = new TFile("hist_MY/nuisance_hist_test.root", "RECREATE");
 	const char* prompt__channel;
 	const char* fake__channel;
 	

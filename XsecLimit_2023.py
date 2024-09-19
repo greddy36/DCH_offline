@@ -50,26 +50,26 @@ tgp.SetLineWidth(3)
 #HC-TopTagVeto_Syst.txt, Asymptotic, uncorrelated pdf uncertainties, added shape pdf and scale uncetainties for SM backgrouns
 limit_bands = np.array([#use make_limitBand.sh script to make the below table
 		# mass, obs, exp -2sigma, exp -1sigma, exp nom, exp +1sigma, exp +2sigma
-[500, 0.1212, 0.0487, 0.0742, 0.1211, 0.2041, 0.3234 ],
-[600, 0.1056, 0.0412, 0.0633, 0.1055, 0.1786, 0.2863 ],
-[800, 0.0844, 0.0307, 0.0492, 0.0845, 0.1471, 0.2389 ],
-[900, 0.0771, 0.0274, 0.0441, 0.0771, 0.1368, 0.2254 ],
-[1000, 0.0675, 0.0237, 0.0384, 0.0674, 0.1206, 0.2016 ],
-[1100, 0.0672, 0.0231, 0.0379, 0.0671, 0.1201, 0.2009 ],
-[1200, 0.0668, 0.0229, 0.0376, 0.0667, 0.1193, 0.1994 ],
-[1300, 0.0655, 0.0226, 0.0371, 0.0657, 0.1180, 0.1984]])
+[500, 0.0985, 0.0437, 0.0633, 0.0981, 0.1568, 0.2376 ],
+[600, 0.0822, 0.0368, 0.0531, 0.0820, 0.1311, 0.2004 ],
+[800, 0.0777, 0.0350, 0.0504, 0.0779, 0.1235, 0.1881 ],
+[900, 0.0765, 0.0344, 0.0496, 0.0767, 0.1216, 0.1852 ],
+[1000, 0.0681, 0.0306, 0.0441, 0.0681, 0.1083, 0.1647 ],
+[1100, 0.0713, 0.0320, 0.0461, 0.0713, 0.1131, 0.1722 ],
+[1200, 0.0712, 0.0320, 0.0461, 0.0713, 0.1131, 0.1722 ],
+[1300, 0.0717, 0.0325, 0.0466, 0.0718, 0.1135, 0.1733]])
 
 mass2 = limit_bands[:,0]
 mass2r = np.flip(mass2)
 massL = np.append(mass2, mass2r)
 
 # observed cross sections:
-obs = limit_bands[:,1]
-obsg = TGraph(len(mass), array.array('d', mass), np.array(obs))	
+'''obs = limit_bands[:,1]
+#obsg = TGraph(len(mass), array.array('d', mass), np.array(obs))	
 obsg.SetMarkerColor(1)
 obsg.SetMarkerStyle(7)
 obsg.SetLineWidth(2)
-
+'''
 exp = limit_bands[:,4] #exp_xsec[]
 expg = TGraph(len(mass), array.array('d', mass), np.array(exp))
 expg.SetLineWidth(3)
@@ -102,7 +102,7 @@ exp2g.SetTitle("")
 exp2g.Draw("AF")
 exp1g.Draw("F")
 expg.Draw("LP")
-obsg.Draw("LP")
+#obsg.Draw("LP")
 #tg1.Draw("LP")
 #tg2.Draw("LP")
 #tg3.Draw("LP")
@@ -127,7 +127,7 @@ leg = TLegend(0.65,0.65,0.895,0.89)
 leg.AddEntry(expg,"Median expected limit","pl")
 leg.AddEntry(exp1g,"68% expected limit","f")
 leg.AddEntry(exp2g,"95% expected limit","f")
-leg.AddEntry(obsg,"Observed limit","pl")
+#leg.AddEntry(obsg,"Observed limit","pl")
 #leg.AddEntry(tg1,"Ybq prod. (c^{bW} = 0.25)","pl")
 #leg.AddEntry(tg2,"Ybq prod. (c^{bW} = 0.2)","pl")
 #leg.AddEntry(tg3,"Ybq prod. (c^{bW} = 0.15)","pl")

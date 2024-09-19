@@ -47,7 +47,7 @@ float XSec(std::string fname){
 	}
 }
 
-void DCH_presel(const char* ext = "2018.root"){
+void DCH_presel_ATLAS(const char* ext = "2018.root"){
 	const char* inDir = ".";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
@@ -69,13 +69,30 @@ void DCH_presel(const char* ext = "2018.root"){
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
 		TH1D* hnevts = (TH1D*)ifile->Get("hNEvts");
-		float weight = 1;
-		if(XSec(filename[j])!=1) weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
+		float xs_weight = 1;
+		if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
 
 		std::string fname = filename[j];
 		//if (fname.find("HppM100") > fname.length()) continue;
 		//cout<<filename[j]<<endl;
 		
+			float evtwt_nom = 1;
+			if (XSec(filename[j])!=1){
+				evtwt_nom = IDSF_1*IDSF_2*IDSF_3*IDSF_4*ISOSF_1*ISOSF_2*ISOSF_3*ISOSF_4*weightPUtruejson;
+				if (isTrig_1 == 1)
+					evtwt_nom *= TrigSF_1;
+				else if (isTrig_1 == -1)
+					evtwt_nom *= TrigSF_2;
+				else if (isTrig_1 == 2)
+					evtwt_nom *= TrigSF_1*TrigSF_2;
+				if (isTrig_2 == 1)
+					evtwt_nom *= TrigSF_3;
+				else if (isTrig_2 == -1)
+					evtwt_nom *= TrigSF_4;
+				else if (isTrig_2 == 2)
+					evtwt_nom *= TrigSF_3*TrigSF_4;
+			}
+			
 		const char* o_name;
 		if (selection =="none") o_name = "hist";
 		else if (selection =="Pre") o_name = "hist_MY";
@@ -88,7 +105,9 @@ void DCH_presel(const char* ext = "2018.root"){
 		TFile* ofile = new TFile(oname, "RECREATE"); 
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
-		float xmin = 0, xmax = 3000; int binw = 100; int nbins = (xmax-xmin)/binw; 
+		//float xmin = 0, xmax = 3000; int binw = 100; int nbins = (xmax-xmin)/binw; 
+		float xmin = 300, xmax = 2000; int nbins = 1; 
+		int nbins3L = 4; float binEdges3L[5] = {299, 380, 530, 680, 1150};
 		TH1F* cutflow = new TH1F("cutflow", "cutflow", 6, 0, 6);     
 		TH1F* h_mll_1 = new TH1F("h_mll_1", "mll_1", nbins, xmin, xmax);
 		TH1F* h_mll_2 = new TH1F("h_mll_2", "mll_2", nbins, xmin, xmax);
@@ -123,7 +142,7 @@ void DCH_presel(const char* ext = "2018.root"){
 		TH1F* h_Xmass_1t = new TH1F("h_Xmass_1t", "mDCH1", nbins, xmin, xmax);
 		TH1F* h_Xmass_2t = new TH1F("h_Xmass_2t", "mDCH1", nbins, xmin, xmax);
 		TH1F* h_Xmass_34t = new TH1F("h_Xmass_34t", "mDCH1", nbins, xmin, xmax);
-		TH1F* h_Xmass_3lep = new TH1F("h_Xmass_3lep", "mDCH1", nbins, xmin, xmax);
+		TH1F* h_Xmass_3lep = new TH1F("h_Xmass_3lep", "mDCH1", nbins3L, binEdges3L);
 		for (int i =0; i < tree->GetEntries(); i++){
 			tree->GetEntry(i);			
 			float *lep_pt, *tau_pt;
@@ -258,7 +277,7 @@ void DCH_presel(const char* ext = "2018.root"){
 						//if (mll_1 <400 or mll_2 <400 ){ continue;}  
 						if ((mll_1+mll_2)/2 <200 ){ continue;}  
 						cutflow->Fill(4);
-						h_Xmass_0t->Fill(mll_1,brWeight);
+						h_Xmass_0t->Fill(mll_1,brWeight*evtwt_nom);
 						//h_Xmass_0t->Fill(mll_2 + xmax/2);
 					}	
 					else if (Ntau == 1){
@@ -271,7 +290,7 @@ void DCH_presel(const char* ext = "2018.root"){
 						//if (mll_1 <250 or mll_2 <250 ){ continue;}
 						if ((mll_1+mll_2)/2 <250 ){ continue;}
 						cutflow->Fill(4);
-						h_Xmass_1t->Fill(mll_1,brWeight);
+						h_Xmass_1t->Fill(mll_1,brWeight*evtwt_nom);
 						//h_Xmass_1t->Fill(mll_2 + xmax/2);
 					}
 					else if (Ntau >= 2 and Ntau !=4){
@@ -284,7 +303,7 @@ void DCH_presel(const char* ext = "2018.root"){
 						//if (mll_1 <100 or mll_2 <100 ){ continue;}
 						if ((mll_1+mll_2)/2 <100 ){ continue;}
 						cutflow->Fill(4);
-						h_Xmass_2t->Fill(mll_1,brWeight);
+						h_Xmass_2t->Fill(mll_1,brWeight*evtwt_nom);
 						//h_Xmass_2t->Fill(mll_2 + xmax/2);
 					}
 					/*if (Ntau > 2){
@@ -297,7 +316,7 @@ void DCH_presel(const char* ext = "2018.root"){
 						//if (mll_1 <100 or mll_2 <100 ){ continue;}
 						if ((mll_1+mll_2)/2 <100 ){ continue;}
 						cutflow->Fill(4);
-						h_Xmass_34t->Fill(mll_1,brWeight);
+						h_Xmass_34t->Fill(mll_1,brWeight*evtwt_nom);
 					}*/
 				}//4-lep	
 				else if(cat >= 22 and Ntau !=3 ){//3-lep	
@@ -310,7 +329,7 @@ void DCH_presel(const char* ext = "2018.root"){
 						cutflow->Fill(3);
 						if (mll_1 <400){ continue;}  
 						cutflow->Fill(4);
-						h_Xmass_3lep->Fill(mll_1,brWeight);
+						h_Xmass_3lep->Fill(mll_1,brWeight*evtwt_nom);
 					//}			
 				}//3-lep
 			}//MyPresel
@@ -322,7 +341,7 @@ void DCH_presel(const char* ext = "2018.root"){
 				if (cat<= 21 and Ntau ==0){
 					if (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(1)+LepV(4)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)continue;
 					if ( (mll_1+mll_2)/2 < 300 ) continue;
-					h_Xmass_0t->Fill(mll_1,brWeight);
+					h_Xmass_0t->Fill(mll_1,brWeight*evtwt_nom);
 
 					h_ll1_pt_4L->Fill(LL1.Pt());
 					h_mZ1->Fill(abs((LepV(1)+LepV(3)).M()));
@@ -330,12 +349,12 @@ void DCH_presel(const char* ext = "2018.root"){
 					h_mZ3->Fill(abs((LepV(2)+LepV(3)).M()));
 					h_mZ4->Fill(abs((LepV(2)+LepV(4)).M()));
 				}
-				else if ( cat >= 22 and Ntau !=3){
+				//else if ( cat >= 22 and Ntau !=3){
 				//else if ( cat >= 22 and Ntau ==0){
-				//if ((cat<=21 and Ntau ==1) or (cat>=21 and Ntau ==0)){
+				if ((cat<=21 and Ntau ==1) or (cat>21 and Ntau ==0)){
 					if (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20)continue;
 					if (LL1.Pt() < 300)continue;
-					h_Xmass_3lep->Fill(mll_1,brWeight);
+					h_Xmass_3lep->Fill(mll_1,brWeight*evtwt_nom);
 
 					h_ll1_pt_3L->Fill(LL1.Pt());
 					h_mZ1_3L->Fill(abs((LepV(1)+LepV(3)).M()));
@@ -346,12 +365,12 @@ void DCH_presel(const char* ext = "2018.root"){
 				else if (cat<= 21 and Ntau == 1){
 					if (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(1)+LepV(4)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)continue;
 					if ( (mll_1+mll_2)/2 < 300 ) continue;
-					h_Xmass_1t->Fill(mll_1,brWeight);
+					h_Xmass_1t->Fill(mll_1,brWeight*evtwt_nom);
 				}
 				else if (cat<= 21 and Ntau >= 2 and Ntau !=4){
 					if (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(1)+LepV(4)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)continue;
 					if ( (mll_1+mll_2)/2 < 300 ) continue;
-					h_Xmass_2t->Fill(mll_1,brWeight);
+					h_Xmass_2t->Fill(mll_1,brWeight*evtwt_nom);
 
 				}//================test================
 					
@@ -434,37 +453,37 @@ void DCH_presel(const char* ext = "2018.root"){
 			}*/
 			
 		}//evt loop
-		cutflow->Scale(weight);
-		h_mll_1->Scale(weight);
-		h_mll_2->Scale(weight);
-		h_mDCH1->Scale(weight);
-		h_mDCH2->Scale(weight);
-		h_ST->Scale(weight);
-		h_ll1_pt_4L->Scale(weight);
-		h_ll1_pt_3L->Scale(weight);
-		h_mZ1->Scale(weight);
-		h_mZ2->Scale(weight);
-		h_mZ3->Scale(weight);
-		h_mZ4->Scale(weight);
-		h_mZ1_3L->Scale(weight);
-		h_mZ2_3L->Scale(weight);
-		h_mZ3_3L->Scale(weight);
-		h_mZ4_3L->Scale(weight);
-		h_met->Scale(weight);
-		h_pT1->Scale(weight);
-		h_pT2->Scale(weight);
-		h_pT3->Scale(weight);
-		h_pT4->Scale(weight); 
-		h_dR->Scale(weight);
-		h_dRll->Scale(weight);
-		h_dRll2->Scale(weight);
-		h_dR1_met->Scale(weight);
-		h_dR2_met->Scale(weight);
-		h_Xmass_0t->Scale(weight);
-		h_Xmass_1t->Scale(weight);
-		h_Xmass_2t->Scale(weight);
-		h_Xmass_34t->Scale(weight);
-		h_Xmass_3lep->Scale(weight);
+		cutflow->Scale(xs_weight);
+		h_mll_1->Scale(xs_weight);
+		h_mll_2->Scale(xs_weight);
+		h_mDCH1->Scale(xs_weight);
+		h_mDCH2->Scale(xs_weight);
+		h_ST->Scale(xs_weight);
+		h_ll1_pt_4L->Scale(xs_weight);
+		h_ll1_pt_3L->Scale(xs_weight);
+		h_mZ1->Scale(xs_weight);
+		h_mZ2->Scale(xs_weight);
+		h_mZ3->Scale(xs_weight);
+		h_mZ4->Scale(xs_weight);
+		h_mZ1_3L->Scale(xs_weight);
+		h_mZ2_3L->Scale(xs_weight);
+		h_mZ3_3L->Scale(xs_weight);
+		h_mZ4_3L->Scale(xs_weight);
+		h_met->Scale(xs_weight);
+		h_pT1->Scale(xs_weight);
+		h_pT2->Scale(xs_weight);
+		h_pT3->Scale(xs_weight);
+		h_pT4->Scale(xs_weight); 
+		h_dR->Scale(xs_weight);
+		h_dRll->Scale(xs_weight);
+		h_dRll2->Scale(xs_weight);
+		h_dR1_met->Scale(xs_weight);
+		h_dR2_met->Scale(xs_weight);
+		h_Xmass_0t->Scale(xs_weight);
+		h_Xmass_1t->Scale(xs_weight);
+		h_Xmass_2t->Scale(xs_weight);
+		h_Xmass_34t->Scale(xs_weight);
+		h_Xmass_3lep->Scale(xs_weight);
 		
 		hnevts->Write();		
 		/*cutflow->Write();

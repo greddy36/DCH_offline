@@ -2,7 +2,7 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 
-void StackHist() {
+void StackHist_all() {
 	TFile *ifile_sig = new TFile("hist_test/HppM900_2018.root","READ");               
 	TFile *ifile1 = new TFile("hist_test/DYJetsToLLM10to50_2018.root","READ");     
 	TFile *ifile2 = new TFile("hist_test/DYJetsToLLM50_2018.root","READ"); 
