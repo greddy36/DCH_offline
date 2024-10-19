@@ -48,6 +48,24 @@ float XSec(std::string fname){
 	}
 }
 
+
+// Histogram creation utility to avoid code duplication
+void createHistograms(std::vector<TH1F*>& histograms, const std::string& prefix, const std::string& label, int bins, float low, float high) {
+    for (int i = 0; i <= 10; i++) {
+        histograms.push_back(new TH1F(Form("%s%d", prefix.c_str(), i), Form("%s %d", label.c_str(), i), bins, low, high));
+    }
+}
+
+void scaleAndWriteHistograms(std::vector<TH1F*>& histograms, float xs_weight, int start = 1, int end = -1) {
+    if (end == -1) {
+        end = histograms.size(); // Default to the end of the vector if no end index is specified
+    }
+    for (int i = start; i < end; ++i) {
+        histograms[i]->Scale(xs_weight);
+        histograms[i]->Write();
+    }
+}
+
 void DCH_test(const char* ext = ".root"){
 	const char* inDir = ".";
 	char* dir = gSystem->ExpandPathName(inDir);
@@ -90,122 +108,63 @@ void DCH_test(const char* ext = ".root"){
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
 		
-
-		TH1F* h_mZ1 = new TH1F("h_mZ1", "mZ (e+e- & e)", 25, 0, 200);
-		TH1F* h_mZ2 = new TH1F("h_mZ2", "mZ (e+e- & m)", 25, 0, 200);
-		TH1F* h_mZ3 = new TH1F("h_mZ3", "mZ (m+m- & e)", 25, 0, 200);
-		TH1F* h_mZ4 = new TH1F("h_mZ4", "mZ (m+m- & m)", 25, 0, 200);
-		TH1F* h_mZv1 = new TH1F("h_mZv1", "Z-veto (e+e- & e)", 25, 0, 300);
-		TH1F* h_mZv2 = new TH1F("h_mZv2", "Z-veto (e+e- & m)", 25, 0, 300);
-		TH1F* h_mZv3 = new TH1F("h_mZv3", "Z-veto (m+m- & e)", 25, 0, 300);
-		TH1F* h_mZv4 = new TH1F("h_mZv4", "Z-veto (m+m- & m)", 25, 0, 300);
-
-		TH1F* h_mH1 = new TH1F("h_mH1", "mll (e+e- & e)", 25, 0, 500);
-		TH1F* h_mH2 = new TH1F("h_mH2", "mll (e+e- & m)", 25, 0, 500);
-		TH1F* h_mH3 = new TH1F("h_mH3", "mll (m+m- & e)", 25, 0, 500);
-		TH1F* h_mH4 = new TH1F("h_mH4", "mll (m+m- & m)", 25, 0, 500);
-		TH1F* h_mHv1 = new TH1F("h_mHv1", "mll in Z-veto (e+e- & e)", 25, 0, 500);
-		TH1F* h_mHv2 = new TH1F("h_mHv2", "mll in Z-veto (e+e- & m)", 25, 0, 500);
-		TH1F* h_mHv3 = new TH1F("h_mHv3", "mll in Z-veto (m+m- & e)", 25, 0, 500);
-		TH1F* h_mHv4 = new TH1F("h_mHv4", "mll in Z-veto (m+m- & m)", 25, 0, 500);	
-
-		TH1F* h_pt1_1 = new TH1F("h_pt1_1", "pt1 (e+e- & e)", 25, 0, 300);
-		TH1F* h_pt1_2 = new TH1F("h_pt1_2", "pt1 (e+e- & m)", 25, 0, 300);
-		TH1F* h_pt1_3 = new TH1F("h_pt1_3", "pt1 (m+m- & e)", 25, 0, 300);
-		TH1F* h_pt1_4 = new TH1F("h_pt1_4", "pt1 (m+m- & m)", 25, 0, 300);
-		TH1F* h_pt1_v1 = new TH1F("h_pt1_v1", "pt1 in Z-veto (e+e- & e)", 25, 0, 300);
-		TH1F* h_pt1_v2 = new TH1F("h_pt1_v2", "pt1 in Z-veto (e+e- & m)", 25, 0, 300);
-		TH1F* h_pt1_v3 = new TH1F("h_pt1_v3", "pt1 in Z-veto (m+m- & e)", 25, 0, 300);
-		TH1F* h_pt1_v4 = new TH1F("h_pt1_v4", "pt1 in Z-veto (m+m- & m)", 25, 0, 300);
-	
-		TH1F* h_pt2_1 = new TH1F("h_pt2_1", "pt2 (e+e- & e)", 25, 0, 300);
-		TH1F* h_pt2_2 = new TH1F("h_pt2_2", "pt2 (e+e- & m)", 25, 0, 300);
-		TH1F* h_pt2_3 = new TH1F("h_pt2_3", "pt2 (m+m- & e)", 25, 0, 300);
-		TH1F* h_pt2_4 = new TH1F("h_pt2_4", "pt2 (m+m- & m)", 25, 0, 300);
-		TH1F* h_pt2_v1 = new TH1F("h_pt2_v1", "pt2 in Z-veto (e+e- & e)", 25, 0, 300);
-		TH1F* h_pt2_v2 = new TH1F("h_pt2_v2", "pt2 in Z-veto (e+e- & m)", 25, 0, 300);
-		TH1F* h_pt2_v3 = new TH1F("h_pt2_v3", "pt2 in Z-veto (m+m- & e)", 25, 0, 300);
-		TH1F* h_pt2_v4 = new TH1F("h_pt2_v4", "pt2 in Z-veto (m+m- & m)", 25, 0, 300);		
-
-	
-		TH1F* h_pt3_1 = new TH1F("h_pt3_1", "pt3 (e+e- & e)", 25, 0, 300);
-		TH1F* h_pt3_2 = new TH1F("h_pt3_2", "pt3 (e+e- & m)", 25, 0, 300);
-		TH1F* h_pt3_3 = new TH1F("h_pt3_3", "pt3 (m+m- & e)", 25, 0, 300);
-		TH1F* h_pt3_4 = new TH1F("h_pt3_4", "pt3 (m+m- & m)", 25, 0, 300);
-		TH1F* h_pt3_v1 = new TH1F("h_pt3_v1", "pt3 in Z-veto (e+e- & e)", 25, 0, 300);
-		TH1F* h_pt3_v2 = new TH1F("h_pt3_v2", "pt3 in Z-veto (e+e- & m)", 25, 0, 300);
-		TH1F* h_pt3_v3 = new TH1F("h_pt3_v3", "pt3 in Z-veto (m+m- & e)", 25, 0, 300);
-		TH1F* h_pt3_v4 = new TH1F("h_pt3_v4", "pt3 in Z-veto (m+m- & m)", 25, 0, 300);	
-
-		TH1F* h_met1 = new TH1F("h_met1", "met (e+e- & e)", 25, 0, 300);
-		TH1F* h_met2 = new TH1F("h_met2", "met (e+e- & m)", 25, 0, 300);
-		TH1F* h_met3 = new TH1F("h_met3", "met (m+m- & e)", 25, 0, 300);
-		TH1F* h_met4 = new TH1F("h_met4", "met (m+m- & m)", 25, 0, 300);
-		TH1F* h_metv1 = new TH1F("h_metv1", "met in Z-veto (e+e- & e)", 25, 0, 300);
-		TH1F* h_metv2 = new TH1F("h_metv2", "met in Z-veto (e+e- & m)", 25, 0, 300);
-		TH1F* h_metv3 = new TH1F("h_metv3", "met in Z-veto (m+m- & e)", 25, 0, 300);
-		TH1F* h_metv4 = new TH1F("h_metv4", "met in Z-veto (m+m- & m)", 25, 0, 300);	
-		
-		TH1F* h_MT1 = new TH1F("h_MT1", "MT (e+e- & e)", 25, 0, 500);
-		TH1F* h_MT2 = new TH1F("h_MT2", "MT (e+e- & m)", 25, 0, 500);
-		TH1F* h_MT3 = new TH1F("h_MT3", "MT (m+m- & e)", 25, 0, 500);
-		TH1F* h_MT4 = new TH1F("h_MT4", "MT (m+m- & m)", 25, 0, 500);
-		TH1F* h_MTv1 = new TH1F("h_MTv1", "MT in Z-veto (e+e- & e)", 25, 0, 500);
-		TH1F* h_MTv2 = new TH1F("h_MTv2", "MT in Z-veto (e+e- & m)", 25, 0, 500);
-		TH1F* h_MTv3 = new TH1F("h_MTv3", "MT in Z-veto (m+m- & e)", 25, 0, 500);
-		TH1F* h_MTv4 = new TH1F("h_MTv4", "MT in Z-veto (m+m- & m)", 25, 0, 500);	
-		
-		TH1F* h_mZ5 = new TH1F("h_mZ5", "mZ (e+e- & ee)", 25, 0, 200);
-		TH1F* h_mZ6 = new TH1F("h_mZ6", "mZ (e+e- & em)", 25, 0, 200);
-		TH1F* h_mZ7 = new TH1F("h_mZ7", "mZ (e+e- & mm)", 25, 0, 200);
-		TH1F* h_mZ8 = new TH1F("h_mZ8", "mZ (m+m- & ee)", 25, 0, 200);
-		TH1F* h_mZ9 = new TH1F("h_mZ9", "mZ (m+m- & em)", 25, 0, 200);	
-		TH1F* h_mZ10 = new TH1F("h_mZ10", "mZ in Z-veto (m+m- & mm)", 25, 0, 200);	
-		TH1F* h_mZv5 = new TH1F("h_mZv5", "mZ in Z-veto (e+e- & ee)", 25, 0, 200);
-		TH1F* h_mZv6 = new TH1F("h_mZv6", "mZ in Z-veto (e+e- & em)", 25, 0, 200);
-		TH1F* h_mZv7 = new TH1F("h_mZv7", "mZ in Z-veto (e+e- & mm)", 25, 0, 200);
-		TH1F* h_mZv8 = new TH1F("h_mZv8", "mZ in Z-veto (m+m- & ee)", 25, 0, 200);
-		TH1F* h_mZv9 = new TH1F("h_mZv9", "mZ in Z-veto (m+m- & em)", 25, 0, 200);	
-		TH1F* h_mZv10 = new TH1F("h_mZv10", "mZ in Z-veto (m+m- & mm)", 25, 0, 200);
-
-		TH1F* h_mH5 = new TH1F("h_mH5", "mll (e+e- & ee)", 25, 0, 500);
-		TH1F* h_mH6 = new TH1F("h_mH6", "mll (e+e- & em)", 25, 0, 500);
-		TH1F* h_mH7 = new TH1F("h_mH7", "mll (m+m- & mm)", 25, 0, 500);
-		TH1F* h_mH8 = new TH1F("h_mH8", "mll (m+m- & ee)", 25, 0, 500);
-		TH1F* h_mH9 = new TH1F("h_mH9", "mll (m+m- & em)", 25, 0, 500);
-		TH1F* h_mH10 = new TH1F("h_mH10", "mll in Z-veto (m+m- & mm)", 25, 0, 500);
-		TH1F* h_mHv5 = new TH1F("h_mHv5", "mll in Z-veto (e+e- & ee)", 25, 0, 500);
-		TH1F* h_mHv6 = new TH1F("h_mHv6", "mll in Z-veto (e+e- & em)", 25, 0, 500);
-		TH1F* h_mHv7 = new TH1F("h_mHv7", "mll in Z-veto (m+m- & mm)", 25, 0, 500);
-		TH1F* h_mHv8 = new TH1F("h_mHv8", "mll in Z-veto (m+m- & ee)", 25, 0, 500);
-		TH1F* h_mHv9 = new TH1F("h_mHv9", "mll in Z-veto (m+m- & em)", 25, 0, 500);
-		TH1F* h_mHv10 = new TH1F("h_mHv10", "mll in Z-veto (m+m- & mm)", 25, 0, 500);
-						
-		TH1F* h_met5 = new TH1F("h_met5", "met (e+e- & ee)", 25, 0, 300);
-		TH1F* h_met6 = new TH1F("h_met6", "met (e+e- & em)", 25, 0, 300);
-		TH1F* h_met7 = new TH1F("h_met7", "met (m+m- & mm)", 25, 0, 300);
-		TH1F* h_met8 = new TH1F("h_met8", "met (m+m- & ee)", 25, 0, 300);
-		TH1F* h_met9 = new TH1F("h_met9", "met (m+m- & em)", 25, 0, 300);
-		TH1F* h_met10 = new TH1F("h_met10", "met in Z-veto (m+m- & mm)", 25, 0, 300);
-		TH1F* h_metv5 = new TH1F("h_metv5", "met in Z-veto (e+e- & ee)", 25, 0, 300);
-		TH1F* h_metv6 = new TH1F("h_metv6", "met in Z-veto (e+e- & em)", 25, 0, 300);
-		TH1F* h_metv7 = new TH1F("h_metv7", "met in Z-veto (m+m- & mm)", 25, 0, 300);
-		TH1F* h_metv8 = new TH1F("h_metv8", "met in Z-veto (m+m- & ee)", 25, 0, 300);
-		TH1F* h_metv9 = new TH1F("h_metv9", "met in Z-veto (m+m- & em)", 25, 0, 300);
-		TH1F* h_metv10 = new TH1F("h_metv10", "met in Z-veto (m+m- & mm)", 25, 0, 300);
-						
-		TH1F* h_MT5 = new TH1F("h_MT5", "MT (e+e- & ee)", 25, 0, 500);
-		TH1F* h_MT6 = new TH1F("h_MT6", "MT (e+e- & em)", 25, 0, 500);
-		TH1F* h_MT7 = new TH1F("h_MT7", "MT (m+m- & mm)", 25, 0, 500);
-		TH1F* h_MT8 = new TH1F("h_MT8", "MT (m+m- & ee)", 25, 0, 500);
-		TH1F* h_MT9 = new TH1F("h_MT9", "MT (m+m- & em)", 25, 0, 500);			
-		TH1F* h_MT10 = new TH1F("h_MT10", "MT in Z-veto (m+m- & mm)", 25, 0, 500);			
-		TH1F* h_MTv5 = new TH1F("h_MTv5", "MT in Z-veto (e+e- & ee)", 25, 0, 500);
-		TH1F* h_MTv6 = new TH1F("h_MTv6", "MT in Z-veto (e+e- & em)", 25, 0, 500);
-		TH1F* h_MTv7 = new TH1F("h_MTv7", "MT in Z-veto (m+m- & mm)", 25, 0, 500);
-		TH1F* h_MTv8 = new TH1F("h_MTv8", "MT in Z-veto (m+m- & ee)", 25, 0, 500);
-		TH1F* h_MTv9 = new TH1F("h_MTv9", "MT in Z-veto (m+m- & em)", 25, 0, 500);			
-		TH1F* h_MTv10 = new TH1F("h_MTv10", "MT in Z-veto (m+m- & mm)", 25, 0, 500);
+		 // Compact histogram creation
+        std::vector<TH1F*> h_mZ, h_mZv, h_mH, h_mHv, h_met, h_metv, h_pt1, h_pt2, h_pt3, h_pt4, h_pt1v, h_pt2v, h_pt3v, h_pt4v, h_eta1, h_eta2, h_eta3, h_eta4, h_eta1v, h_eta2v, h_eta3v, h_eta4v, h_phi1, h_phi2, h_phi3, h_phi4, h_phi1v, h_phi2v, h_phi3v, h_phi4v, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_dxy1v, h_dxy2v, h_dxy3v, h_dxy4v, h_dZ1v, h_dZ2v, h_dZ3v, h_dZ4v, h_iso1v, h_iso2v, h_iso3v, h_iso4v;
+        createHistograms(h_mZ, "h_mZ", "mZ", 25, 0, 200);
+        createHistograms(h_mZv, "h_mZv", "Z-veto", 25, 0, 300);
+        createHistograms(h_mH, "h_mH", "mll", 25, 0, 300);
+        createHistograms(h_mHv, "h_mHv", "mll in Z-veto", 25, 0, 300);
+        createHistograms(h_met, "h_met", "MET", 25, 0, 300);
+        createHistograms(h_metv, "h_metv", "MET in Z-veto", 25, 0, 300);
+        createHistograms(h_pt1, "h_pt1", "pT1", 25, 0, 300);
+        createHistograms(h_pt1v, "h_pt1v", "pT1 in Z-veto", 25, 0, 300);
+        createHistograms(h_eta1, "h_eta1", "Eta1", 25, 0, 3);
+        createHistograms(h_eta1v, "h_eta1v", "Eta1 in Z-veto", 25, 0, 3);
+        createHistograms(h_phi1, "h_phi1", "Phi1", 25, -3.5, 3.5);
+        createHistograms(h_phi1v, "h_phi1v", "Phi1 in Z-veto", 25, -3.5, 3.5);
+        createHistograms(h_pt2, "h_pt2", "pT2", 25, 0, 300);
+        createHistograms(h_pt2v, "h_pt2v", "pT2 in Z-veto", 25, 0, 300);
+        createHistograms(h_eta2, "h_eta2", "Eta2", 25, 0, 3);
+        createHistograms(h_eta2v, "h_eta2v", "Eta2 in Z-veto", 25, 0, 3);
+        createHistograms(h_phi2, "h_phi2", "Phi2", 25, -3.5, 3.5);
+        createHistograms(h_phi2v, "h_phi2v", "Phi2 in Z-veto", 25, -3.5, 3.5);
+        createHistograms(h_pt3, "h_pt3", "pT3", 25, 0, 300);
+        createHistograms(h_pt3v, "h_pt3v", "pT3 in Z-veto", 25, 0, 300);
+        createHistograms(h_eta3, "h_eta3", "Eta3", 25, 0, 3);
+        createHistograms(h_eta3v, "h_eta3v", "Eta3 in Z-veto", 25, 0, 3);
+        createHistograms(h_phi3, "h_phi3", "Phi3", 25, -3.5, 3.5);
+        createHistograms(h_phi3v, "h_phi4v", "Phi3 in Z-veto", 25, -3.5, 3.5);
+        createHistograms(h_pt4, "h_pt4", "pT4", 25, 0, 300);
+        createHistograms(h_pt4v, "h_pt4v", "pT4 in Z-veto", 25, 0, 300);
+        createHistograms(h_eta4, "h_eta4", "Eta4", 25, 0, 3);
+        createHistograms(h_eta4v, "h_eta4v", "Eta4 in Z-veto", 25, 0, 3);
+        createHistograms(h_phi4, "h_phi4", "Phi4", 25, -3.5, 3.5);
+        createHistograms(h_phi4v, "h_phi4v", "Phi4 in Z-veto", 25, -3.5, 3.5);
+        createHistograms(h_dxy1, "h_dxy1", "dxy1", 25, -0.045, 0.045);
+        createHistograms(h_dxy2, "h_dxy2", "dxy2", 25, -0.045, 0.045);
+        createHistograms(h_dxy3, "h_dxy3", "dxy3", 25, -0.045, 0.045);
+        createHistograms(h_dxy4, "h_dxy4", "dxy4", 25, -0.045, 0.045);
+        createHistograms(h_dZ1, "h_dZ1", "dZ1", 25, -0.1, 0.1);
+        createHistograms(h_dZ2, "h_dZ2", "dZ2", 25, -0.1, 0.1);
+        createHistograms(h_dZ3, "h_dZ3", "dZ3", 25, -0.1, 0.1);
+        createHistograms(h_dZ4, "h_dZ4", "dZ4", 25, -0.1, 0.1);
+        createHistograms(h_iso1, "h_iso1", "iso1 in Z-veto", 25, 0, 0.25);
+        createHistograms(h_iso2, "h_iso2", "iso2 in Z-veto", 25, 0, 0.25);
+        createHistograms(h_iso3, "h_iso3", "iso3 in Z-veto", 25, 0, 0.25);
+        createHistograms(h_iso4, "h_iso4", "iso4 in Z-veto", 25, 0, 0.25);
+        createHistograms(h_dxy1v, "h_dxy1v", "dxy1 in Z-veto", 25, -0.045, 0.045);
+        createHistograms(h_dxy2v, "h_dxy2v", "dxy2 in Z-veto", 25, -0.045, 0.045);
+        createHistograms(h_dxy3v, "h_dxy3v", "dxy3 in Z-veto", 25, -0.045, 0.045);
+        createHistograms(h_dxy4v, "h_dxy4v", "dxy4 in Z-veto", 25, -0.045, 0.045);
+        createHistograms(h_dZ1v, "h_dZ1v", "dZ1 in Z-veto", 25, -0.1, 0.1);
+        createHistograms(h_dZ2v, "h_dZ2v", "dZ2 in Z-veto", 25, -0.1, 0.1);
+        createHistograms(h_dZ3v, "h_dZ3v", "dZ3 in Z-veto", 25, -0.1, 0.1);
+        createHistograms(h_dZ4v, "h_dZ4v", "dZ4 in Z-veto", 25, -0.1, 0.1);
+        createHistograms(h_iso1v, "h_iso1v", "iso1 in Z-veto", 25, 0, 0.25);
+        createHistograms(h_iso2v, "h_iso2v", "iso2 in Z-veto", 25, 0, 0.25);
+        createHistograms(h_iso3v, "h_iso3v", "iso3 in Z-veto", 25, 0, 0.25);
+        createHistograms(h_iso4v, "h_iso4v", "iso4 in Z-veto", 25, 0, 0.25);
+        
 		for (int i =0; i < tree->GetEntries(); i++){
 			tree->GetEntry(i);			
 			float *lep_pt, *tau_pt;
@@ -280,305 +239,472 @@ void DCH_test(const char* ext = ".root"){
 				TLorentzVector *Zcands = ZCandMaker_pair(cat_name, LepV(1), LepV(2), LepV(3), LepV(4), 20);	
 				TLorentzVector L1 = Zcands[0], L2 = Zcands[1], L3 = Zcands[2], L4 = Zcands[3];
 				if (cat_name == "eee" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20)){ 
-					h_mZ1->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mH1->Fill(mll_1, brWeight*evtwt_nom);
-					h_pt1_1->Fill(L1.Pt(), brWeight*evtwt_nom);
-					h_pt2_1->Fill(L2.Pt(), brWeight*evtwt_nom);
-					h_pt3_1->Fill(L3.Pt(), brWeight*evtwt_nom);
-					h_met1->Fill(met, brWeight*evtwt_nom);
-					h_MT1->Fill(met+L3.Mt(), brWeight*evtwt_nom);
+					h_mZ[1]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mH[1]->Fill(mll_1, brWeight*evtwt_nom);
+					h_met[1]->Fill(met, brWeight*evtwt_nom);
+					h_pt1[1]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2[1]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3[1]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4[1]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1[1]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2[1]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3[1]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4[1]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1[1]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2[1]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3[1]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4[1]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1[1]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2[1]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3[1]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4[1]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1[1]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2[1]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3[1]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4[1]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1[1]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2[1]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3[1]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4[1]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if (cat_name == "eme" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20)){ 
-					h_mZ2->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mH2->Fill(mll_1, brWeight*evtwt_nom);
-					h_pt1_2->Fill(L1.Pt(), brWeight*evtwt_nom);
-					h_pt2_2->Fill(L2.Pt(), brWeight*evtwt_nom);
-					h_pt3_2->Fill(L3.Pt(), brWeight*evtwt_nom);
-					h_met2->Fill(met, brWeight*evtwt_nom);
-					h_MT2->Fill(met+L3.Mt(), brWeight*evtwt_nom);
+					h_mZ[2]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mH[2]->Fill(mll_1, brWeight*evtwt_nom);
+					h_met[2]->Fill(met, brWeight*evtwt_nom);
+					h_pt1[2]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2[2]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3[2]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4[2]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1[2]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2[2]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3[2]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4[2]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1[2]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2[2]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3[2]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4[2]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1[2]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2[2]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3[2]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4[2]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1[2]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2[2]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3[2]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4[2]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1[2]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2[2]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3[2]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4[2]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if (cat_name == "emm" and (abs((LepV(2)+LepV(3)).M()-mZ) < 20)){ 
-					h_mZ3->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mH3->Fill(mll_1, brWeight*evtwt_nom);
-					h_pt1_3->Fill(L1.Pt(), brWeight*evtwt_nom);
-					h_pt2_3->Fill(L2.Pt(), brWeight*evtwt_nom);
-					h_pt3_3->Fill(L3.Pt(), brWeight*evtwt_nom);
-					h_met3->Fill(met, brWeight*evtwt_nom);
-					h_MT3->Fill(met+L3.Mt(), brWeight*evtwt_nom);
+					h_mZ[3]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mH[3]->Fill(mll_1, brWeight*evtwt_nom);
+					h_met[3]->Fill(met, brWeight*evtwt_nom);
+					h_pt1[3]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2[3]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3[3]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4[3]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1[3]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2[3]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3[3]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4[3]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1[3]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2[3]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3[3]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4[3]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1[3]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2[3]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3[3]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4[3]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1[3]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2[3]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3[3]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4[3]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1[3]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2[3]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3[3]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4[3]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if( cat_name == "mmm" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20)){ 
-					h_mZ4->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mH4->Fill(mll_1, brWeight*evtwt_nom);
-					h_pt1_4->Fill(L1.Pt(), brWeight*evtwt_nom);
-					h_pt2_4->Fill(L2.Pt(), brWeight*evtwt_nom);
-					h_pt3_4->Fill(L3.Pt(), brWeight*evtwt_nom);
-					h_met4->Fill(met, brWeight*evtwt_nom);
-					h_MT4->Fill(met+L3.Mt(), brWeight*evtwt_nom);
+					h_mZ[4]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mH[4]->Fill(mll_1, brWeight*evtwt_nom);
+					h_met[4]->Fill(met, brWeight*evtwt_nom);
+					h_pt1[4]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2[4]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3[4]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4[4]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1[4]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2[4]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3[4]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4[4]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1[4]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2[4]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3[4]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4[4]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1[4]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2[4]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3[4]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4[4]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1[4]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2[4]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3[4]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4[4]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1[4]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2[4]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3[4]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4[4]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if( cat_name == "eeee" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(1)+LepV(4)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)){ 
-					h_mZ5->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mH5->Fill(mll_1, brWeight*evtwt_nom);
-					h_met5->Fill(met, brWeight*evtwt_nom);
-					h_MT5->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_mZ[5]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mH[5]->Fill(mll_1, brWeight*evtwt_nom);
+					h_met[5]->Fill(met, brWeight*evtwt_nom);
+					h_pt1[5]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2[5]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3[5]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4[5]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1[5]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2[5]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3[5]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4[5]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1[5]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2[5]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3[5]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4[5]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1[5]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2[5]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3[5]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4[5]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1[5]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2[5]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3[5]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4[5]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1[5]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2[5]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3[5]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4[5]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if( cat_name == "eeem" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 )){ 
-					h_mZ6->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mH6->Fill(mll_1, brWeight*evtwt_nom);
-					h_met6->Fill(met, brWeight*evtwt_nom);
-					h_MT6->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_mZ[6]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mH[6]->Fill(mll_1, brWeight*evtwt_nom);
+					h_met[6]->Fill(met, brWeight*evtwt_nom);
+					h_pt1[6]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2[6]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3[6]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4[6]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1[6]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2[6]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3[6]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4[6]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1[6]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2[6]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3[6]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4[6]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1[6]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2[6]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3[6]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4[6]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1[6]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2[6]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3[6]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4[6]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1[6]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2[6]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3[6]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4[6]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if( cat_name == "eemm" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20)){ 
-					h_mZ7->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mH7->Fill(mll_1, brWeight*evtwt_nom);
-					h_met7->Fill(met, brWeight*evtwt_nom);
-					h_MT7->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_mZ[7]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mH[7]->Fill(mll_1, brWeight*evtwt_nom);
+					h_met[7]->Fill(met, brWeight*evtwt_nom);
+					h_pt1[7]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2[7]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3[7]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4[7]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1[7]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2[7]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3[7]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4[7]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1[7]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2[7]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3[7]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4[7]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1[7]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2[7]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3[7]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4[7]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1[7]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2[7]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3[7]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4[7]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1[7]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2[7]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3[7]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4[7]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if( cat_name == "emem" and (abs((LepV(2)+LepV(4)).M()-mZ) < 20)){ 
-					h_mZ8->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mH8->Fill(mll_1, brWeight*evtwt_nom);
-					h_met8->Fill(met, brWeight*evtwt_nom);
-					h_MT8->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_mZ[8]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mH[8]->Fill(mll_1, brWeight*evtwt_nom);
+					h_met[8]->Fill(met, brWeight*evtwt_nom);
+					h_pt1[8]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2[8]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3[8]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4[8]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1[8]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2[8]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3[8]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4[8]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1[8]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2[8]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3[8]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4[8]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1[8]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2[8]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3[8]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4[8]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1[8]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2[8]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3[8]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4[8]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1[8]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2[8]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3[8]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4[8]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if( cat_name == "emmm" and (abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)){ 
-					h_mZ9->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mH9->Fill(mll_1, brWeight*evtwt_nom);
-					h_met9->Fill(met, brWeight*evtwt_nom);
-					h_MT9->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_mZ[9]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mH[9]->Fill(mll_1, brWeight*evtwt_nom);
+					h_met[9]->Fill(met, brWeight*evtwt_nom);
+					h_pt1[9]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2[9]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3[9]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4[9]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1[9]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2[9]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3[9]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4[9]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1[9]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2[9]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3[9]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4[9]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1[9]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2[9]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3[9]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4[9]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1[9]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2[9]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3[9]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4[9]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1[9]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2[9]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3[9]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4[9]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if( cat_name == "mmmm" and (abs((LepV(1)+LepV(3)).M()-mZ) < 20 or abs((LepV(2)+LepV(3)).M()-mZ) < 20 or abs((LepV(1)+LepV(4)).M()-mZ) < 20 or abs((LepV(2)+LepV(4)).M()-mZ) < 20)){ 
-					h_mZ10->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mH10->Fill(mll_1, brWeight*evtwt_nom);
-					h_met10->Fill(met, brWeight*evtwt_nom);
-					h_MT10->Fill(met+(L3+L4).Mt(), brWeight*evtwt_nom);
+					h_mZ[10]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mH[10]->Fill(mll_1, brWeight*evtwt_nom);
+					h_met[10]->Fill(met, brWeight*evtwt_nom);
+					h_pt1[10]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2[10]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3[10]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4[10]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1[10]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2[10]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3[10]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4[10]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1[10]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2[10]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3[10]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4[10]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1[10]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2[10]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3[10]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4[10]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1[10]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2[10]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3[10]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4[10]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1[10]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2[10]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3[10]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4[10]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				
-				/*TLorentzVector *ZcandsV = ZVetoMaker_pair(cat_name, LepV(1), LepV(2), LepV(3), LepV(4), 20);	
-				L1 = ZcandsV[0], L2 = ZcandsV[1], L3 = ZcandsV[2], L4 = ZcandsV[3];*/
+				TLorentzVector *ZcandsV = ZVetoMaker_pair(cat_name, LepV(1), LepV(2), LepV(3), LepV(4), 20);	
+				L1 = ZcandsV[0], L2 = ZcandsV[1], L3 = ZcandsV[2], L4 = ZcandsV[3];
 				
 				if (cat_name == "eee" and (abs((LepV(1)+LepV(3)).M()-mZ) > 20 and abs((LepV(2)+LepV(3)).M()-mZ) > 20)){ 
-					h_mZv1->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mHv1->Fill(mll_1, brWeight*evtwt_nom);
-					h_pt1_v1->Fill(L1.Pt(), brWeight*evtwt_nom);
-					h_pt2_v1->Fill(L2.Pt(), brWeight*evtwt_nom);
-					h_pt3_v1->Fill(L3.Pt(), brWeight*evtwt_nom);
-					h_metv1->Fill(met, brWeight*evtwt_nom);
-					h_MTv1->Fill(met+L3.Mt(), brWeight*evtwt_nom);
+					h_mZv[1]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mHv[1]->Fill(mll_1, brWeight*evtwt_nom);
+					h_metv[1]->Fill(met, brWeight*evtwt_nom);
+					h_pt1v[1]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2v[1]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3v[1]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4v[1]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1v[1]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2v[1]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3v[1]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4v[1]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1v[1]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2v[1]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3v[1]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4v[1]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1v[1]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2v[1]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3v[1]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4v[1]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1v[1]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2v[1]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3v[1]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4v[1]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1v[1]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2v[1]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3v[1]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4v[1]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if (cat_name == "eme" and (abs((LepV(1)+LepV(3)).M()-mZ) > 20)){  
-					h_mZv2->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mHv2->Fill(mll_1, brWeight*evtwt_nom);
-					h_pt1_v2->Fill(L1.Pt(), brWeight*evtwt_nom);
-					h_pt2_v2->Fill(L2.Pt(), brWeight*evtwt_nom);
-					h_pt3_v2->Fill(L3.Pt(), brWeight*evtwt_nom);
-					h_metv2->Fill(met, brWeight*evtwt_nom);
-					h_MTv2->Fill(met+L3.Mt(), brWeight*evtwt_nom);
+					h_mZv[2]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mHv[2]->Fill(mll_1, brWeight*evtwt_nom);
+					h_metv[2]->Fill(met, brWeight*evtwt_nom);
+					h_pt1v[2]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2v[2]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3v[2]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4v[2]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1v[2]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2v[2]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3v[2]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4v[2]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1v[2]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2v[2]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3v[2]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4v[2]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1v[2]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2v[2]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3v[2]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4v[2]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1v[2]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2v[2]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3v[2]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4v[2]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1v[2]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2v[2]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3v[2]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4v[2]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if (cat_name == "emm" and (abs((LepV(2)+LepV(3)).M()-mZ) > 20)){ 
-					h_mZv3->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mHv3->Fill(mll_1, brWeight*evtwt_nom);
-					h_pt1_v3->Fill(L1.Pt(), brWeight*evtwt_nom);
-					h_pt2_v3->Fill(L2.Pt(), brWeight*evtwt_nom);
-					h_pt3_v3->Fill(L3.Pt(), brWeight*evtwt_nom);
-					h_metv3->Fill(met, brWeight*evtwt_nom);
-					h_MTv3->Fill(met+L3.Mt(), brWeight*evtwt_nom);
+					h_mZv[3]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mHv[3]->Fill(mll_1, brWeight*evtwt_nom);
+					h_metv[3]->Fill(met, brWeight*evtwt_nom);
+					h_pt1v[3]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2v[3]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3v[3]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4v[3]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1v[3]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2v[3]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3v[3]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4v[3]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1v[3]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2v[3]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3v[3]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_phi4v[3]->Fill(L4.Phi(), brWeight*evtwt_nom);
+					h_dxy1v[3]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2v[3]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3v[3]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4v[3]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1v[3]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2v[3]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3v[3]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4v[3]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1v[3]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2v[3]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3v[3]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4v[3]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 				else if( cat_name == "mmm" and (abs((LepV(1)+LepV(3)).M()-mZ) > 20 and abs((LepV(2)+LepV(3)).M()-mZ) > 20)){ 
-					h_mZv4->Fill((L1+L2).M(), brWeight*evtwt_nom);
-					h_mHv4->Fill(mll_1, brWeight*evtwt_nom);
-					h_pt1_v4->Fill(L1.Pt(), brWeight*evtwt_nom);
-					h_pt2_v4->Fill(L2.Pt(), brWeight*evtwt_nom);
-					h_pt3_v4->Fill(L3.Pt(), brWeight*evtwt_nom);
-					h_metv4->Fill(met, brWeight*evtwt_nom);
-					h_MTv4->Fill(met+L3.Mt(), brWeight*evtwt_nom);
+					h_mZv[4]->Fill((L1+L2).M(), brWeight*evtwt_nom);
+					h_mHv[4]->Fill(mll_1, brWeight*evtwt_nom);
+					h_metv[4]->Fill(met, brWeight*evtwt_nom);
+					h_pt1v[4]->Fill(L1.Pt(), brWeight*evtwt_nom);
+					h_pt2v[4]->Fill(L2.Pt(), brWeight*evtwt_nom);
+					h_pt3v[4]->Fill(L3.Pt(), brWeight*evtwt_nom);
+					h_pt4v[4]->Fill(L4.Pt(), brWeight*evtwt_nom);
+					h_eta1v[4]->Fill(L1.Eta(), brWeight*evtwt_nom);
+					h_eta2v[4]->Fill(L2.Eta(), brWeight*evtwt_nom);
+					h_eta3v[4]->Fill(L3.Eta(), brWeight*evtwt_nom);
+					h_eta4v[4]->Fill(L4.Eta(), brWeight*evtwt_nom);
+					h_phi1v[4]->Fill(L1.Phi(), brWeight*evtwt_nom);
+					h_phi2v[4]->Fill(L2.Phi(), brWeight*evtwt_nom);
+					h_phi3v[4]->Fill(L3.Phi(), brWeight*evtwt_nom);
+					h_dxy1v[4]->Fill(d0_1, brWeight*evtwt_nom);
+					h_dxy2v[4]->Fill(d0_2, brWeight*evtwt_nom);
+					h_dxy3v[4]->Fill(d0_3, brWeight*evtwt_nom);
+					h_dxy4v[4]->Fill(d0_4, brWeight*evtwt_nom);
+					h_dZ1v[4]->Fill(dZ_1, brWeight*evtwt_nom);
+					h_dZ2v[4]->Fill(dZ_2, brWeight*evtwt_nom);
+					h_dZ3v[4]->Fill(dZ_3, brWeight*evtwt_nom);
+					h_dZ4v[4]->Fill(dZ_4, brWeight*evtwt_nom);
+					h_iso1v[4]->Fill(iso_1, brWeight*evtwt_nom);
+					h_iso2v[4]->Fill(iso_2, brWeight*evtwt_nom);
+					h_iso3v[4]->Fill(iso_3, brWeight*evtwt_nom);
+					h_iso4v[4]->Fill(iso_4, brWeight*evtwt_nom);
 				}
 			}
 		}//evt loop 
-
-		h_mZ1->Scale(xs_weight);
-		h_mZ2->Scale(xs_weight);
-		h_mZ3->Scale(xs_weight);
-		h_mZ4->Scale(xs_weight);
-		h_mZv1->Scale(xs_weight);
-		h_mZv2->Scale(xs_weight);
-		h_mZv3->Scale(xs_weight);
-		h_mZv4->Scale(xs_weight);
-		
-		h_mH1->Scale(xs_weight);
-		h_mH2->Scale(xs_weight);
-		h_mH3->Scale(xs_weight);
-		h_mH4->Scale(xs_weight);
-		h_mHv1->Scale(xs_weight);
-		h_mHv2->Scale(xs_weight);
-		h_mHv3->Scale(xs_weight);
-		h_mHv4->Scale(xs_weight);
-		
-		h_met1->Scale(xs_weight);
-		h_met2->Scale(xs_weight);
-		h_met3->Scale(xs_weight);
-		h_met4->Scale(xs_weight);
-		h_metv1->Scale(xs_weight);
-		h_metv2->Scale(xs_weight);
-		h_metv3->Scale(xs_weight);
-		h_metv4->Scale(xs_weight);
-
-		h_MT1->Scale(xs_weight);
-		h_MT2->Scale(xs_weight);
-		h_MT3->Scale(xs_weight);
-		h_MT4->Scale(xs_weight);
-		h_MTv1->Scale(xs_weight);
-		h_MTv2->Scale(xs_weight);
-		h_MTv3->Scale(xs_weight);
-		h_MTv4->Scale(xs_weight);
-
-		h_pt1_1->Scale(xs_weight);
-		h_pt2_1->Scale(xs_weight);
-		h_pt3_1->Scale(xs_weight);
-		h_pt1_v1->Scale(xs_weight);
-		h_pt2_v1->Scale(xs_weight);
-		h_pt3_v1->Scale(xs_weight);
-	
-		h_pt1_2->Scale(xs_weight);
-		h_pt2_2->Scale(xs_weight);
-		h_pt3_2->Scale(xs_weight);
-		h_pt1_v2->Scale(xs_weight);
-		h_pt2_v2->Scale(xs_weight);
-		h_pt3_v2->Scale(xs_weight);
-
-		h_pt1_3->Scale(xs_weight);
-		h_pt2_3->Scale(xs_weight);
-		h_pt3_3->Scale(xs_weight);
-		h_pt1_v3->Scale(xs_weight);
-		h_pt2_v3->Scale(xs_weight);
-		h_pt3_v3->Scale(xs_weight);
-
-		h_pt1_4->Scale(xs_weight);
-		h_pt2_4->Scale(xs_weight);
-		h_pt3_4->Scale(xs_weight);
-		h_pt1_v4->Scale(xs_weight);
-		h_pt2_v4->Scale(xs_weight);
-		h_pt3_v4->Scale(xs_weight);
-
 		hnevts->Write();	
-			
-		h_mZ1->Write();
-		h_mZ2->Write();
-		h_mZ3->Write();
-		h_mZ4->Write();
-		h_mZv1->Write();
-		h_mZv2->Write();
-		h_mZv3->Write();
-		h_mZv4->Write();
-		
-		h_mH1->Write();
-		h_mH2->Write();
-		h_mH3->Write();
-		h_mH4->Write();
-		h_mHv1->Write();
-		h_mHv2->Write();
-		h_mHv3->Write();
-		h_mHv4->Write();
-		
-		h_met1->Write();
-		h_met2->Write();
-		h_met3->Write();
-		h_met4->Write();
-		h_metv1->Write();
-		h_metv2->Write();
-		h_metv3->Write();
-		h_metv4->Write();
 
-		h_MT1->Write();
-		h_MT2->Write();
-		h_MT3->Write();
-		h_MT4->Write();
-		h_MTv1->Write();
-		h_MTv2->Write();
-		h_MTv3->Write();
-		h_MTv4->Write();
-
-		h_pt1_1->Write();
-		h_pt2_1->Write();
-		h_pt3_1->Write();
-		h_pt1_v1->Write();
-		h_pt2_v1->Write();
-		h_pt3_v1->Write();
-	
-		h_pt1_2->Write();
-		h_pt2_2->Write();
-		h_pt3_2->Write();
-		h_pt1_v2->Write();
-		h_pt2_v2->Write();
-		h_pt3_v2->Write();
-
-		h_pt1_3->Write();
-		h_pt2_3->Write();
-		h_pt3_3->Write();
-		h_pt1_v3->Write();
-		h_pt2_v3->Write();
-		h_pt3_v3->Write();
-
-		h_pt1_4->Write();
-		h_pt2_4->Write();
-		h_pt3_4->Write();
-		h_pt1_v4->Write();
-		h_pt2_v4->Write();
-		h_pt3_v4->Write();
-
-		h_mZ5->Scale(xs_weight);
-		h_mZ6->Scale(xs_weight);
-		h_mZ7->Scale(xs_weight);
-		h_mZ8->Scale(xs_weight);
-		h_mZ9->Scale(xs_weight);
-		h_mZ10->Scale(xs_weight);
-
-		h_mH5->Scale(xs_weight);
-		h_mH6->Scale(xs_weight);
-		h_mH7->Scale(xs_weight);
-		h_mH8->Scale(xs_weight);
-		h_mH9->Scale(xs_weight);
-		h_mH10->Scale(xs_weight);
-
-		h_met5->Scale(xs_weight);
-		h_met6->Scale(xs_weight);
-		h_met7->Scale(xs_weight);
-		h_met8->Scale(xs_weight);
-		h_met9->Scale(xs_weight);
-		h_met10->Scale(xs_weight);		
-
-		h_MT5->Write();
-		h_MT6->Write();
-		h_MT7->Write();
-		h_MT8->Write();
-		h_MT9->Write();
-		h_MT10->Write();
-		
-		h_mZ5->Write();
-		h_mZ6->Write();
-		h_mZ7->Write();
-		h_mZ8->Write();
-		h_mZ9->Write();
-		h_mZ10->Write();
-
-		h_mH5->Write();
-		h_mH6->Write();
-		h_mH7->Write();
-		h_mH8->Write();
-		h_mH9->Write();
-		h_mH10->Write();
-
-		h_met5->Write();
-		h_met6->Write();
-		h_met7->Write();
-		h_met8->Write();
-		h_met9->Write();
-		h_met10->Write();		
-
-		h_MT5->Write();
-		h_MT6->Write();
-		h_MT7->Write();
-		h_MT8->Write();
-		h_MT9->Write();
-		h_MT10->Write();
+		scaleAndWriteHistograms(h_mZ, xs_weight);
+		scaleAndWriteHistograms(h_mZv, xs_weight);
+		scaleAndWriteHistograms(h_mH, xs_weight);
+		scaleAndWriteHistograms(h_mHv, xs_weight);
+		scaleAndWriteHistograms(h_met, xs_weight);
+		scaleAndWriteHistograms(h_metv, xs_weight);
+		scaleAndWriteHistograms(h_pt1, xs_weight);
+		scaleAndWriteHistograms(h_pt2, xs_weight);
+		scaleAndWriteHistograms(h_pt3, xs_weight);
+		scaleAndWriteHistograms(h_pt4, xs_weight);
+		scaleAndWriteHistograms(h_pt1v, xs_weight);
+		scaleAndWriteHistograms(h_pt2v, xs_weight);
+		scaleAndWriteHistograms(h_pt3v, xs_weight);
+		scaleAndWriteHistograms(h_pt4v, xs_weight);
+		scaleAndWriteHistograms(h_eta1, xs_weight);
+		scaleAndWriteHistograms(h_eta2, xs_weight);
+		scaleAndWriteHistograms(h_eta3, xs_weight);
+		scaleAndWriteHistograms(h_eta4, xs_weight);
+		scaleAndWriteHistograms(h_eta1v, xs_weight);
+		scaleAndWriteHistograms(h_eta2v, xs_weight);
+		scaleAndWriteHistograms(h_eta3v, xs_weight);
+		scaleAndWriteHistograms(h_eta4v, xs_weight);
+		scaleAndWriteHistograms(h_phi1, xs_weight);
+		scaleAndWriteHistograms(h_phi2, xs_weight);
+		scaleAndWriteHistograms(h_phi3, xs_weight);
+		scaleAndWriteHistograms(h_phi4, xs_weight);
+		scaleAndWriteHistograms(h_phi1v, xs_weight);
+		scaleAndWriteHistograms(h_phi2v, xs_weight);
+		scaleAndWriteHistograms(h_phi3v, xs_weight);
+		scaleAndWriteHistograms(h_phi4v, xs_weight);
+		scaleAndWriteHistograms(h_dxy1, xs_weight);
+		scaleAndWriteHistograms(h_dxy2, xs_weight);
+		scaleAndWriteHistograms(h_dxy3, xs_weight);
+		scaleAndWriteHistograms(h_dxy4, xs_weight);
+		scaleAndWriteHistograms(h_dZ1, xs_weight);
+		scaleAndWriteHistograms(h_dZ2, xs_weight);
+		scaleAndWriteHistograms(h_dZ3, xs_weight);
+		scaleAndWriteHistograms(h_dZ4, xs_weight);
+		scaleAndWriteHistograms(h_iso1, xs_weight);
+		scaleAndWriteHistograms(h_iso2, xs_weight);
+		scaleAndWriteHistograms(h_iso3, xs_weight);
+		scaleAndWriteHistograms(h_iso4, xs_weight);
+		scaleAndWriteHistograms(h_dxy1v, xs_weight);
+		scaleAndWriteHistograms(h_dxy2v, xs_weight);
+		scaleAndWriteHistograms(h_dxy3v, xs_weight);
+		scaleAndWriteHistograms(h_dxy4v, xs_weight);
+		scaleAndWriteHistograms(h_dZ1v, xs_weight);
+		scaleAndWriteHistograms(h_dZ2v, xs_weight);
+		scaleAndWriteHistograms(h_dZ3v, xs_weight);
+		scaleAndWriteHistograms(h_dZ4v, xs_weight);
+		scaleAndWriteHistograms(h_iso1v, xs_weight);
+		scaleAndWriteHistograms(h_iso2v, xs_weight);
+		scaleAndWriteHistograms(h_iso3v, xs_weight);
+		scaleAndWriteHistograms(h_iso4v, xs_weight);
 		//cout<< j <<"\t"<< oname <<endl;
 		printf("%s %f\n", oname, XSec(filename[j])*lumi_2018/hnevts->Integral() );
 		delete tree;

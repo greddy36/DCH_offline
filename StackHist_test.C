@@ -2,7 +2,7 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 
-void StackHist_all() {
+void StackHist_test() {
 	TFile *ifile_sig = new TFile("hist_test/HppM900_2018.root","READ");               
 	TFile *ifile1 = new TFile("hist_test/DYJetsToLLM10to50_2018.root","READ");     
 	TFile *ifile2 = new TFile("hist_test/DYJetsToLLM50_2018.root","READ"); 
@@ -31,7 +31,7 @@ void StackHist_all() {
 	TFile *ifile19 = new TFile("hist_test/ST_tW_antitop_2018.root","READ");  
 	TFile *ifile20 = new TFile("hist_test/ST_tW_top_2018.root","READ");            
 
-	TFile *ifile21 = new TFile("hist_test/ttHTo2L2Nu_2018.root","READ");
+	//TFile *ifile21 = new TFile("hist_test/ttHTo2L2Nu_2018.root","READ");
 	//TFile *ifile22 = new TFile("hist_test/ttHToEE_2018.root","READ");
 	//TFile *ifile23 = new TFile("hist_test/ttHToMuMu_2018.root","READ");
 	TFile *ifile24 = new TFile("hist_test/ttHToTauTau_2018.root","READ");
@@ -48,35 +48,18 @@ void StackHist_all() {
 
 	//float nEvents = 
 
-	/*const char *hist_list[] = {"cutflow","h_Xmass_0t","h_Xmass_1t","h_Xmass_2t", "h_Xmass_34t", "h_ST", "h_ll1_pt_4L","h_ll1_pt_3L","h_mZ1", "h_mZ2","h_mZ3","h_mZ4","h_mZ1_3L", "h_mZ2_3L","h_mZ3_3L","h_mZ4_3L","h_met","h_pT1","h_pT2","h_pT3","h_pT4","h_dR","h_dRll","h_dRll2"};*/
+	const char *hist_list[] = {"ele_cutflow","mu_cutflow","tau_cutflow"};
+	const char *hist_names[] = {"Ele cutflow","Mu cutflow","Tau cutflow"};
 	
-	/*const char *hist_names[] = {"Cutflow","mll1 in Z(e+e-) + l region","mll1 in Z(m+m-) + l region", "mll1 in Z-veto(e+e-) + l region", "mll1 in Z-veto(m+m-) + l region", "ST", "Leading pair pT in 4L","Leading pair pT in 3L","Z mass from pair (1,3) in 4L", "Z mass from pair (1,4) in 4L","Z mass from pair (2,3) in 4L","Z mass from pair (2,4) in 4L", "Z mass from pair (1,3) in 3L", "Z mass from pair (1,4) in 3L","Z mass from pair (2,3)","Z mass from pair (2,4)","MET","Leading pT","Sub-Leading pT","3rd pT","4th pT","dR (+-) leptons; DR; Events","dR between 1st pair", "dR between 2nd pair"};*/
-
-	const char *hist_list[] = {
-	 "h_mZ1","h_mZ2","h_mZ3","h_mZ4","h_mZv1","h_mZv2","h_mZv3","h_mZv4","h_mH1","h_mH2","h_mH3","h_mH4","h_mHv1","h_mHv2","h_mHv3","h_mHv4","h_met1","h_met2","h_met3","h_met4","h_metv1","h_metv2","h_metv3","h_metv4","h_MT1","h_MT2","h_MT3","h_MT4","h_MTv1","h_MTv2","h_MTv3","h_MTv4","h_pt1_1","h_pt2_1","h_pt3_1","h_pt1_v1","h_pt2_v1","h_pt3_v1","h_pt1_2","h_pt2_2","h_pt3_2","h_pt1_v2","h_pt2_v2","h_pt3_v2","h_pt1_3","h_pt2_3","h_pt3_3","h_pt1_v3","h_pt2_v3","h_pt3_v3","h_pt1_4","h_pt2_4","h_pt3_4","h_pt1_v4","h_pt2_v4","h_pt3_v4",
-
-	"h_mZ5","h_mZ6","h_mZ7","h_mZ8","h_mZ9","h_mZ10","h_mZv5","h_mZv6","h_mZv7","h_mZv8","h_mZv9","h_mZv10",
-	"h_mH5","h_mH6","h_mH7","h_mH8","h_mH9","h_mH10","h_mHv5","h_mHv6","h_mHv7","h_mHv8","h_mHv9","h_mHv10",
-	"h_met5","h_met6","h_met7","h_met8","h_met9","h_met10","h_metv5","h_metv6","h_metv7","h_metv8","h_metv9","h_metv10",
-	"h_MT5","h_MT6","h_MT7","h_MT8","h_MT9","h_MT10","h_MTv5","h_MTv6","h_MTv7","h_MTv8","h_MTv9","h_MTv10"
-	};
-	
-	const char *hist_names[] = {
-	"mZ (e+e- & e) in Z-window","mZ (e+e- & m) in Z-window","mZ (m+m- & e) in Z-window","mZ (m+m- & m) in Z-window","mZ (e+e- & e) in Z-veto","mZ (e+e- & m) in Z-veto","mZ (m+m- & e) in Z-veto","mZ (m+m- & m) in Z-veto",
-	"mH (e+e- & e) in Z-window","mH (e+e- & m) in Z-window","mH (m+m- & e) in Z-window","mH (m+m- & m) in Z-window","mH (e+e- & e) in Z-veto","mH (e+e- & m) in Z-veto","mH (m+m- & e) in Z-veto","mH (m+m- & m) in Z-veto",
-	"MET (e+e- e) in Z-window","MET (e+e- m) in Z-window","MET (m+m- e) in Z-window","MET (m+m- m) in Z-window","MET (e+e- e) in Z-veto","MET (e+e- m) in Z-veto","MET (m+m- e) in Z-veto","MET (m+m- m) in Z-veto","MET+mt3 (e+e- e) in Z-window","MET+mt3 (e+e- m) in Z-window","MET+mt3 (m+m- e) in Z-window","MET+mt3 (m+m- m) in Z-window","MET+mt3 (e+e- e) in Z-veto","MET+mt3 (e+e- m) in Z-veto","MET+mt3 (m+m- e) in Z-veto","MET+mt3 (m+m- m) in Z-veto","pT1 (e+e- e) in Z-window","pT1 (e+e- m) in Z-window","pT1 (m+m- e) in Z-window","pT1 (m+m- m) in Z-window","pT1 (e+e- e) in Z-veto","pT1 (e+e- m) in Z-veto","pT1 (m+m- e) in Z-veto","pT1 (m+m- m) in Z-veto","pT2 (e+e- e) in Z-window","pT2 (e+e- m) in Z-window","pT2 (m+m- e) in Z-window","pT2 (m+m- m) in Z-window","pT2 (e+e- e) in Z-veto","pT2 (e+e- m) in Z-veto","pT2 (m+m- e) in Z-veto","pT2 (m+m- m) in Z-veto","pT3 (e+e- e) in Z-window","pT3 (e+e- m) in Z-window","pT3 (m+m- e) in Z-window","pT3 (m+m- m) in Z-window","pT3 (e+e- e) in Z-veto","pT3 (e+e- m) in Z-veto","pT3 (m+m- e) in Z-veto","pT3 (m+m- m) in Z-veto", "mZ (e+e- & ee) in Z-window","mZ (e+e- & em) in Z-window","mZ (e+e- & mm) in Z-window","mZ (m+m- & ee) in Z-window","mZ (m+m- & em) in Z-window","mZ (m+m- & mm) in Z-window","mZ (e+e- & ee) in Z-veto","mZ (e+e- & em) in Z-veto","mZ (e+e- & mm) in Z-veto","mZ (m+m- & ee) in Z-veto","mZ (m+m- & em) in Z-veto","mZ (m+m- & mm) in Z-veto",
-	"mH (e+e- & ee) in Z-window","mH (e+e- & em) in Z-window","mH (e+e- & mm) in Z-window","mH (m+m- & ee) in Z-window","mH (m+m- & em) in Z-window","mH (m+m- & mm) in Z-window","mH (e+e- & ee) in Z-veto","mH (e+e- & em) in Z-veto","mH (e+e- & mm) in Z-veto","mH (m+m- & ee) in Z-veto","mH (m+m- & em) in Z-veto","mH (m+m- & mm) in Z-veto",
-	"MET (e+e- & ee) in Z-window","MET (e+e- & em) in Z-window","MET (e+e- & mm) in Z-window","MET (m+m- & ee) in Z-window","MET (m+m- & em) in Z-window","MET (m+m- & mm) in Z-window","MET (e+e- & ee) in Z-veto","MET (e+e- & em) in Z-veto","MET (e+e- & mm) in Z-veto","MET (m+m- & ee) in Z-veto","MET (m+m- & em) in Z-veto","MET (m+m- & mm) in Z-veto",
-	"MET+H2_mt (e+e- & ee) in Z-window","MET+H2_mt (e+e- & em) in Z-window","MET+H2_mt (e+e- & mm) in Z-window","MET+H2_mt (m+m- & ee) in Z-window","MET+H2_mt (m+m- & em) in Z-window","MET+H2_mt (m+m- & mm) in Z-window","MET+H2_mt (e+e- & ee) in Z-veto","MET+H2_mt (e+e- & em) in Z-veto","MET+H2_mt (e+e- & mm) in Z-veto","MET+H2_mt (m+m- & ee) in Z-veto","MET+H2_mt (m+m- & em) in Z-veto","MET+H2_mt (m+m- & mm) in Z-veto"
-	};
 	TCanvas* canvas = new TCanvas("canvas", "Stacked histograms", 800, 700);//600);
 	gStyle->SetOptStat(0);	
 	
 // make changes to take in xs from a csv file
 	for(int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++){
-		TH1F *h_sig = (TH1F*)ifile_sig->Get(hist_list[i]); h_sig->SetLineStyle(5);h_sig->SetLineWidth(2);h_sig->SetLineColor(2);h_sig->Scale(10);
+		//TH1F *h_sig = (TH1F*)ifile_sig->Get(hist_list[i]); h_sig->SetLineStyle(5);h_sig->SetLineWidth(2);h_sig->SetLineColor(2);h_sig->Scale(10);
 		
-		TH1F *h1 = (TH1F*)ifile1->Get(hist_list[i]);h1->SetFillColor(7);//h1->SetLineColor(7);
+		TH1F *h1 = (TH1F*)ifile1->Get(hist_list[i]);
+		h1->SetFillColor(7);//h1->SetLineColor(7);
 		TH1F *h2 = (TH1F*)ifile2->Get(hist_list[i]);h2->SetFillColor(7);//h2->SetLineColor(7);
 		
 		//TH1F *h3 = (TH1F*)ifile3->Get(hist_list[i]);h3->SetFillColor(8);h3->SetLineColor(8);
@@ -103,7 +86,7 @@ void StackHist_all() {
 		TH1F *h19 = (TH1F*)ifile19->Get(hist_list[i]);h19->SetFillColor(30);
 		TH1F *h20 = (TH1F*)ifile20->Get(hist_list[i]);h20->SetFillColor(30);
 
-		TH1F *h21 = (TH1F*)ifile21->Get(hist_list[i]);h21->SetFillColor(28);
+		//TH1F *h21 = (TH1F*)ifile21->Get(hist_list[i]);h21->SetFillColor(28);
 		//TH1F *h22 = (TH1F*)ifile22->Get(hist_list[i]);h22->SetFillColor(28);
 		//TH1F *h23 = (TH1F*)ifile23->Get(hist_list[i]);h23->SetFillColor(28);
 		TH1F *h24 = (TH1F*)ifile24->Get(hist_list[i]);h24->SetFillColor(28);
@@ -144,7 +127,7 @@ void StackHist_all() {
 		bkg_stack->Add(h18);
 		bkg_stack->Add(h19);
 		bkg_stack->Add(h20);
-		bkg_stack->Add(h21);
+		//bkg_stack->Add(h21);
 		//bkg_stack->Add(h22);
 		//bkg_stack->Add(h23);
 		bkg_stack->Add(h24);
@@ -156,7 +139,7 @@ void StackHist_all() {
 		//hD5->Draw("e");// hD5->SetStats(0);
 		//bkg_stack->Draw("hist same");
 		//h_sig->Draw("hist same");
-				
+		  gPad->SetLogy(1);	
 		auto rp = new TRatioPlot(bkg_stack,hD5);
 		rp->SetSeparationMargin(0.01);
 		rp->Draw();
@@ -168,7 +151,7 @@ void StackHist_all() {
 
 		// CReate a legend
 		//TLegend* legend = new TLegend(0.1, 0.9, 0.3, 0.7);
-		TLegend* legend = new TLegend(0.6, 0.6, 0.9, 0.9);	
+		TLegend* legend = new TLegend(0.75, 0.6, 0.9, 0.9);
 		//legend->AddEntry(h_sig, "M900*1000");
 		legend->AddEntry(h8, "VV", "f");
 		legend->AddEntry(h9, "VVV", "f");
