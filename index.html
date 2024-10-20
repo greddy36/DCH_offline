@@ -23,52 +23,299 @@
             border-radius: 8px;
         }
         .button-container {
-            margin-top: 20px;
+        	position: sticky;
+            top: 10px;
+            left: 100%;
         }
         .hidden {
             display: none;
         }
-    </style>
+        .header {
+		 	position: sticky;
+		 	top: 0;
+		 	color: blue;
+		}
+	</style>
 </head>
 <body>
-    <h1>MC validation plots</h1>
-    <div class="button-container">
-        <button onclick="showSet('set1')">Electrons</button>
-        <button onclick="showSet('set2')">Muons</button>
+    <h1> MC validation plots </h1>
+    <div class="button-container" align="right">
+		    <button onclick="showSet('Ele')">Electrons</button>
+		    <button onclick="showSet('Mu')">Muons</button>
+	</div>
+    <!--
+    <div class="header" id="myHeader">
+    	<h1> No pairing &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; DCH pairing
+    	</h1>
     </div>
-    <div id="set1" class="gallery">
+    -->
+    <h2 align="left"> pT of leptons </h2>
+    <div id="Ele" class="gallery">
 		<img src=MC_validation_plots/h_pt11.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt1v1.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt21.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt2v1.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt31.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt3v1.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt41.png alt=Image 1>
-		<img src=MC_validation_plots/h_pt14.png alt=Image 1>
-		<img src=MC_validation_plots/h_pt24.png alt=Image 1>
-		<img src=MC_validation_plots/h_pt34.png alt=Image 1>
-		<img src=MC_validation_plots/h_pt44.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt4v1.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt15.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt1v5.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt25.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt2v5.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt35.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt3v5.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt45.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt4v5.png alt=Image 1>
+    </div>  
+    <div id="Mu" class="gallery">
+		<img src=MC_validation_plots/h_pt14.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt1v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt24.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt2v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt34.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt3v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt44.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt4v4.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt110.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt1v10.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt210.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt2v10.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt310.png alt=Image 1>
+		<img src=MC_validation_plots/h_pt3v10.png alt=Image 1>
 		<img src=MC_validation_plots/h_pt410.png alt=Image 1>
-        <!-- Add more images as needed -->
-    </div>
-    
-    <div id="set2" class="gallery">
-        <img src="MC_validation_plots/h_eta410.png" alt="Image 1">
-        <img src="MC_validation_plots/h_eta310.png" alt="Image 2">
-        <img src="MC_validation_plots/h_eta210.png" alt="Image 3">
-        <img src="MC_validation_plots/h_eta110.png" alt="Image 4">
-        <!-- Add more images as needed -->
-    </div>
-    
+		<img src=MC_validation_plots/h_pt4v10.png alt=Image 1>
+    </div>  
+    <h2 align="left"> Eta of leptons </h2>
+    <div id="Ele" class="gallery">
+		<img src=MC_validation_plots/h_eta11.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta1v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta21.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta2v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta31.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta3v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta41.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta4v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta15.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta1v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta25.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta2v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta35.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta3v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta45.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta4v5.png alt=Image 1>
+    </div>  
+    <div id="Mu" class="gallery">
+		<img src=MC_validation_plots/h_eta14.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta1v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta24.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta2v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta34.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta3v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta44.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta4v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta110.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta1v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta210.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta2v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta310.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta3v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta410.png alt=Image 1>
+		<img src=MC_validation_plots/h_eta4v10.png alt=Image 1>
+    </div> 
+    <h2 align="left"> Phi of leptons </h2>
+    <div id="Ele" class="gallery">
+		<img src=MC_validation_plots/h_phi11.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi1v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi21.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi2v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi31.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi3v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi41.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi4v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi15.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi1v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi25.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi2v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi35.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi3v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi45.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi4v5.png alt=Image 1>
+    </div>  
+    <div id="Mu" class="gallery">
+		<img src=MC_validation_plots/h_phi14.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi1v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi24.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi2v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi34.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi3v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi44.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi4v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi110.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi1v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi210.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi2v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi310.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi3v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi410.png alt=Image 1>
+		<img src=MC_validation_plots/h_phi4v10.png alt=Image 1>
+    </div> 
+    <h2 align="left"> dxy of leptons </h2>
+    <div id="Ele" class="gallery">
+		<img src=MC_validation_plots/h_dxy11.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy1v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy21.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy2v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy31.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy3v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy41.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy4v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy15.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy1v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy25.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy2v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy35.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy3v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy45.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy4v5.png alt=Image 1>
+    </div>  
+    <div id="Mu" class="gallery">
+		<img src=MC_validation_plots/h_dxy14.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy1v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy24.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy2v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy34.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy3v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy44.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy4v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy110.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy1v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy210.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy2v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy310.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy3v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy410.png alt=Image 1>
+		<img src=MC_validation_plots/h_dxy4v10.png alt=Image 1>
+    </div> 
+    <h2 align="left"> dZ of leptons </h2>
+    <div id="Ele" class="gallery">
+		<img src=MC_validation_plots/h_dZ11.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ1v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ21.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ2v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ31.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ3v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ41.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ4v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ15.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ1v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ25.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ2v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ35.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ3v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ45.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ4v5.png alt=Image 1>
+    </div>  
+    <div id="Mu" class="gallery">
+		<img src=MC_validation_plots/h_dZ14.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ1v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ24.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ2v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ34.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ3v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ44.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ4v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ110.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ1v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ210.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ2v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ310.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ3v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ410.png alt=Image 1>
+		<img src=MC_validation_plots/h_dZ4v10.png alt=Image 1>
+    </div> 
+    <h2 align="left"> ISO of leptons </h2>
+    <div id="Ele" class="gallery">
+		<img src=MC_validation_plots/h_iso11.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso1v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso21.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso2v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso31.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso3v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso41.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso4v1.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso15.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso1v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso25.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso2v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso35.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso3v5.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso45.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso4v5.png alt=Image 1>
+    </div>  
+    <div id="Mu" class="gallery">
+		<img src=MC_validation_plots/h_iso14.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso1v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso24.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso2v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso34.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso3v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso44.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso4v4.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso110.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso1v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso210.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso2v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso310.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso3v10.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso410.png alt=Image 1>
+		<img src=MC_validation_plots/h_iso4v10.png alt=Image 1>
+    </div> 
+    <h2 align="left"> MET in the event </h2>
+    <div id="Ele" class="gallery">
+		<img src=MC_validation_plots/h_met1.png alt=Image 1>
+		<img src=MC_validation_plots/h_metv1.png alt=Image 1>
+		<img src=MC_validation_plots/h_met5.png alt=Image 1>
+		<img src=MC_validation_plots/h_metv5.png alt=Image 1>
+	</div>
+    <div id="Mu" class="gallery">
+		<img src=MC_validation_plots/h_met4.png alt=Image 1>
+		<img src=MC_validation_plots/h_metv4.png alt=Image 1>
+		<img src=MC_validation_plots/h_met10.png alt=Image 1>
+		<img src=MC_validation_plots/h_metv10.png alt=Image 1>
+	</div>
+    <h2 align="left"> Z-mass of leading pair </h2>
+    <div id="Ele" class="gallery">
+		<img src=MC_validation_plots/h_mZ1.png alt=Image 1>
+		<img src=MC_validation_plots/h_mZv1.png alt=Image 1>
+		<img src=MC_validation_plots/h_mZ5.png alt=Image 1>
+		<img src=MC_validation_plots/h_mZv5.png alt=Image 1>
+	</div>
+    <div id="Mu" class="gallery">
+		<img src=MC_validation_plots/h_mZ4.png alt=Image 1>
+		<img src=MC_validation_plots/h_mZv4.png alt=Image 1>
+		<img src=MC_validation_plots/h_mZ10.png alt=Image 1>
+		<img src=MC_validation_plots/h_mZv10.png alt=Image 1>
+	</div>
+    <h2 align="left"> DCH-mass of leading pair </h2>
+    <div id="Ele" class="gallery">
+		<img src=MC_validation_plots/h_mH1.png alt=Image 1>
+		<img src=MC_validation_plots/h_mHv1.png alt=Image 1>
+		<img src=MC_validation_plots/h_mH5.png alt=Image 1>
+		<img src=MC_validation_plots/h_mHv5.png alt=Image 1>
+	</div>
+    <div id="Mu" class="gallery">
+		<img src=MC_validation_plots/h_mH4.png alt=Image 1>
+		<img src=MC_validation_plots/h_mHv4.png alt=Image 1>
+		<img src=MC_validation_plots/h_mH10.png alt=Image 1>
+		<img src=MC_validation_plots/h_mHv10.png alt=Image 1>
+	</div>
+
     <script>
         function showSet(setId) {
             // Hide both sets
-            document.getElementById('set1').classList.add('hidden');
-            document.getElementById('set2').classList.add('hidden');
+            document.getElementById('Ele').classList.add('hidden');
+            document.getElementById('Mu').classList.add('hidden');
             
             // Show the selected set
             document.getElementById(setId).classList.remove('hidden');
