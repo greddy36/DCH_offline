@@ -99,11 +99,13 @@ string pairFunc(int m, int n, string cat, float Zwindow){//checks if a pair is Z
 		lep2 = LepV(4);
 		c2 = q_4;
 	}
-	
-	if (cat[m] == cat[n] and c1 == -c2 and abs((lep1+lep2).M()-91.2) < Zwindow) return "Z";
-	else if (cat[m] == cat[n] and c1 == -c2 and abs((lep1+lep2).M()-91.2) >= Zwindow) return "Zv";
-	else if (c1 == c2 ) return "DCH";
-	else return "found nothing";
+	if (c1 == c2 ) return "DCH";
+	else if (c1 == -c2){
+		if (cat[m] == cat[n] and abs((lep1+lep2).M()-91.2) < Zwindow) return "Z";
+		else if (cat[m] == cat[n] and abs((lep1+lep2).M()-91.2) >= Zwindow) return "Zv";
+		else return "found nothing";
+	}
+	else "found nothing";
 }
 
 

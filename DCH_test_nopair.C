@@ -276,9 +276,9 @@ void DCH_test_nopair(const char* ext = "root"){
 				std::vector<float> mZ, mZv, mH;
 				for(int m = 1; m <= 4; ++m){
 					for(int n = m+1; n <=4; ++n){
-						if(pairFunc(m,n,cat_name,10)=="Z") mZ.push_back((LepV(m)+LepV(n)).M());
-						else if(pairFunc(m,n,cat_name,10)=="Zv") mZv.push_back((LepV(m)+LepV(n)).M());
-						else if(pairFunc(m,n,cat_name,10)=="DCH") mH.push_back((LepV(m)+LepV(n)).M());
+						if(pairFunc(m,n,cat_name,20)=="Z") mZ.push_back((LepV(m)+LepV(n)).M());
+						else if(pairFunc(m,n,cat_name,20)=="Zv") mZv.push_back((LepV(m)+LepV(n)).M());
+						else if(pairFunc(m,n,cat_name,20)=="DCH") mH.push_back((LepV(m)+LepV(n)).M());
 						else continue;
 					}
 				}
@@ -407,7 +407,8 @@ void DCH_test_nopair(const char* ext = "root"){
 						h_iso3[4]->Fill(leptons[2].iso, brWeight*evtwt_nom);
 						h_iso4[4]->Fill(leptons[3].iso, brWeight*evtwt_nom);
 					}
-					else if( cat_string== "eeee" ){ 
+					if(mZ.size()<2) continue;
+					if( cat_string== "eeee" ){ 
 						h_mZ[5]->Fill(mZ[0], brWeight*evtwt_nom);
 						h_mH[5]->Fill(mH[0], brWeight*evtwt_nom);
 						h_met[5]->Fill(met, brWeight*evtwt_nom);
@@ -728,7 +729,8 @@ void DCH_test_nopair(const char* ext = "root"){
 						h_iso3v[4]->Fill(leptons[2].iso, brWeight*evtwt_nom);
 						h_iso4v[4]->Fill(leptons[3].iso, brWeight*evtwt_nom);
 					}
-					else if( cat_string== "eeee"  ){ 
+					if(mZv.size()<2) continue;
+					if( cat_string== "eeee"  ){ 
 						h_mZv[5]->Fill(mZv[0], brWeight*evtwt_nom);
 						h_mHv[5]->Fill(mH[0], brWeight*evtwt_nom);
 						h_metv[5]->Fill(met, brWeight*evtwt_nom);

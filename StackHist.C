@@ -283,11 +283,7 @@ void StackHist() {
 		//TH1F *hD2 = (TH1F*)ifileD2->Get(hist_list[i]);
 		//TH1F *hD3 = (TH1F*)ifileD3->Get(hist_list[i]);
 		//TH1F *hD4 = (TH1F*)ifileD4->Get(hist_list[i]);
-		TH1F *hD5 = (TH1F*)ifileD5->Get(hist_list[i]);hD5->SetMarkerColor(1);hD5->SetMarkerStyle(kFullDotLarge);
-		hD5->Add(hD1);
-		//hD5->Add(hD2);
-		//hD5->Add(hD3);
-		//hD5->Add(hD4);
+		TH1F *hD5 = (TH1F*)ifileD5->Get(hist_list[i]);
 				
 		// bkg_stack histograms
 		THStack* bkg_stack = new THStack("bkg_stack", hist_names[i]);
@@ -320,23 +316,53 @@ void StackHist() {
 		bkg_stack->Add(h26);
 		bkg_stack->Add(h27);
 
+		TH1F *h_bkg_total = (TH1F*)h1->Clone("h_bkg_total");
+    	h_bkg_total->Add(h2);
+    	//h_bkg_total->Add(h3);
+		h_bkg_total->Add(h4);
+		h_bkg_total->Add(h5);
+		//h_bkg_total->Add(h6);
+		h_bkg_total->Add(h7);
+		h_bkg_total->Add(h8);
+		h_bkg_total->Add(h9);
+		h_bkg_total->Add(h10);
+		h_bkg_total->Add(h15); 
+		h_bkg_total->Add(h11);
+		h_bkg_total->Add(h12);
+		h_bkg_total->Add(h1201);
+		h_bkg_total->Add(h13);
+		h_bkg_total->Add(h14);
+		h_bkg_total->Add(h16);
+		h_bkg_total->Add(h17);
+		h_bkg_total->Add(h18);
+		h_bkg_total->Add(h19);
+		h_bkg_total->Add(h20);
+		h_bkg_total->Add(h21);
+		//h_bkg_total->Add(h22);
+		//h_bkg_total->Add(h23);
+		h_bkg_total->Add(h24);
+		h_bkg_total->Add(h25);
+		h_bkg_total->Add(h26);
+		h_bkg_total->Add(h27);
 		
-		//hD5->Draw("e");// hD5->SetStats(0);
-		//bkg_stack->Draw("hist same");
-		//h_sig->Draw("hist same");
-				
-		auto rp = new TRatioPlot(bkg_stack,hD5);
-		rp->SetSeparationMargin(0.01);
-		rp->Draw();
+		TH1F *h_data_total = (TH1F*)hD1->Clone("h_data_total");
+		h_data_total->SetTitle(hist_names[i]);
+		h_data_total->SetMarkerColor(1);
+		h_data_total->SetMarkerStyle(kFullDotLarge);
+		h_data_total->Add(hD5);
 
-		rp->GetLowerPad()->cd();
-		rp->GetLowerRefYaxis()->SetRangeUser(0, 3);
+		canvas->Divide(1, 2);				
+		// Adjust the upper pad (stacked plot)
+		TPad *pad1 = (TPad*)canvas->cd(1);
+		pad1->SetPad(0, 0.3, 1, 1);
+		pad1->SetBottomMargin(0.01); // Remove bottom margin to reduce gap
 		
-		rp->GetUpperPad()->cd();
+		bkg_stack->Draw("HIST");		
+		h_data_total->Draw("E SAME");
 
-		// CReate a legend
+		
 		//TLegend* legend = new TLegend(0.1, 0.9, 0.3, 0.7);
-		TLegend* legend = new TLegend(0.6, 0.6, 0.9, 0.9);	
+		TLegend* legend = new TLegend(0.65, 0.65, 0.9, 0.9);	
 		//legend->AddEntry(h_sig, "M900*1000");
 		legend->AddEntry(h8, "VV", "f");
 		legend->AddEntry(h9, "VVV", "f");
@@ -345,10 +371,39 @@ void StackHist() {
 		legend->AddEntry(h12, "TTVJets", "f");
 		legend->AddEntry(h16, "ST", "f");
 		legend->AddEntry(h24, "other BKGs", "f");
-		legend->AddEntry(hD5, "Data");
-		legend->AddEntry(rp, "Bkg/Data");
-		// Add more entries to the legend if needed
-		legend->Draw();
+		legend->AddEntry(h_data_total, "Data");
+		legend->Draw();		
+
+
+		// Adjust the lower pad (ratio plot)
+		TPad *pad2 = (TPad*)canvas->cd(2);
+		pad2->SetPad(0, 0, 1, 0.3);
+		pad2->SetTopMargin(0.01);
+		pad2->SetBottomMargin(0.3);
+		
+		// Create the Data/MC ratio plot
+		TH1F *h_ratio = (TH1F*)h_data_total->Clone("h_ratio");
+		h_ratio->Divide(h_bkg_total);
+		h_ratio->SetLineColor(kBlack);
+		h_ratio->SetMarkerStyle(2);
+		h_ratio->SetTitle(""); // Remove the title for the ratio plot
+		h_ratio->GetYaxis()->SetTitle("Data/MC");
+		h_ratio->GetYaxis()->SetNdivisions(505);
+		h_ratio->GetYaxis()->SetTitleSize(0.1);
+		h_ratio->GetYaxis()->SetTitleOffset(0.5);
+		h_ratio->GetYaxis()->SetLabelSize(0.07);
+		h_ratio->GetXaxis()->SetTitleSize(0.1);
+		h_ratio->GetXaxis()->SetLabelSize(0.1);
+		h_ratio->SetMinimum(0); // Set the minimum y-value for the ratio plot
+h_ratio->SetMaximum(2); // Set the maximum y-value for the ratio plot
+		h_ratio->Draw("E");
+		
+		// Draw lines for reference
+		TLine *line1 = new TLine(h_ratio->GetXaxis()->GetXmin(), 1, h_ratio->GetXaxis()->GetXmax(), 1);
+		TLine *line2 = new TLine(h_ratio->GetXaxis()->GetXmin(), 0.5, h_ratio->GetXaxis()->GetXmax(), 0.5);
+		TLine *line3 = new TLine(h_ratio->GetXaxis()->GetXmin(), 1.5, h_ratio->GetXaxis()->GetXmax(), 1.5);
+		line1->SetLineStyle(2);line2->SetLineStyle(2);line3->SetLineStyle(2);
+		line1->Draw();line2->Draw();line3->Draw();
 
 		// Show the canvas
 		canvas->Update();
