@@ -62,7 +62,8 @@ std::string getCatName(int index) {
         "ete", "etm", "ett",
         "mme", "mmm", "mmt",
         "mte", "mtm", "mtt",
-        "tte", "ttm", "ttt"
+        "tte", "ttm", "ttt",
+        "ee","em","et","mm","mt","tt"
     };
 
     // Check if the index is within the valid range
@@ -76,7 +77,7 @@ std::string getCatName(int index) {
 
 // Histogram creation utility to avoid code duplication
 void createHistograms(std::vector<TH1F*>& histograms, const std::string& prefix, const std::string& label, int bins, float low, float high) {
-    for (int i = 0; i <= 10; i++) {
+    for (int i = 0; i <= 13; i++) {
         histograms.push_back(new TH1F(Form("%s%d", prefix.c_str(), i), Form("%s %d", label.c_str(), i), bins, low, high));
     }
 }
@@ -113,11 +114,11 @@ void DCH_test_nopair(const char* ext = "root"){
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
 		TH1D* hnevts = (TH1D*)ifile->Get("hNEvts");
-		float xs_weight = 1;
+		double xs_weight = 1;
 		if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
 		
 		std::string fname = filename[j];
-		//if (fname.find("ZZTo4L") > fname.length()) continue;
+		//if (fname.find("DY") > fname.length()) continue;
 		
 		//cout<<filename[j]<<endl;
 		const char* o_name;
@@ -190,6 +191,7 @@ void DCH_test_nopair(const char* ext = "root"){
         createHistograms(h_iso3v, "h_iso3v", "iso3 in Z-veto", 25, 0, 0.25);
         createHistograms(h_iso4v, "h_iso4v", "iso4 in Z-veto", 25, 0, 0.25);
         
+        
 		for (int i =0; i < tree->GetEntries(); i++){
 			tree->GetEntry(i);			
 			float *lep_pt, *tau_pt;
@@ -218,6 +220,7 @@ void DCH_test_nopair(const char* ext = "root"){
 					evtwt_nom *= TrigSF_4;
 				else if (isTrig_1 == 2 and isTrig_2 == 2)
 					evtwt_nom *= TrigSF_1;
+				//evtwt_nom = IDSF_1*IDSF_2*ISOSF_1*ISOSF_2*weightPUtruejson*TrigSF_1;
 			}//cout<<evtwt_nom<< filename[j]<<endl;		 			
 
 			if(selection == "test"){//My tests
@@ -239,12 +242,12 @@ void DCH_test_nopair(const char* ext = "root"){
 						}
 					}
 				}
-				if (foundDup == true) continue;
+				if (foundDup == true and strlen(cat_name)>2) continue;
 				// Sort the lepton variables in descending order based on pt
 				std::sort(leptons.begin(), leptons.end(), [](const Lepton& a, const Lepton& b) {
 					return a.pt > b.pt;
 				});
-				
+
 				/*std::vector<int> Zcands = ZCandMaker(cat_name, 20);	
 				TLorentzVector L1 = LepV(Zcands[0]), L2 = LepV(Zcands[1]), L3 = LepV(Zcands[2]), L4 = LepV(Zcands[3]);
 				int Q[] = {-99, -99, -99, -99};
@@ -276,12 +279,14 @@ void DCH_test_nopair(const char* ext = "root"){
 				std::vector<float> mZ, mZv, mH;
 				for(int m = 1; m <= 4; ++m){
 					for(int n = m+1; n <=4; ++n){
-						if(pairFunc(m,n,cat_name,20)=="Z") mZ.push_back((LepV(m)+LepV(n)).M());
-						else if(pairFunc(m,n,cat_name,20)=="Zv") mZv.push_back((LepV(m)+LepV(n)).M());
-						else if(pairFunc(m,n,cat_name,20)=="DCH") mH.push_back((LepV(m)+LepV(n)).M());
+						string pair_name = pairFunc(m,n,cat_name,20);
+						if(pair_name=="Z") mZ.push_back((LepV(m)+LepV(n)).M());
+						else if(pair_name=="Zv") mZv.push_back((LepV(m)+LepV(n)).M());
+						else if(pair_name=="DCH") mH.push_back((LepV(m)+LepV(n)).M());
 						else continue;
 					}
 				}
+				
 				std::sort(mH.begin(), mH.end(), [](float a, float b) {
 						return a > b;
 				});
@@ -289,8 +294,97 @@ void DCH_test_nopair(const char* ext = "root"){
 					std::sort(mZ.begin(), mZ.end(), [](float a, float b) {
 						return a > b;
 					});
-					//cout<<"AFTER "<<cat_name<<"\t"<<"\t"<<mZ.size()<<endl;
-					if (cat_string== "eee"){ 
+					if (cat_string== "ee"){ 
+						//cout<<brWeight<<"\t"<<evtwt_nom<<endl;
+						h_mZ[11]->Fill(mZ[0], brWeight*evtwt_nom);
+						h_mH[11]->Fill(mH[0], brWeight*evtwt_nom);
+						h_met[11]->Fill(met, brWeight*evtwt_nom);
+						h_pt1[11]->Fill(leptons[0].pt, brWeight*evtwt_nom);
+						h_pt2[11]->Fill(leptons[1].pt, brWeight*evtwt_nom);
+						h_pt3[11]->Fill(leptons[2].pt, brWeight*evtwt_nom);
+						h_pt4[11]->Fill(leptons[3].pt, brWeight*evtwt_nom);
+						h_eta1[11]->Fill(leptons[0].eta, brWeight*evtwt_nom);
+						h_eta2[11]->Fill(leptons[1].eta, brWeight*evtwt_nom);
+						h_eta3[11]->Fill(leptons[2].eta, brWeight*evtwt_nom);
+						h_eta4[11]->Fill(leptons[3].eta, brWeight*evtwt_nom);
+						h_phi1[11]->Fill(leptons[0].phi, brWeight*evtwt_nom);
+						h_phi2[11]->Fill(leptons[1].phi, brWeight*evtwt_nom);
+						h_phi3[11]->Fill(leptons[2].phi, brWeight*evtwt_nom);
+						h_phi4[11]->Fill(leptons[3].phi, brWeight*evtwt_nom);
+						h_dxy1[11]->Fill(leptons[0].d0, brWeight*evtwt_nom);
+						h_dxy2[11]->Fill(leptons[1].d0, brWeight*evtwt_nom);
+						h_dxy3[11]->Fill(leptons[2].d0, brWeight*evtwt_nom);
+						h_dxy4[11]->Fill(leptons[3].d0, brWeight*evtwt_nom);
+						h_dZ1[11]->Fill(leptons[0].dZ, brWeight*evtwt_nom);
+						h_dZ2[11]->Fill(leptons[1].dZ, brWeight*evtwt_nom);
+						h_dZ3[11]->Fill(leptons[2].dZ, brWeight*evtwt_nom);
+						h_dZ4[11]->Fill(leptons[3].dZ, brWeight*evtwt_nom);
+						h_iso1[11]->Fill(leptons[0].iso, brWeight*evtwt_nom);
+						h_iso2[11]->Fill(leptons[1].iso, brWeight*evtwt_nom);
+						h_iso3[11]->Fill(leptons[2].iso, brWeight*evtwt_nom);
+						h_iso4[11]->Fill(leptons[3].iso, brWeight*evtwt_nom);
+					}
+					else if (cat_string== "em"){ 
+						//cout<<cat_name<<"\t"<<abs((L1+L3).M()-mZ)<<endl;
+						h_mZ[12]->Fill(mZ[0], brWeight*evtwt_nom);
+						h_mH[12]->Fill(mH[0], brWeight*evtwt_nom);
+						h_met[12]->Fill(met, brWeight*evtwt_nom);
+						h_pt1[12]->Fill(leptons[0].pt, brWeight*evtwt_nom);
+						h_pt2[12]->Fill(leptons[1].pt, brWeight*evtwt_nom);
+						h_pt3[12]->Fill(leptons[2].pt, brWeight*evtwt_nom);
+						h_pt4[12]->Fill(leptons[3].pt, brWeight*evtwt_nom);
+						h_eta1[12]->Fill(leptons[0].eta, brWeight*evtwt_nom);
+						h_eta2[12]->Fill(leptons[1].eta, brWeight*evtwt_nom);
+						h_eta3[12]->Fill(leptons[2].eta, brWeight*evtwt_nom);
+						h_eta4[12]->Fill(leptons[3].eta, brWeight*evtwt_nom);
+						h_phi1[12]->Fill(leptons[0].phi, brWeight*evtwt_nom);
+						h_phi2[12]->Fill(leptons[1].phi, brWeight*evtwt_nom);
+						h_phi3[12]->Fill(leptons[2].phi, brWeight*evtwt_nom);
+						h_phi4[12]->Fill(leptons[3].phi, brWeight*evtwt_nom);
+						h_dxy1[12]->Fill(leptons[0].d0, brWeight*evtwt_nom);
+						h_dxy2[12]->Fill(leptons[1].d0, brWeight*evtwt_nom);
+						h_dxy3[12]->Fill(leptons[2].d0, brWeight*evtwt_nom);
+						h_dxy4[12]->Fill(leptons[3].d0, brWeight*evtwt_nom);
+						h_dZ1[12]->Fill(leptons[0].dZ, brWeight*evtwt_nom);
+						h_dZ2[12]->Fill(leptons[1].dZ, brWeight*evtwt_nom);
+						h_dZ3[12]->Fill(leptons[2].dZ, brWeight*evtwt_nom);
+						h_dZ4[12]->Fill(leptons[3].dZ, brWeight*evtwt_nom);
+						h_iso1[12]->Fill(leptons[0].iso, brWeight*evtwt_nom);
+						h_iso2[12]->Fill(leptons[1].iso, brWeight*evtwt_nom);
+						h_iso3[12]->Fill(leptons[2].iso, brWeight*evtwt_nom);
+						h_iso4[12]->Fill(leptons[3].iso, brWeight*evtwt_nom);
+					}
+					else if (cat_string== "mm"){ 
+						//cout<<cat_name<<"\t"<<abs((L1+L3).M()-mZ)<<endl;
+						h_mZ[13]->Fill(mZ[0], brWeight*evtwt_nom);
+						h_mH[13]->Fill(mH[0], brWeight*evtwt_nom);
+						h_met[13]->Fill(met, brWeight*evtwt_nom);
+						h_pt1[13]->Fill(leptons[0].pt, brWeight*evtwt_nom);
+						h_pt2[13]->Fill(leptons[1].pt, brWeight*evtwt_nom);
+						h_pt3[13]->Fill(leptons[2].pt, brWeight*evtwt_nom);
+						h_pt4[13]->Fill(leptons[3].pt, brWeight*evtwt_nom);
+						h_eta1[13]->Fill(leptons[0].eta, brWeight*evtwt_nom);
+						h_eta2[13]->Fill(leptons[1].eta, brWeight*evtwt_nom);
+						h_eta3[13]->Fill(leptons[2].eta, brWeight*evtwt_nom);
+						h_eta4[13]->Fill(leptons[3].eta, brWeight*evtwt_nom);
+						h_phi1[13]->Fill(leptons[0].phi, brWeight*evtwt_nom);
+						h_phi2[13]->Fill(leptons[1].phi, brWeight*evtwt_nom);
+						h_phi3[13]->Fill(leptons[2].phi, brWeight*evtwt_nom);
+						h_phi4[13]->Fill(leptons[3].phi, brWeight*evtwt_nom);
+						h_dxy1[13]->Fill(leptons[0].d0, brWeight*evtwt_nom);
+						h_dxy2[13]->Fill(leptons[1].d0, brWeight*evtwt_nom);
+						h_dxy3[13]->Fill(leptons[2].d0, brWeight*evtwt_nom);
+						h_dxy4[13]->Fill(leptons[3].d0, brWeight*evtwt_nom);
+						h_dZ1[13]->Fill(leptons[0].dZ, brWeight*evtwt_nom);
+						h_dZ2[13]->Fill(leptons[1].dZ, brWeight*evtwt_nom);
+						h_dZ3[13]->Fill(leptons[2].dZ, brWeight*evtwt_nom);
+						h_dZ4[13]->Fill(leptons[3].dZ, brWeight*evtwt_nom);
+						h_iso1[13]->Fill(leptons[0].iso, brWeight*evtwt_nom);
+						h_iso2[13]->Fill(leptons[1].iso, brWeight*evtwt_nom);
+						h_iso3[13]->Fill(leptons[2].iso, brWeight*evtwt_nom);
+						h_iso4[13]->Fill(leptons[3].iso, brWeight*evtwt_nom);
+					}
+					else if (cat_string== "eee"){ 
 						//cout<<cat_name<<"\t"<<abs((L1+L3).M()-mZ)<<endl;
 						h_mZ[1]->Fill(mZ[0], brWeight*evtwt_nom);
 						h_mH[1]->Fill(mH[0], brWeight*evtwt_nom);
@@ -612,7 +706,94 @@ void DCH_test_nopair(const char* ext = "root"){
 				if (mZv.size() !=0 and mZ.size() ==0){ 
 					std::sort(mZv.begin(), mZv.end(), [](float a, float b) {
 						return a > b;
-					});
+					});//cout<<mZv[11]<<endl;
+					if (cat_string== "ee" ){ 
+						h_mZv[11]->Fill(mZv[0], brWeight*evtwt_nom);
+						h_mHv[11]->Fill(mH[0], brWeight*evtwt_nom);
+						h_metv[11]->Fill(met, brWeight*evtwt_nom);
+						h_pt1v[11]->Fill(leptons[0].pt, brWeight*evtwt_nom);
+						h_pt2v[11]->Fill(leptons[1].pt, brWeight*evtwt_nom);
+						h_pt3v[11]->Fill(leptons[2].pt, brWeight*evtwt_nom);
+						h_pt4v[11]->Fill(leptons[3].pt, brWeight*evtwt_nom);
+						h_eta1v[11]->Fill(leptons[0].eta, brWeight*evtwt_nom);
+						h_eta2v[11]->Fill(leptons[1].eta, brWeight*evtwt_nom);
+						h_eta3v[11]->Fill(leptons[2].eta, brWeight*evtwt_nom);
+						h_eta4v[11]->Fill(leptons[3].eta, brWeight*evtwt_nom);
+						h_phi1v[11]->Fill(leptons[0].phi, brWeight*evtwt_nom);
+						h_phi2v[11]->Fill(leptons[1].phi, brWeight*evtwt_nom);
+						h_phi3v[11]->Fill(leptons[2].phi, brWeight*evtwt_nom);
+						h_phi4v[11]->Fill(leptons[3].phi, brWeight*evtwt_nom);
+						h_dxy1v[11]->Fill(leptons[0].d0, brWeight*evtwt_nom);
+						h_dxy2v[11]->Fill(leptons[1].d0, brWeight*evtwt_nom);
+						h_dxy3v[11]->Fill(leptons[2].d0, brWeight*evtwt_nom);
+						h_dxy4v[11]->Fill(leptons[3].d0, brWeight*evtwt_nom);
+						h_dZ1v[11]->Fill(leptons[0].dZ, brWeight*evtwt_nom);
+						h_dZ2v[11]->Fill(leptons[1].dZ, brWeight*evtwt_nom);
+						h_dZ3v[11]->Fill(leptons[2].dZ, brWeight*evtwt_nom);
+						h_dZ4v[11]->Fill(leptons[3].dZ, brWeight*evtwt_nom);
+						h_iso1v[11]->Fill(leptons[0].iso, brWeight*evtwt_nom);
+						h_iso2v[11]->Fill(leptons[1].iso, brWeight*evtwt_nom);
+						h_iso3v[11]->Fill(leptons[2].iso, brWeight*evtwt_nom);
+						h_iso4v[11]->Fill(leptons[3].iso, brWeight*evtwt_nom);
+					}
+					if (cat_string== "em" ){ 
+						h_mZv[11]->Fill(mZv[0], brWeight*evtwt_nom);
+						h_mHv[11]->Fill(mH[0], brWeight*evtwt_nom);
+						h_metv[11]->Fill(met, brWeight*evtwt_nom);
+						h_pt1v[11]->Fill(leptons[0].pt, brWeight*evtwt_nom);
+						h_pt2v[11]->Fill(leptons[1].pt, brWeight*evtwt_nom);
+						h_pt3v[11]->Fill(leptons[2].pt, brWeight*evtwt_nom);
+						h_pt4v[11]->Fill(leptons[3].pt, brWeight*evtwt_nom);
+						h_eta1v[11]->Fill(leptons[0].eta, brWeight*evtwt_nom);
+						h_eta2v[11]->Fill(leptons[1].eta, brWeight*evtwt_nom);
+						h_eta3v[11]->Fill(leptons[2].eta, brWeight*evtwt_nom);
+						h_eta4v[11]->Fill(leptons[3].eta, brWeight*evtwt_nom);
+						h_phi1v[11]->Fill(leptons[0].phi, brWeight*evtwt_nom);
+						h_phi2v[11]->Fill(leptons[1].phi, brWeight*evtwt_nom);
+						h_phi3v[11]->Fill(leptons[2].phi, brWeight*evtwt_nom);
+						h_phi4v[11]->Fill(leptons[3].phi, brWeight*evtwt_nom);
+						h_dxy1v[11]->Fill(leptons[0].d0, brWeight*evtwt_nom);
+						h_dxy2v[11]->Fill(leptons[1].d0, brWeight*evtwt_nom);
+						h_dxy3v[11]->Fill(leptons[2].d0, brWeight*evtwt_nom);
+						h_dxy4v[11]->Fill(leptons[3].d0, brWeight*evtwt_nom);
+						h_dZ1v[11]->Fill(leptons[0].dZ, brWeight*evtwt_nom);
+						h_dZ2v[11]->Fill(leptons[1].dZ, brWeight*evtwt_nom);
+						h_dZ3v[11]->Fill(leptons[2].dZ, brWeight*evtwt_nom);
+						h_dZ4v[11]->Fill(leptons[3].dZ, brWeight*evtwt_nom);
+						h_iso1v[11]->Fill(leptons[0].iso, brWeight*evtwt_nom);
+						h_iso2v[11]->Fill(leptons[1].iso, brWeight*evtwt_nom);
+						h_iso3v[11]->Fill(leptons[2].iso, brWeight*evtwt_nom);
+						h_iso4v[11]->Fill(leptons[3].iso, brWeight*evtwt_nom);
+					}
+					if (cat_string== "mm" ){ 
+						h_mZv[11]->Fill(mZv[0], brWeight*evtwt_nom);
+						h_mHv[11]->Fill(mH[0], brWeight*evtwt_nom);
+						h_metv[11]->Fill(met, brWeight*evtwt_nom);
+						h_pt1v[11]->Fill(leptons[0].pt, brWeight*evtwt_nom);
+						h_pt2v[11]->Fill(leptons[1].pt, brWeight*evtwt_nom);
+						h_pt3v[11]->Fill(leptons[2].pt, brWeight*evtwt_nom);
+						h_pt4v[11]->Fill(leptons[3].pt, brWeight*evtwt_nom);
+						h_eta1v[11]->Fill(leptons[0].eta, brWeight*evtwt_nom);
+						h_eta2v[11]->Fill(leptons[1].eta, brWeight*evtwt_nom);
+						h_eta3v[11]->Fill(leptons[2].eta, brWeight*evtwt_nom);
+						h_eta4v[11]->Fill(leptons[3].eta, brWeight*evtwt_nom);
+						h_phi1v[11]->Fill(leptons[0].phi, brWeight*evtwt_nom);
+						h_phi2v[11]->Fill(leptons[1].phi, brWeight*evtwt_nom);
+						h_phi3v[11]->Fill(leptons[2].phi, brWeight*evtwt_nom);
+						h_phi4v[11]->Fill(leptons[3].phi, brWeight*evtwt_nom);
+						h_dxy1v[11]->Fill(leptons[0].d0, brWeight*evtwt_nom);
+						h_dxy2v[11]->Fill(leptons[1].d0, brWeight*evtwt_nom);
+						h_dxy3v[11]->Fill(leptons[2].d0, brWeight*evtwt_nom);
+						h_dxy4v[11]->Fill(leptons[3].d0, brWeight*evtwt_nom);
+						h_dZ1v[11]->Fill(leptons[0].dZ, brWeight*evtwt_nom);
+						h_dZ2v[11]->Fill(leptons[1].dZ, brWeight*evtwt_nom);
+						h_dZ3v[11]->Fill(leptons[2].dZ, brWeight*evtwt_nom);
+						h_dZ4v[11]->Fill(leptons[3].dZ, brWeight*evtwt_nom);
+						h_iso1v[11]->Fill(leptons[0].iso, brWeight*evtwt_nom);
+						h_iso2v[11]->Fill(leptons[1].iso, brWeight*evtwt_nom);
+						h_iso3v[11]->Fill(leptons[2].iso, brWeight*evtwt_nom);
+						h_iso4v[11]->Fill(leptons[3].iso, brWeight*evtwt_nom);
+					}
 					if (cat_string== "eee" ){ 
 						h_mZv[1]->Fill(mZv[0], brWeight*evtwt_nom);
 						h_mHv[1]->Fill(mH[0], brWeight*evtwt_nom);
@@ -908,7 +1089,7 @@ void DCH_test_nopair(const char* ext = "root"){
 			}//selections loop
 		}//evt loop 
 		hnevts->Write();	
-		
+		h_mZ[11]->Draw();
 		scaleAndWriteHistograms(h_mZ, xs_weight);
 		scaleAndWriteHistograms(h_mZv, xs_weight);
 		scaleAndWriteHistograms(h_mH, xs_weight);

@@ -12,8 +12,9 @@ const char* numberToCat(int number){
           "ete", "etm", "ett",
           "mme", "mmm", "mmt",
           "mte", "mtm", "mtt",
-          "tte", "ttm", "ttt"};
-    if (number >= 1 && number <= 39)
+          "tte", "ttm", "ttt",
+          "ee","em","et","mm","mt","tt"};
+    if (number >= 1 && number <= 45)
         return cat_name[number - 1];
     else
         return "Invalid";

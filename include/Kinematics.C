@@ -101,8 +101,8 @@ string pairFunc(int m, int n, string cat, float Zwindow){//checks if a pair is Z
 	}
 	if (c1 == c2 ) return "DCH";
 	else if (c1 == -c2){
-		if (cat[m] == cat[n] and abs((lep1+lep2).M()-91.2) < Zwindow) return "Z";
-		else if (cat[m] == cat[n] and abs((lep1+lep2).M()-91.2) >= Zwindow) return "Zv";
+		if (cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) < Zwindow) return "Z";
+		else if (cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) >= Zwindow) return "Zv";
 		else return "found nothing";
 	}
 	else "found nothing";

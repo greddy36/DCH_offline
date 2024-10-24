@@ -31,7 +31,7 @@ void StackHist() {
 	TFile *ifile19 = new TFile("hist_test_nopair/ST_tW_antitop_2018.root","READ");  
 	TFile *ifile20 = new TFile("hist_test_nopair/ST_tW_top_2018.root","READ");            
 
-	TFile *ifile21 = new TFile("hist_test_nopair/ttHTo2L2Nu_2018.root","READ");
+	//TFile *ifile21 = new TFile("hist_test_nopair/ttHTo2L2Nu_2018.root","READ");
 	//TFile *ifile22 = new TFile("hist_test_nopair/ttHToEE_2018.root","READ");
 	//TFile *ifile23 = new TFile("hist_test_nopair/ttHToMuMu_2018.root","READ");
 	TFile *ifile24 = new TFile("hist_test_nopair/ttHToTauTau_2018.root","READ");
@@ -54,56 +54,58 @@ void StackHist() {
 
 
 	const char *hist_list[] = {
-"h_mZ1","h_mZ2","h_mZ3","h_mZ4","h_mZ5","h_mZ6","h_mZ7","h_mZ8","h_mZ9","h_mZ10",
+"h_mZ1","h_mZ2","h_mZ3","h_mZ4","h_mZ5","h_mZ6","h_mZ7","h_mZ8","h_mZ9","h_mZ10","h_mZ11","h_mZ12","h_mZ13",
 
-"h_mZv1","h_mZv2","h_mZv3","h_mZv4","h_mZv5","h_mZv6","h_mZv7","h_mZv8","h_mZv9","h_mZv10",
+"h_mZv1","h_mZv2","h_mZv3","h_mZv4","h_mZv5","h_mZv6","h_mZv7","h_mZv8","h_mZv9","h_mZv10","h_mZv11","h_mZv12","h_mZv13",
 
-"h_mH1","h_mH2","h_mH3","h_mH4","h_mH5","h_mH6","h_mH7","h_mH8","h_mH9","h_mH10",
+"h_mH1","h_mH2","h_mH3","h_mH4","h_mH5","h_mH6","h_mH7","h_mH8","h_mH9","h_mH10","h_mH11","h_mH12","h_mH13",
 
-"h_mHv1","h_mHv2","h_mHv3","h_mHv4","h_mHv5","h_mHv6","h_mHv7","h_mHv8","h_mHv9","h_mHv10",
+"h_mHv1","h_mHv2","h_mHv3","h_mHv4","h_mHv5","h_mHv6","h_mHv7","h_mHv8","h_mHv9","h_mHv10","h_mHv11","h_mHv12","h_mHv13",
  
-"h_met1","h_met2","h_met3","h_met4","h_met5","h_met6","h_met7","h_met8","h_met9","h_met10",
+"h_met1","h_met2","h_met3","h_met4","h_met5","h_met6","h_met7","h_met8","h_met9","h_met10","h_met11","h_met12","h_met13",
 
-"h_metv1","h_metv2","h_metv3","h_metv4","h_metv5","h_metv6","h_metv7","h_metv8","h_metv9","h_metv10",
+"h_metv1","h_metv2","h_metv3","h_metv4","h_metv5","h_metv6","h_metv7","h_metv8","h_metv9","h_metv10","h_metv11","h_metv12","h_metv13",
 
-"h_pt11", "h_pt21","h_pt31","h_pt41","h_pt12", "h_pt22","h_pt32","h_pt42","h_pt13", "h_pt23","h_pt33","h_pt43","h_pt14", "h_pt24","h_pt34","h_pt44","h_pt15", "h_pt25","h_pt35","h_pt45","h_pt16", "h_pt26","h_pt36","h_pt46","h_pt17", "h_pt27","h_pt37","h_pt47","h_pt17", "h_pt28","h_pt38","h_pt48","h_pt19", "h_pt29","h_pt39","h_pt49","h_pt110", "h_pt210","h_pt310","h_pt410",
+"h_pt11", "h_pt21","h_pt31","h_pt41","h_pt12", "h_pt22","h_pt32","h_pt42","h_pt13", "h_pt23","h_pt33","h_pt43","h_pt14", "h_pt24","h_pt34","h_pt44","h_pt15", "h_pt25","h_pt35","h_pt45","h_pt16", "h_pt26","h_pt36","h_pt46","h_pt17", "h_pt27","h_pt37","h_pt47","h_pt17", "h_pt28","h_pt38","h_pt48","h_pt19", "h_pt29","h_pt39","h_pt49","h_pt110", "h_pt210","h_pt310","h_pt410","h_pt111", "h_pt211","h_pt311","h_pt411","h_pt112", "h_pt212","h_pt312","h_pt412","h_pt113", "h_pt213","h_pt313","h_pt413",
 
-"h_pt1v1", "h_pt2v1","h_pt3v1","h_pt4v1","h_pt1v2", "h_pt2v2","h_pt3v2","h_pt4v2","h_pt1v3", "h_pt2v3","h_pt3v3","h_pt4v3","h_pt1v4", "h_pt2v4","h_pt3v4","h_pt4v4","h_pt1v5", "h_pt2v5","h_pt3v5","h_pt4v5","h_pt1v6", "h_pt2v6","h_pt3v6","h_pt4v6","h_pt1v7", "h_pt2v7","h_pt3v7","h_pt4v7","h_pt1v8", "h_pt2v8","h_pt3v8","h_pt4v8","h_pt1v9", "h_pt2v9","h_pt3v9","h_pt4v9","h_pt1v10", "h_pt2v10","h_pt3v10","h_pt4v10",
+"h_pt1v1", "h_pt2v1","h_pt3v1","h_pt4v1","h_pt1v2", "h_pt2v2","h_pt3v2","h_pt4v2","h_pt1v3", "h_pt2v3","h_pt3v3","h_pt4v3","h_pt1v4", "h_pt2v4","h_pt3v4","h_pt4v4","h_pt1v5", "h_pt2v5","h_pt3v5","h_pt4v5","h_pt1v6", "h_pt2v6","h_pt3v6","h_pt4v6","h_pt1v7", "h_pt2v7","h_pt3v7","h_pt4v7","h_pt1v8", "h_pt2v8","h_pt3v8","h_pt4v8","h_pt1v9", "h_pt2v9","h_pt3v9","h_pt4v9","h_pt1v10", "h_pt2v10","h_pt3v10","h_pt4v10","h_pt1v11","h_pt2v11","h_pt3v11","h_pt4v11","h_pt1v12", "h_pt2v12","h_pt3v12","h_pt4v12","h_pt1v13", "h_pt2v13","h_pt3v13","h_pt4v13",
 
-"h_eta11", "h_eta21","h_eta31","h_eta41","h_eta12", "h_eta22","h_eta32","h_eta42","h_eta13", "h_eta23","h_eta33","h_eta43","h_eta14", "h_eta24","h_eta34","h_eta44","h_eta15", "h_eta25","h_eta35","h_eta45","h_eta16", "h_eta26","h_eta36","h_eta46","h_eta17", "h_eta27","h_eta37","h_eta47","h_eta18", "h_eta28","h_eta38","h_eta48","h_eta19", "h_eta29","h_eta39","h_eta49","h_eta110", "h_eta210","h_eta310","h_eta410",
 
-"h_eta1v1", "h_eta2v1","h_eta3v1","h_eta4v1","h_eta1v2", "h_eta2v2","h_eta3v2","h_eta4v2","h_eta1v3", "h_eta2v3","h_eta3v3","h_eta4v3","h_eta1v4", "h_eta2v4","h_eta3v4","h_eta4v4","h_eta1v5", "h_eta2v5","h_eta3v5","h_eta4v5","h_eta1v6", "h_eta2v6","h_eta3v6","h_eta4v6","h_eta1v7", "h_eta2v7","h_eta3v7","h_eta4v7","h_eta1v8", "h_eta2v8","h_eta3v8","h_eta4v8","h_eta1v9", "h_eta2v9","h_eta3v9","h_eta4v9","h_eta1v10", "h_eta2v10","h_eta3v10","h_eta4v10",
+"h_eta11", "h_eta21","h_eta31","h_eta41","h_eta12", "h_eta22","h_eta32","h_eta42","h_eta13", "h_eta23","h_eta33","h_eta43","h_eta14", "h_eta24","h_eta34","h_eta44","h_eta15", "h_eta25","h_eta35","h_eta45","h_eta16", "h_eta26","h_eta36","h_eta46","h_eta17", "h_eta27","h_eta37","h_eta47","h_eta18", "h_eta28","h_eta38","h_eta48","h_eta19", "h_eta29","h_eta39","h_eta49","h_eta110", "h_eta210","h_eta310","h_eta410","h_eta111", "h_eta211","h_eta311","h_eta411","h_eta112", "h_eta212","h_eta312","h_eta412","h_eta113", "h_eta213","h_eta313","h_eta413",
 
-"h_phi11", "h_phi21","h_phi31","h_phi41","h_phi12", "h_phi22","h_phi32","h_phi42","h_phi13", "h_phi23","h_phi33","h_phi43","h_phi14", "h_phi24","h_phi34","h_phi44","h_phi15", "h_phi25","h_phi35","h_phi45","h_phi16", "h_phi26","h_phi36","h_phi46","h_phi17", "h_phi27","h_phi37","h_phi47","h_phi18", "h_phi28","h_phi38","h_phi48","h_phi19", "h_phi29","h_phi39","h_phi49","h_phi110", "h_phi210","h_phi310","h_phi410",
+"h_eta1v1", "h_eta2v1","h_eta3v1","h_eta4v1","h_eta1v2", "h_eta2v2","h_eta3v2","h_eta4v2","h_eta1v3", "h_eta2v3","h_eta3v3","h_eta4v3","h_eta1v4", "h_eta2v4","h_eta3v4","h_eta4v4","h_eta1v5", "h_eta2v5","h_eta3v5","h_eta4v5","h_eta1v6", "h_eta2v6","h_eta3v6","h_eta4v6","h_eta1v7", "h_eta2v7","h_eta3v7","h_eta4v7","h_eta1v8", "h_eta2v8","h_eta3v8","h_eta4v8","h_eta1v9", "h_eta2v9","h_eta3v9","h_eta4v9","h_eta1v10", "h_eta2v10","h_eta3v10","h_eta4v10","h_eta1v11","h_eta2v11","h_eta3v11","h_eta4v11","h_eta1v12", "h_eta2v12","h_eta3v12","h_eta4v12","h_eta1v13", "h_eta2v13","h_eta3v13","h_eta4v13",
 
-"h_phi1v1", "h_phi2v1","h_phi3v1","h_phi4v1","h_phi1v2", "h_phi2v2","h_phi3v2","h_phi4v2","h_phi1v3", "h_phi2v3","h_phi3v3","h_phi4v3","h_phi1v4", "h_phi2v4","h_phi3v4","h_phi4v4","h_phi1v5", "h_phi2v5","h_phi3v5","h_phi4v5","h_phi1v6", "h_phi2v6","h_phi3v6","h_phi4v6","h_phi1v7", "h_phi2v7","h_phi3v7","h_phi4v7","h_phi1v8", "h_phi2v8","h_phi3v8","h_phi4v8","h_phi1v9", "h_phi2v9","h_phi3v9","h_phi4v9","h_phi1v10", "h_phi2v10","h_phi3v10","h_phi4v10",
+"h_phi11", "h_phi21","h_phi31","h_phi41","h_phi12", "h_phi22","h_phi32","h_phi42","h_phi13", "h_phi23","h_phi33","h_phi43","h_phi14", "h_phi24","h_phi34","h_phi44","h_phi15", "h_phi25","h_phi35","h_phi45","h_phi16", "h_phi26","h_phi36","h_phi46","h_phi17", "h_phi27","h_phi37","h_phi47","h_phi18", "h_phi28","h_phi38","h_phi48","h_phi19", "h_phi29","h_phi39","h_phi49","h_phi110", "h_phi210","h_phi310","h_phi410","h_phi111", "h_phi211","h_phi311","h_phi411","h_phi112", "h_phi212","h_phi312","h_phi412","h_phi113", "h_phi213","h_phi313","h_phi413",
 
-"h_dxy11", "h_dxy21","h_dxy31","h_dxy41","h_dxy12", "h_dxy22","h_dxy32","h_dxy42","h_dxy13", "h_dxy23","h_dxy33","h_dxy43","h_dxy14", "h_dxy24","h_dxy34","h_dxy44","h_dxy15", "h_dxy25","h_dxy35","h_dxy45","h_dxy16", "h_dxy26","h_dxy36","h_dxy46","h_dxy17", "h_dxy27","h_dxy37","h_dxy47","h_dxy17", "h_dxy28","h_dxy38","h_dxy48","h_dxy19", "h_dxy29","h_dxy39","h_dxy49","h_dxy110", "h_dxy210","h_dxy310","h_dxy410",
+"h_phi1v1", "h_phi2v1","h_phi3v1","h_phi4v1","h_phi1v2", "h_phi2v2","h_phi3v2","h_phi4v2","h_phi1v3", "h_phi2v3","h_phi3v3","h_phi4v3","h_phi1v4", "h_phi2v4","h_phi3v4","h_phi4v4","h_phi1v5", "h_phi2v5","h_phi3v5","h_phi4v5","h_phi1v6", "h_phi2v6","h_phi3v6","h_phi4v6","h_phi1v7", "h_phi2v7","h_phi3v7","h_phi4v7","h_phi1v8", "h_phi2v8","h_phi3v8","h_phi4v8","h_phi1v9", "h_phi2v9","h_phi3v9","h_phi4v9","h_phi1v10", "h_phi2v10","h_phi3v10","h_phi4v10","h_phi1v11","h_phi2v11","h_phi3v11","h_phi4v11","h_phi1v12", "h_phi2v12","h_phi3v12","h_phi4v12","h_phi1v13", "h_phi2v13","h_phi3v13","h_phi4v13",
 
-"h_dxy1v1", "h_dxy2v1","h_dxy3v1","h_dxy4v1","h_dxy1v2", "h_dxy2v2","h_dxy3v2","h_dxy4v2","h_dxy1v3", "h_dxy2v3","h_dxy3v3","h_dxy4v3","h_dxy1v4", "h_dxy2v4","h_dxy3v4","h_dxy4v4","h_dxy1v5", "h_dxy2v5","h_dxy3v5","h_dxy4v5","h_dxy1v6", "h_dxy2v6","h_dxy3v6","h_dxy4v6","h_dxy1v7", "h_dxy2v7","h_dxy3v7","h_dxy4v7","h_dxy1v8", "h_dxy2v8","h_dxy3v8","h_dxy4v8","h_dxy1v9", "h_dxy2v9","h_dxy3v9","h_dxy4v9","h_dxy1v10", "h_dxy2v10","h_dxy3v10","h_dxy4v10",
+"h_dxy11", "h_dxy21","h_dxy31","h_dxy41","h_dxy12", "h_dxy22","h_dxy32","h_dxy42","h_dxy13", "h_dxy23","h_dxy33","h_dxy43","h_dxy14", "h_dxy24","h_dxy34","h_dxy44","h_dxy15", "h_dxy25","h_dxy35","h_dxy45","h_dxy16", "h_dxy26","h_dxy36","h_dxy46","h_dxy17", "h_dxy27","h_dxy37","h_dxy47","h_dxy17", "h_dxy28","h_dxy38","h_dxy48","h_dxy19", "h_dxy29","h_dxy39","h_dxy49","h_dxy110", "h_dxy210","h_dxy310","h_dxy410","h_dxy111","h_dxy211","h_dxy311","h_dxy411","h_dxy112", "h_dxy212","h_dxy312","h_dxy412","h_dxy113", "h_dxy213","h_dxy313","h_dxy413",
 
-"h_dZ11", "h_dZ21","h_dZ31","h_dZ41","h_dZ12", "h_dZ22","h_dZ32","h_dZ42","h_dZ13", "h_dZ23","h_dZ33","h_dZ43","h_dZ14", "h_dZ24","h_dZ34","h_dZ44","h_dZ15", "h_dZ25","h_dZ35","h_dZ45","h_dZ16", "h_dZ26","h_dZ36","h_dZ46","h_dZ17", "h_dZ27","h_dZ37","h_dZ47","h_dZ18", "h_dZ28","h_dZ38","h_dZ48","h_dZ19", "h_dZ29","h_dZ39","h_dZ49","h_dZ110", "h_dZ210","h_dZ310","h_dZ410",
+"h_dxy1v1", "h_dxy2v1","h_dxy3v1","h_dxy4v1","h_dxy1v2", "h_dxy2v2","h_dxy3v2","h_dxy4v2","h_dxy1v3", "h_dxy2v3","h_dxy3v3","h_dxy4v3","h_dxy1v4", "h_dxy2v4","h_dxy3v4","h_dxy4v4","h_dxy1v5", "h_dxy2v5","h_dxy3v5","h_dxy4v5","h_dxy1v6", "h_dxy2v6","h_dxy3v6","h_dxy4v6","h_dxy1v7", "h_dxy2v7","h_dxy3v7","h_dxy4v7","h_dxy1v8", "h_dxy2v8","h_dxy3v8","h_dxy4v8","h_dxy1v9", "h_dxy2v9","h_dxy3v9","h_dxy4v9","h_dxy1v10", "h_dxy2v10","h_dxy3v10","h_dxy4v10","h_dxy1v11","h_dxy2v11","h_dxy3v11","h_dxy4v11","h_dxy1v12", "h_dxy2v12","h_dxy3v12","h_dxy4v12","h_dxy1v13", "h_dxy2v13","h_dxy3v13","h_dxy4v13",
 
-"h_dZ1v1", "h_dZ2v1","h_dZ3v1","h_dZ4v1","h_dZ1v2", "h_dZ2v2","h_dZ3v2","h_dZ4v2","h_dZ1v3", "h_dZ2v3","h_dZ3v3","h_dZ4v3","h_dZ1v4", "h_dZ2v4","h_dZ3v4","h_dZ4v4","h_dZ1v5", "h_dZ2v5","h_dZ3v5","h_dZ4v5","h_dZ1v6", "h_dZ2v6","h_dZ3v6","h_dZ4v6","h_dZ1v7", "h_dZ2v7","h_dZ3v7","h_dZ4v7","h_dZ1v8", "h_dZ2v8","h_dZ3v8","h_dZ4v8","h_dZ1v9", "h_dZ2v9","h_dZ3v9","h_dZ4v9","h_dZ1v10", "h_dZ2v10","h_dZ3v10","h_dZ4v10",
+"h_dZ11", "h_dZ21","h_dZ31","h_dZ41","h_dZ12", "h_dZ22","h_dZ32","h_dZ42","h_dZ13", "h_dZ23","h_dZ33","h_dZ43","h_dZ14", "h_dZ24","h_dZ34","h_dZ44","h_dZ15", "h_dZ25","h_dZ35","h_dZ45","h_dZ16", "h_dZ26","h_dZ36","h_dZ46","h_dZ17", "h_dZ27","h_dZ37","h_dZ47","h_dZ18", "h_dZ28","h_dZ38","h_dZ48","h_dZ19", "h_dZ29","h_dZ39","h_dZ49","h_dZ110", "h_dZ210","h_dZ310","h_dZ410","h_dZ111","h_dZ211","h_dZ311","h_dZ411","h_dZ112", "h_dZ212","h_dZ312","h_dZ412","h_dZ113", "h_dZ213","h_dZ313","h_dZ413",
 
-"h_iso11", "h_iso21","h_iso31","h_iso41","h_iso12", "h_iso22","h_iso32","h_iso42","h_iso13", "h_iso23","h_iso33","h_iso43","h_iso14", "h_iso24","h_iso34","h_iso44","h_iso15", "h_iso25","h_iso35","h_iso45","h_iso16", "h_iso26","h_iso36","h_iso46","h_iso17", "h_iso27","h_iso37","h_iso47","h_iso18", "h_iso28","h_iso38","h_iso48","h_iso19", "h_iso29","h_iso39","h_iso49","h_iso110", "h_iso210","h_iso310","h_iso410",
+"h_dZ1v1", "h_dZ2v1","h_dZ3v1","h_dZ4v1","h_dZ1v2", "h_dZ2v2","h_dZ3v2","h_dZ4v2","h_dZ1v3", "h_dZ2v3","h_dZ3v3","h_dZ4v3","h_dZ1v4", "h_dZ2v4","h_dZ3v4","h_dZ4v4","h_dZ1v5", "h_dZ2v5","h_dZ3v5","h_dZ4v5","h_dZ1v6", "h_dZ2v6","h_dZ3v6","h_dZ4v6","h_dZ1v7", "h_dZ2v7","h_dZ3v7","h_dZ4v7","h_dZ1v8", "h_dZ2v8","h_dZ3v8","h_dZ4v8","h_dZ1v9", "h_dZ2v9","h_dZ3v9","h_dZ4v9","h_dZ1v10", "h_dZ2v10","h_dZ3v10","h_dZ4v10","h_dZ1v11","h_dZ2v11","h_dZ3v11","h_dZ4v11","h_dZ1v12", "h_dZ2v12","h_dZ3v12","h_dZ4v12","h_dZ1v13", "h_dZ2v13","h_dZ3v13","h_dZ4v13",
 
-"h_iso1v1", "h_iso2v1","h_iso3v1","h_iso4v1","h_iso1v2", "h_iso2v2","h_iso3v2","h_iso4v2","h_iso1v3", "h_iso2v3","h_iso3v3","h_iso4v3","h_iso1v4", "h_iso2v4","h_iso3v4","h_iso4v4","h_iso1v5", "h_iso2v5","h_iso3v5","h_iso4v5","h_iso1v6", "h_iso2v6","h_iso3v6","h_iso4v6","h_iso1v7", "h_iso2v7","h_iso3v7","h_iso4v7","h_iso1v8", "h_iso2v8","h_iso3v8","h_iso4v8","h_iso1v9", "h_iso2v9","h_iso3v9","h_iso4v9","h_iso1v10", "h_iso2v10","h_iso3v10","h_iso4v10",
+
+"h_iso11", "h_iso21","h_iso31","h_iso41","h_iso12", "h_iso22","h_iso32","h_iso42","h_iso13", "h_iso23","h_iso33","h_iso43","h_iso14", "h_iso24","h_iso34","h_iso44","h_iso15", "h_iso25","h_iso35","h_iso45","h_iso16", "h_iso26","h_iso36","h_iso46","h_iso17", "h_iso27","h_iso37","h_iso47","h_iso18", "h_iso28","h_iso38","h_iso48","h_iso19", "h_iso29","h_iso39","h_iso49","h_iso110", "h_iso210","h_iso310","h_iso410","h_iso111","h_iso211","h_iso311","h_iso411","h_iso112", "h_iso212","h_iso312","h_iso412","h_iso113", "h_iso213","h_iso313","h_iso413",
+
+"h_iso1v1", "h_iso2v1","h_iso3v1","h_iso4v1","h_iso1v2", "h_iso2v2","h_iso3v2","h_iso4v2","h_iso1v3", "h_iso2v3","h_iso3v3","h_iso4v3","h_iso1v4", "h_iso2v4","h_iso3v4","h_iso4v4","h_iso1v5", "h_iso2v5","h_iso3v5","h_iso4v5","h_iso1v6", "h_iso2v6","h_iso3v6","h_iso4v6","h_iso1v7", "h_iso2v7","h_iso3v7","h_iso4v7","h_iso1v8", "h_iso2v8","h_iso3v8","h_iso4v8","h_iso1v9", "h_iso2v9","h_iso3v9","h_iso4v9","h_iso1v10", "h_iso2v10","h_iso3v10","h_iso4v10","h_iso1v11","h_iso2v11","h_iso3v11","h_iso4v11","h_iso1v12", "h_iso2v12","h_iso3v12","h_iso4v12","h_iso1v13", "h_iso2v13","h_iso3v13","h_iso4v13",
 
 	};
 	
 	const char *hist_names[] = {
-	"mZ (e+e- & e) in Z-window","mZ (e+e- & m) in Z-window","mZ (m+m- & e) in Z-window","mZ (m+m- & m) in Z-window","mZ (e+e- & e+e-) in Z-window","mZ (e+e- & em) in Z-window","mZ (e+e- & m+m-) in Z-window","mZ (blabla) in Z-window","mZ (m+m- & em) in Z-window","mZ (m+m- & m+m-) in Z-window",
+	"mZ (e+e- & e) in Z-window","mZ (e+e- & m) in Z-window","mZ (m+m- & e) in Z-window","mZ (m+m- & m) in Z-window","mZ (e+e- & e+e-) in Z-window","mZ (e+e- & em) in Z-window","mZ (e+e- & m+m-) in Z-window","mZ (blabla) in Z-window","mZ (m+m- & em) in Z-window","mZ (m+m- & m+m-) in Z-window","mZ (e+e-) in Z-window","mZ (e m) in Z-window","mZ (m+m-) in Z-window",
 	
-	"mZ (e+e- & e) in Z-veto","mZ (e+e- & m) in Z-veto","mZ (m+m- & e) in Z-veto","mZ (m+m- & m) in Z-veto","mZ (e+e- & e+e-) in Z-veto","mZ (e+e- & em) in Z-veto","mZ (e+e- & m+m-) in Z-veto","mZ (blabla) in Z-veto","mZ (m+m- & em) in Z-veto","mZ (m+m- & m+m-) in Z-veto",
+	"mZ (e+e- & e) in Z-veto","mZ (e+e- & m) in Z-veto","mZ (m+m- & e) in Z-veto","mZ (m+m- & m) in Z-veto","mZ (e+e- & e+e-) in Z-veto","mZ (e+e- & em) in Z-veto","mZ (e+e- & m+m-) in Z-veto","mZ (blabla) in Z-veto","mZ (m+m- & em) in Z-veto","mZ (m+m- & m+m-) in Z-veto","mZ (e+e-) in Z-veto","mZ (e m) in Z-veto","mZ (m+m-) in Z-veto",
 	
-	"mH (e+e- & e) in Z-window","mH (e+e- & m) in Z-window","mH (m+m- & e) in Z-window","mH (m+m- & m) in Z-window","mH (e+e- & e+e-) in Z-window","mH (e+e- & em) in Z-window","mH (e+e- & m+m-) in Z-window","mH (blabla) in Z-window","mH (m+m- & em) in Z-window","mH (m+m- & m+m-) in Z-window",
+	"mH (e+e- & e) in Z-window","mH (e+e- & m) in Z-window","mH (m+m- & e) in Z-window","mH (m+m- & m) in Z-window","mH (e+e- & e+e-) in Z-window","mH (e+e- & em) in Z-window","mH (e+e- & m+m-) in Z-window","mH (blabla) in Z-window","mH (m+m- & em) in Z-window","mH (m+m- & m+m-) in Z-window","mH (e+e-) in Z-window","mH (e m) in Z-window","mH (m+m-) in Z-window",
 	
-	"mH (e+e- & e) in Z-veto","mH (e+e- & m) in Z-veto","mH (m+m- & e) in Z-veto","mH (m+m- & m) in Z-veto","mH (e+e- & e+e-) in Z-veto","mH (e+e- & em) in Z-veto","mH (e+e- & m+m-) in Z-veto","mH (blabla) in Z-veto","mH (m+m- & em) in Z-veto","mH (m+m- & m+m-) in Z-veto",
+	"mH (e+e- & e) in Z-veto","mH (e+e- & m) in Z-veto","mH (m+m- & e) in Z-veto","mH (m+m- & m) in Z-veto","mH (e+e- & e+e-) in Z-veto","mH (e+e- & em) in Z-veto","mH (e+e- & m+m-) in Z-veto","mH (blabla) in Z-veto","mH (m+m- & em) in Z-veto","mH (m+m- & m+m-) in Z-veto","mH (e+e-) in Z-veto","mH (e m) in Z-veto","mH (m+m-) in Z-veto",
 	
-	"MET (e+e- & e) in Z-window","MET (e+e- & m) in Z-window","MET (m+m- & e) in Z-window","MET (m+m- & m) in Z-window","MET (e+e- & e+e-) in Z-window","MET (e+e- & em) in Z-window","MET (e+e- & m+m-) in Z-window","MET (blabla) in Z-window","MET (m+m- & em) in Z-window","MET (m+m- & m+m-) in Z-window",
+	"MET (e+e- & e) in Z-window","MET (e+e- & m) in Z-window","MET (m+m- & e) in Z-window","MET (m+m- & m) in Z-window","MET (e+e- & e+e-) in Z-window","MET (e+e- & em) in Z-window","MET (e+e- & m+m-) in Z-window","MET (blabla) in Z-window","MET (m+m- & em) in Z-window","MET (m+m- & m+m-) in Z-window","MET (e+e-) in Z-window","MET (e m) in Z-window","MET (m+m-) in Z-window",
 	
-	"MET (e+e- & e) in Z-veto","MET (e+e- & m) in Z-veto","MET (m+m- & e) in Z-veto","MET (m+m- & m) in Z-veto","MET (e+e- & e+e-) in Z-veto","MET (e+e- & em) in Z-veto","MET (m+m- & e) in Z-veto","MET (blabla) in Z-veto","MET (m+m- & em) in Z-veto","MET (m+m- & m+m-) in Z-veto",
+	"MET (e+e- & e) in Z-veto","MET (e+e- & m) in Z-veto","MET (m+m- & e) in Z-veto","MET (m+m- & m) in Z-veto","MET (e+e- & e+e-) in Z-veto","MET (e+e- & em) in Z-veto","MET (m+m- & e) in Z-veto","MET (blabla) in Z-veto","MET (m+m- & em) in Z-veto","MET (m+m- & m+m-) in Z-veto","MET (e+e-) in Z-veto","MET (e m) in Z-veto","MET (m+m-) in Z-veto",
 	
 	"pT1 (e+e- & e) in Z-window","pT2 (e+e- & e) in Z-window","pT3 (e+e- & e) in Z-window","pT4 (e+e- & e) in Z-window",
 	"pT1 (e+e- & m) in Z-window","pT2 (e+e- & m) in Z-window","pT3 (e+e- & m) in Z-window","pT4 (e+e- & m) in Z-window",
@@ -115,6 +117,10 @@ void StackHist() {
 	"pT1 (blabla) in Z-window","pT2 (blabla) in Z-window","pT3 (blabla) in Z-window","pT4 (blabla) in Z-window",
 	"pT1 (m+m- & em) in Z-window","pT2 (m+m- & em) in Z-window","pT3 (m+m- & em) in Z-window","pT4 (m+m- & em) in Z-window",
 	"pT1 (m+m- & m+m-) in Z-window","pT2 (m+m- & m+m-) in Z-window","pT3 (m+m- & m+m-) in Z-window","pT4 (m+m- & m+m-) in Z-window",
+	"pT1 (e+e-) in Z-window","pT2 (e+e-) in Z-window","pT3 (e+e-) in Z-window","pT4 (e+e-) in Z-window",
+	"pT1 (e m) in Z-window","pT2 (e m) in Z-window","pT3 (e m) in Z-window","pT4 (e m) in Z-window",
+	"pT1 (m+m-) in Z-window","pT2 (m+m-) in Z-window","pT3 (m+m-) in Z-window","pT4 (m+m-) in Z-window",
+	
 	
 	"pT1 (e+e- & e) in Z-veto","pT2 (e+e- & e) in Z-veto","pT3 (e+e- & e) in Z-veto","pT4 (e+e- & e) in Z-veto",
 	"pT1 (e+e- & m) in Z-veto","pT2 (e+e- & m) in Z-veto","pT3 (e+e- & m) in Z-veto","pT4 (e+e- & m) in Z-veto",
@@ -126,6 +132,9 @@ void StackHist() {
 	"pT1 (blabla) in Z-veto","pT2 (blabla) in Z-veto","pT3 (blabla) in Z-veto","pT4 (blabla) in Z-veto",
 	"pT1 (m+m- & em) in Z-veto","pT2 (m+m- & em) in Z-veto","pT3 (m+m- & em) in Z-veto","pT4 (m+m- & em) in Z-veto",
 	"pT1 (m+m- & m+m-) in Z-veto","pT2 (m+m- & m+m-) in Z-veto","pT3 (m+m- & m+m-) in Z-veto","pT4 (m+m- & m+m-) in Z-veto",
+	"pT1 (e+e-) in Z-veto","pT2 (e+e-) in Z-veto","pT3 (e+e-) in Z-veto","pT4 (e+e-) in Z-veto",
+	"pT1 (e m) in Z-veto","pT2 (e m) in Z-veto","pT3 (e m) in Z-veto","pT4 (e m) in Z-veto",
+	"pT1 (m+m-) in Z-veto","pT2 (m+m-) in Z-veto","pT3 (m+m-) in Z-veto","pT4 (m+m-) in Z-veto",
 
 	"Eta1 (e+e- & e) in Z-window","Eta2 (e+e- & e) in Z-window","Eta3 (e+e- & e) in Z-window","Eta4 (e+e- & e) in Z-window",
 	"Eta1 (e+e- & m) in Z-window","Eta2 (e+e- & m) in Z-window","Eta3 (e+e- & m) in Z-window","Eta4 (e+e- & m) in Z-window",
@@ -137,6 +146,9 @@ void StackHist() {
 	"Eta1 (blabla) in Z-window","Eta2 (blabla) in Z-window","Eta3 (blabla) in Z-window","Eta4 (blabla) in Z-window",
 	"Eta1 (m+m- & em) in Z-window","Eta2 (m+m- & em) in Z-window","Eta3 (m+m- & em) in Z-window","Eta4 (m+m- & em) in Z-window",
 	"Eta1 (m+m- & m+m-) in Z-window","Eta2 (m+m- & m+m-) in Z-window","Eta3 (m+m- & m+m-) in Z-window","Eta4 (m+m- & m+m-) in Z-window",
+	"Eta1 (e+e-) in Z-window","Eta2 (e+e-) in Z-window","Eta3 (e+e-) in Z-window","Eta4 (e+e-) in Z-window",
+	"Eta1 (e m) in Z-window","Eta2 (e m) in Z-window","Eta3 (e m) in Z-window","Eta4 (e m) in Z-window",
+	"Eta1 (m+m-) in Z-window","Eta2 (m+m-) in Z-window","Eta3 (m+m-) in Z-window","Eta4 (m+m-) in Z-window",
 
 	"Eta1 (e+e- & e) in Z-veto","Eta2 (e+e- & e) in Z-veto","Eta3 (e+e- & e) in Z-veto","Eta4 (e+e- & e) in Z-veto",
 	"Eta1 (e+e- & m) in Z-veto","Eta2 (e+e- & m) in Z-veto","Eta3 (e+e- & m) in Z-veto","Eta4 (e+e- & m) in Z-veto",
@@ -148,6 +160,9 @@ void StackHist() {
 	"Eta1 (blabla) in Z-veto","Eta2 (blabla) in Z-veto","Eta3 (blabla) in Z-veto","Eta4 (blabla) in Z-veto",
 	"Eta1 (m+m- & em) in Z-veto","Eta2 (m+m- & em) in Z-veto","Eta3 (m+m- & em) in Z-veto","Eta4 (m+m- & em) in Z-veto",
 	"Eta1 (m+m- & m+m-) in Z-veto","Eta2 (m+m- & m+m-) in Z-veto","Eta3 (m+m- & m+m-) in Z-veto","Eta4 (m+m- & m+m-) in Z-veto",
+	"Eta1 (e+e-) in Z-veto","Eta2 (e+e-) in Z-veto","Eta3 (e+e-) in Z-veto","Eta4 (e+e-) in Z-veto",
+	"Eta1 (e m) in Z-veto","Eta2 (e m) in Z-veto","Eta3 (e m) in Z-veto","Eta4 (e m) in Z-veto",
+	"Eta1 (m+m-) in Z-veto","Eta2 (m+m-) in Z-veto","Eta3 (m+m-) in Z-veto","Eta4 (m+m-) in Z-veto",
 
 	"Phi1 (e+e- & e) in Z-window","Phi2 (e+e- & e) in Z-window","Phi3 (e+e- & e) in Z-window","Phi4 (e+e- & e) in Z-window",
 	"Phi1 (e+e- & m) in Z-window","Phi2 (e+e- & m) in Z-window","Phi3 (e+e- & m) in Z-window","Phi4 (e+e- & m) in Z-window",
@@ -159,6 +174,9 @@ void StackHist() {
 	"Phi1 (blabla) in Z-window","Phi2 (blabla) in Z-window","Phi3 (blabla) in Z-window","Phi4 (blabla) in Z-window",
 	"Phi1 (m+m- & em) in Z-window","Phi2 (m+m- & em) in Z-window","Phi3 (m+m- & em) in Z-window","Phi4 (m+m- & em) in Z-window",
 	"Phi1 (m+m- & m+m-) in Z-window","Phi2 (m+m- & m+m-) in Z-window","Phi3 (m+m- & m+m-) in Z-window","Phi4 (m+m- & m+m-) in Z-window",
+	"Phi1 (e+e-) in Z-window","Phi2 (e+e-) in Z-window","Phi3 (e+e-) in Z-window","Phi4 (e+e-) in Z-window",
+	"Phi1 (e m) in Z-window","Phi2 (e m) in Z-window","Phi3 (e m) in Z-window","Phi4 (e m) in Z-window",
+	"Phi1 (m+m-) in Z-window","Phi2 (m+m-) in Z-window","Phi3 (m+m-) in Z-window","Phi4 (m+m-) in Z-window",
 
 	"Phi1 (e+e- & e) in Z-veto","Phi2 (e+e- & e) in Z-veto","Phi3 (e+e- & e) in Z-veto","Phi4 (e+e- & e) in Z-veto",
 	"Phi1 (e+e- & m) in Z-veto","Phi2 (e+e- & m) in Z-veto","Phi3 (e+e- & m) in Z-veto","Phi4 (e+e- & m) in Z-veto",
@@ -170,6 +188,10 @@ void StackHist() {
 	"Phi1 (blabla) in Z-veto","Phi2 (blabla) in Z-veto","Phi3 (blabla) in Z-veto","Phi4 (blabla) in Z-veto",
 	"Phi1 (m+m- & em) in Z-veto","Phi2 (m+m- & em) in Z-veto","Phi3 (m+m- & em) in Z-veto","Phi4 (m+m- & em) in Z-veto",
 	"Phi1 (m+m- & m+m-) in Z-veto","Phi2 (m+m- & m+m-) in Z-veto","Phi3 (m+m- & m+m-) in Z-veto","Phi4 (m+m- & m+m-) in Z-veto",
+	"Phi1 (e+e-) in Z-veto","Phi2 (e+e-) in Z-veto","Phi3 (e+e-) in Z-veto","Phi4 (e+e-) in Z-veto",
+	"Phi1 (e m) in Z-veto","Phi2 (e m) in Z-veto","Phi3 (e m) in Z-veto","Phi4 (e m) in Z-veto",
+	"Phi1 (m+m-) in Z-veto","Phi2 (m+m-) in Z-veto","Phi3 (m+m-) in Z-veto","Phi4 (m+m-) in Z-veto",
+	
 	"dXY1 (e+e- & e) in Z-window","dXY2 (e+e- & e) in Z-window","dXY3 (e+e- & e) in Z-window","dXY4 (e+e- & e) in Z-window",
 	"dXY1 (e+e- & m) in Z-window","dXY2 (e+e- & m) in Z-window","dXY3 (e+e- & m) in Z-window","dXY4 (e+e- & m) in Z-window",
 	"dXY1 (m+m- & e) in Z-window","dXY2 (m+m- & e) in Z-window","dXY3 (m+m- & e) in Z-window","dXY4 (m+m- & e) in Z-window",
@@ -180,6 +202,10 @@ void StackHist() {
 	"dXY1 (blabla) in Z-window","dXY2 (blabla) in Z-window","dXY3 (blabla) in Z-window","dXY4 (blabla) in Z-window",
 	"dXY1 (m+m- & em) in Z-window","dXY2 (m+m- & em) in Z-window","dXY3 (m+m- & em) in Z-window","dXY4 (m+m- & em) in Z-window",
 	"dXY1 (m+m- & m+m-) in Z-window","dXY2 (m+m- & m+m-) in Z-window","dXY3 (m+m- & m+m-) in Z-window","dXY4 (m+m- & m+m-) in Z-window",
+	"dXY1 (e+e-) in Z-window","dXY2 (e+e-) in Z-window","dXY3 (e+e-) in Z-window","dXY4 (e+e-) in Z-window",
+	"dXY1 (e m) in Z-window","dXY2 (e m) in Z-window","dXY3 (e m) in Z-window","dXY4 (e m) in Z-window",
+	"dXY1 (m+m-) in Z-window","dXY2 (m+m-) in Z-window","dXY3 (m+m-) in Z-window","dXY4 (m+m-) in Z-window",
+	
 	
 	"dXY1 (e+e- & e) in Z-veto","dXY2 (e+e- & e) in Z-veto","dXY3 (e+e- & e) in Z-veto","dXY4 (e+e- & e) in Z-veto",
 	"dXY1 (e+e- & m) in Z-veto","dXY2 (e+e- & m) in Z-veto","dXY3 (e+e- & m) in Z-veto","dXY4 (e+e- & m) in Z-veto",
@@ -191,6 +217,9 @@ void StackHist() {
 	"dXY1 (blabla) in Z-veto","dXY2 (blabla) in Z-veto","dXY3 (blabla) in Z-veto","dXY4 (blabla) in Z-veto",
 	"dXY1 (m+m- & em) in Z-veto","dXY2 (m+m- & em) in Z-veto","dXY3 (m+m- & em) in Z-veto","dXY4 (m+m- & em) in Z-veto",
 	"dXY1 (m+m- & m+m-) in Z-veto","dXY2 (m+m- & m+m-) in Z-veto","dXY3 (m+m- & m+m-) in Z-veto","dXY4 (m+m- & m+m-) in Z-veto",
+	"dXY1 (e+e-) in Z-veto","dXY2 (e+e-) in Z-veto","dXY3 (e+e-) in Z-veto","dXY4 (e+e-) in Z-veto",
+	"dXY1 (e m) in Z-veto","dXY2 (e m) in Z-veto","dXY3 (e m) in Z-veto","dXY4 (e m) in Z-veto",
+	"dXY1 (m+m-) in Z-veto","dXY2 (m+m-) in Z-veto","dXY3 (m+m-) in Z-veto","dXY4 (m+m-) in Z-veto",
 	
 	"dZ1 (e+e- & e) in Z-window","dZ2 (e+e- & e) in Z-window","dZ3 (e+e- & e) in Z-window","dZ4 (e+e- & e) in Z-window",
 	"dZ1 (e+e- & m) in Z-window","dZ2 (e+e- & m) in Z-window","dZ3 (e+e- & m) in Z-window","dZ4 (e+e- & m) in Z-window",
@@ -202,7 +231,10 @@ void StackHist() {
 	"dZ1 (blabla) in Z-window","dZ2 (blabla) in Z-window","dZ3 (blabla) in Z-window","dZ4 (blabla) in Z-window",
 	"dZ1 (m+m- & em) in Z-window","dZ2 (m+m- & em) in Z-window","dZ3 (m+m- & em) in Z-window","dZ4 (m+m- & em) in Z-window",
 	"dZ1 (m+m- & m+m-) in Z-window","dZ2 (m+m- & m+m-) in Z-window","dZ3 (m+m- & m+m-) in Z-window","dZ4 (m+m- & m+m-) in Z-window",
-
+	"dZ1 (e+e-) in Z-window","dZ2 (e+e-) in Z-window","dZ3 (e+e-) in Z-window","dZ4 (e+e-) in Z-window",
+	"dZ1 (e m) in Z-window","dZ2 (e m) in Z-window","dZ3 (e m) in Z-window","dZ4 (e m) in Z-window",
+	"dZ1 (m+m-) in Z-window","dZ2 (m+m-) in Z-window","dZ3 (m+m-) in Z-window","dZ4 (m+m-) in Z-window",
+	
 	"dZ1 (e+e- & e) in Z-veto","dZ2 (e+e- & e) in Z-veto","dZ3 (e+e- & e) in Z-veto","dZ4 (e+e- & e) in Z-veto",
 	"dZ1 (e+e- & m) in Z-veto","dZ2 (e+e- & m) in Z-veto","dZ3 (e+e- & m) in Z-veto","dZ4 (e+e- & m) in Z-veto",
 	"dZ1 (m+m- & e) in Z-veto","dZ2 (m+m- & e) in Z-veto","dZ3 (m+m- & e) in Z-veto","dZ4 (m+m- & e) in Z-veto",
@@ -213,6 +245,9 @@ void StackHist() {
 	"dZ1 (blabla) in Z-veto","dZ2 (blabla) in Z-veto","dZ3 (blabla) in Z-veto","dZ4 (blabla) in Z-veto",
 	"dZ1 (m+m- & em) in Z-veto","dZ2 (m+m- & em) in Z-veto","dZ3 (m+m- & em) in Z-veto","dZ4 (m+m- & em) in Z-veto",
 	"dZ1 (m+m- & m+m-) in Z-veto","dZ2 (m+m- & m+m-) in Z-veto","dZ3 (m+m- & m+m-) in Z-veto","dZ4 (m+m- & m+m-) in Z-veto",
+	"dZ1 (e+e-) in Z-veto","dZ2 (e+e-) in Z-veto","dZ3 (e+e-) in Z-veto","dZ4 (e+e-) in Z-veto",
+	"dZ1 (e m) in Z-veto","dZ2 (e m) in Z-veto","dZ3 (e m) in Z-veto","dZ4 (e m) in Z-veto",
+	"dZ1 (m+m-) in Z-veto","dZ2 (m+m-) in Z-veto","dZ3 (m+m-) in Z-veto","dZ4 (m+m-) in Z-veto",
 
 	"ISO1 (e+e- & e) in Z-window","ISO2 (e+e- & e) in Z-window","ISO3 (e+e- & e) in Z-window","ISO4 (e+e- & e) in Z-window",
 	"ISO1 (e+e- & m) in Z-window","ISO2 (e+e- & m) in Z-window","ISO3 (e+e- & m) in Z-window","ISO4 (e+e- & m) in Z-window",
@@ -224,6 +259,9 @@ void StackHist() {
 	"ISO1 (blabla) in Z-window","ISO2 (blabla) in Z-window","ISO3 (blabla) in Z-window","ISO4 (blabla) in Z-window",
 	"ISO1 (m+m- & em) in Z-window","ISO2 (m+m- & em) in Z-window","ISO3 (m+m- & em) in Z-window","ISO4 (m+m- & em) in Z-window",
 	"ISO1 (m+m- & m+m-) in Z-window","ISO2 (m+m- & m+m-) in Z-window","ISO3 (m+m- & m+m-) in Z-window","ISO4 (m+m- & m+m-) in Z-window",
+	"ISO1 (e+e-) in Z-window","ISO2 (e+e-) in Z-window","ISO3 (e+e-) in Z-window","ISO4 (e+e-) in Z-window",
+	"ISO1 (e m) in Z-window","ISO2 (e m) in Z-window","ISO3 (e m) in Z-window","ISO4 (e m) in Z-window",
+	"ISO1 (m+m-) in Z-window","ISO2 (m+m-) in Z-window","ISO3 (m+m-) in Z-window","ISO4 (m+m-) in Z-window",
 
 	"ISO1 (e+e- & e) in Z-veto","ISO2 (e+e- & e) in Z-veto","ISO3 (e+e- & e) in Z-veto","ISO4 (e+e- & e) in Z-veto",
 	"ISO1 (e+e- & m) in Z-veto","ISO2 (e+e- & m) in Z-veto","ISO3 (e+e- & m) in Z-veto","ISO4 (e+e- & m) in Z-veto",
@@ -235,7 +273,9 @@ void StackHist() {
 	"ISO1 (blabla) in Z-veto","ISO2 (blabla) in Z-veto","ISO3 (blabla) in Z-veto","ISO4 (blabla) in Z-veto",
 	"ISO1 (m+m- & em) in Z-veto","ISO2 (m+m- & em) in Z-veto","ISO3 (m+m- & em) in Z-veto","ISO4 (m+m- & em) in Z-veto",
 	"ISO1 (m+m- & m+m-) in Z-veto","ISO2 (m+m- & m+m-) in Z-veto","ISO3 (m+m- & m+m-) in Z-veto","ISO4 (m+m- & m+m-) in Z-veto",
-
+	"ISO1 (e+e-) in Z-veto","ISO2 (e+e-) in Z-veto","ISO3 (e+e-) in Z-veto","ISO4 (e+e-) in Z-veto",
+	"ISO1 (e m) in Z-veto","ISO2 (e m) in Z-veto","ISO3 (e m) in Z-veto","ISO4 (e m) in Z-veto",
+	"ISO1 (m+m-) in Z-veto","ISO2 (m+m-) in Z-veto","ISO3 (m+m-) in Z-veto","ISO4 (m+m-) in Z-veto",
 	};
 	TCanvas* canvas = new TCanvas("canvas", "Stacked histograms", 800, 700);//600);
 	gStyle->SetOptStat(0);	
@@ -271,7 +311,7 @@ void StackHist() {
 		TH1F *h19 = (TH1F*)ifile19->Get(hist_list[i]);h19->SetFillColor(30);
 		TH1F *h20 = (TH1F*)ifile20->Get(hist_list[i]);h20->SetFillColor(30);
 
-		TH1F *h21 = (TH1F*)ifile21->Get(hist_list[i]);h21->SetFillColor(28);
+		//TH1F *h21 = (TH1F*)ifile21->Get(hist_list[i]);h21->SetFillColor(28);
 		//TH1F *h22 = (TH1F*)ifile22->Get(hist_list[i]);h22->SetFillColor(28);
 		//TH1F *h23 = (TH1F*)ifile23->Get(hist_list[i]);h23->SetFillColor(28);
 		TH1F *h24 = (TH1F*)ifile24->Get(hist_list[i]);h24->SetFillColor(28);
@@ -308,7 +348,7 @@ void StackHist() {
 		bkg_stack->Add(h18);
 		bkg_stack->Add(h19);
 		bkg_stack->Add(h20);
-		bkg_stack->Add(h21);
+		//bkg_stack->Add(h21);
 		//bkg_stack->Add(h22);
 		//bkg_stack->Add(h23);
 		bkg_stack->Add(h24);
@@ -337,7 +377,7 @@ void StackHist() {
 		h_bkg_total->Add(h18);
 		h_bkg_total->Add(h19);
 		h_bkg_total->Add(h20);
-		h_bkg_total->Add(h21);
+		//h_bkg_total->Add(h21);
 		//h_bkg_total->Add(h22);
 		//h_bkg_total->Add(h23);
 		h_bkg_total->Add(h24);
