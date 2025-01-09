@@ -1,10 +1,10 @@
 #include "Kinematics.h"
 #include "cat.h" //cat sort funs
 
-float* SortPt(string cat, string tau){
-	float pt[] = {pt_1,pt_2,pt_3,pt_4};
+double* SortPt(string cat, string tau){
+	double pt[] = {pt_1,pt_2,pt_3,pt_4};
 	int n = cat_lepCount(cat, 'e','m');
-	std::vector<float> sort_pt;
+	std::vector<double> sort_pt;
 	if (tau=="t"){
 		for (int j = 0; j < cat.length(); j++){
 			if (cat[j] == 't')
@@ -17,14 +17,14 @@ float* SortPt(string cat, string tau){
 				sort_pt.push_back(pt[j]);
 		}
 	}	
-	float *pt_arr = new float[0]; //any number to initialize it.
+	double *pt_arr = new double[0]; //any number to initialize it.
 	std::sort(sort_pt.begin(), sort_pt.end(), greater());//descending order
 	std::copy(sort_pt.begin(), sort_pt.begin()+n, pt_arr);//vector->array	
 	return pt_arr;
 }
 
-float ST(string cat){//for only leptons
-	float st = 0;
+double ST(string cat){//for only leptons
+	double st = 0;
 	if (cat.find("e")+1==1 or cat.find("m")+1==1)
 		st += pt_1;
 	if (cat.find("e")+1==2 or cat.find("m")+1==2)
@@ -36,10 +36,10 @@ float ST(string cat){//for only leptons
 	return st;
 }
 
-float getDR(float eta1, float phi1, float eta2, float phi2) {
-    float pi = TMath::Pi();
-    float dPhi = fmin(fabs(phi2 - phi1), 2.0 * pi - fabs(phi2 - phi1));
-    float DR = sqrt(pow(dPhi, 2) + pow(eta2 - eta1, 2));
+double getDR(double eta1, double phi1, double eta2, double phi2) {
+    double pi = TMath::Pi();
+    double dPhi = fmin(fabs(phi2 - phi1), 2.0 * pi - fabs(phi2 - phi1));
+    double DR = sqrt(pow(dPhi, 2) + pow(eta2 - eta1, 2));
     return DR;
 }
 
@@ -50,21 +50,21 @@ struct Lepton{
     double phi;
     double mass; 
     int charge;
- 	float d0;
- 	float dZ;
- 	float iso;
+ 	double d0;
+ 	double dZ;
+ 	double iso;
     // Constructor for convenience
-    Lepton(double pt, double eta, double phi, double mass, int charge, float d0, float dZ, float iso)
+    Lepton(double pt, double eta, double phi, double mass, int charge, double d0, double dZ, double iso)
         : pt(pt), eta(eta), phi(phi), mass(mass), charge(charge), d0(d0), dZ(dZ), iso(iso) {}
 };
 
 bool isDuplicate(const Lepton &lepton1, const Lepton &lepton2){
-	 if ( lepton1.charge == lepton2.charge and getDR(lepton1.eta, lepton1.phi, lepton2.eta, lepton2.phi) <= 0.2)
+	 if ( lepton1.charge == lepton2.charge and getDR(lepton1.eta, lepton1.phi, lepton2.eta, lepton2.phi) <= 0.4)
 	 	return true;
 	 else return false;
 }
 
-string pairFunc(int m, int n, string cat, float Zwindow){//checks if a pair is Z, Z-veto or DCH
+string pairFunc(int m, int n, string cat, double Zwindow){//checks if a pair is Z, Z-veto or DCH
 	TLorentzVector lep1, lep2;
 	int c1, c2;
 	if (m==1){
@@ -73,7 +73,7 @@ string pairFunc(int m, int n, string cat, float Zwindow){//checks if a pair is Z
 	}
 	else if (m==2){
 		lep1 = LepV(2);
-		c1 = q_3;
+		c1 = q_2;
 	}
 	else if (m==3){
 		lep1 = LepV(3);
@@ -89,7 +89,7 @@ string pairFunc(int m, int n, string cat, float Zwindow){//checks if a pair is Z
 	}
 	else if (n==2){
 		lep2 = LepV(2);
-		c2 = q_3;
+		c2 = q_2;
 	}
 	else if (n==3){
 		lep2 = LepV(3);
@@ -101,7 +101,7 @@ string pairFunc(int m, int n, string cat, float Zwindow){//checks if a pair is Z
 	}
 	if (c1 == c2 ) return "DCH";
 	else if (c1 == -c2){
-		if (cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) < Zwindow) return "Z";
+		if (cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) < Zwindow) return "Zwindow";
 		else if (cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) >= Zwindow) return "Zv";
 		else return "found nothing";
 	}
@@ -122,12 +122,12 @@ TLorentzVector LepV(int n){
 	return lepV;
 }	
 
-std::vector<int> ZCandMaker(string cat, float Zwindow){
+std::vector<int> ZCandMaker(string cat, double Zwindow){
 //make sure the there's no more than 2 lep with same charge before calling this fn.
 //no need to sort cat in order of leptons before calling this fn.
 //returns opposite-sign same-flav pairs
 //First 2 leptons form the best Z pair and are pt sorted.
-	float mZ = 91.2;
+	double mZ = 91.2;
 	TLorentzVector l1 = LepV(1), l2 = LepV(2), l3 = LepV(3), l4 = LepV(4);
 	std::vector<int> arr = {1,2,3,4};
 	auto swap_lep_array = [](std::vector<int>& arr, int m, int n){
@@ -214,8 +214,8 @@ std::vector<int> ZCandMaker(string cat, float Zwindow){
 }		
 
 
-std::vector<int> ZVetoMaker(string cat, float Zwindow){
-	float mZ = 91.2;
+std::vector<int> ZVetoMaker(string cat, double Zwindow){
+	double mZ = 91.2;
 	//static int Zveto_arr[4] ;
 	TLorentzVector l1 = LepV(1), l2 = LepV(2), l3 = LepV(3), l4 = LepV(4);
 	std::vector<int> arr = {1,2,3,4};
@@ -279,8 +279,8 @@ std::vector<int> ZVetoMaker(string cat, float Zwindow){
 	}
 }
 
-TLorentzVector *ZCandMaker_pair(string cat, TLorentzVector l1, TLorentzVector l2, TLorentzVector l3, TLorentzVector l4, float Zwindow){
-	float mZ = 91.2;
+TLorentzVector *ZCandMaker_pair(string cat, TLorentzVector l1, TLorentzVector l2, TLorentzVector l3, TLorentzVector l4, double Zwindow){
+	double mZ = 91.2;
 	TLorentzVector *Zpaired_lep = new TLorentzVector[4] ;
 	TLorentzVector L1, L2, L3, L4;
 	
@@ -374,8 +374,8 @@ TLorentzVector *ZCandMaker_pair(string cat, TLorentzVector l1, TLorentzVector l2
 }		
 
 
-TLorentzVector *ZVetoMaker_pair(string cat, TLorentzVector l1, TLorentzVector l2, TLorentzVector l3, TLorentzVector l4, float Zwindow){
-	float mZ = 91.2;
+TLorentzVector *ZVetoMaker_pair(string cat, TLorentzVector l1, TLorentzVector l2, TLorentzVector l3, TLorentzVector l4, double Zwindow){
+	double mZ = 91.2;
 	TLorentzVector *Zveto_lep = new TLorentzVector[4] ;
 	TLorentzVector L1, L2, L3, L4;
 	

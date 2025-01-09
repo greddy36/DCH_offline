@@ -1,8 +1,8 @@
 
-float* SortPt(string cat, string tau);
+double* SortPt(string cat, string tau);
 	
-float ST(string cat);
+double ST(string cat);
 
-float getDR(float eta1, float phi1, float eta2, float phi2);
+double getDR(double eta1, double phi1, double eta2, double phi2);
 
 TLorentzVector LepV(int n);
