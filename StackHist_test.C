@@ -3,57 +3,59 @@
 #include <TLegend.h>
 
 void StackHist_test() {
-	TFile *ifile_sig = new TFile("hist_test_nopair/HppM900_2018.root","READ");               
-	TFile *ifile_DY1 = new TFile("hist_test_nopair/DYJetsToLLM10to50_2018.root","READ");     
-	TFile *ifile_DY2 = new TFile("hist_test_nopair/DYJetsToLLM50_2018.root","READ"); 
+	TFile *ifile_sig = new TFile("hist_APre/HppM900_2018.root","READ");               
+	TFile *ifile_DY1 = new TFile("hist_APre/DYJetsToLLM10to50_2018.root","READ");     
+	TFile *ifile_DY2 = new TFile("hist_APre/DYJetsToLLM50_2018.root","READ"); 
 		    
-	//TFile *ifile_VV1 = new TFile("hist_test_nopair/WGToLNuG_2018.root","READ");
-	TFile *ifile_VV2 = new TFile("hist_test_nopair/WW_2018.root","READ");
-	TFile *ifile_VV3 = new TFile("hist_test_nopair/WWTo2L2Nu_2018.root","READ");
-	//TFile *ifile_VV4 = new TFile("hist_test_nopair/WZ_2018.root","READ");
-	TFile *ifile_VV5 = new TFile("hist_test_nopair/WZTo2Q2L_2018.root","READ");
-	TFile *ifile_VV6 = new TFile("hist_test_nopair/WZTo3LNu_2018.root","READ");
+	//TFile *ifile_VV1 = new TFile("hist_APre/WGToLNuG_2018.root","READ");
+	TFile *ifile_VV2 = new TFile("hist_APre/WW_2018.root","READ");
+	TFile *ifile_VV3 = new TFile("hist_APre/WWTo2L2Nu_2018.root","READ");
+	//TFile *ifile_VV4 = new TFile("hist_APre/WZ_2018.root","READ");
+	TFile *ifile_VV5 = new TFile("hist_APre/WZTo2Q2L_2018.root","READ");
+	TFile *ifile_VV6 = new TFile("hist_APre/WZTo3LNu_2018.root","READ");
 
-	TFile *ifile_VVV1 = new TFile("hist_test_nopair/WWW_2018.root","READ");
-	TFile *ifile_VVV2 = new TFile("hist_test_nopair/WZZ_2018.root","READ");
-	TFile *ifile_VVV3 = new TFile("hist_test_nopair/ZZZ_2018.root","READ");
+	TFile *ifile_VVV1 = new TFile("hist_APre/WWW_2018.root","READ");
+	TFile *ifile_VVV2 = new TFile("hist_APre/WZZ_2018.root","READ");
+	TFile *ifile_VVV3 = new TFile("hist_APre/ZZZ_2018.root","READ");
 
-	TFile *ifile_ttV1 = new TFile("hist_test_nopair/ttWJets_2018.root","READ");
-	TFile *ifile_ttV2 = new TFile("hist_test_nopair/ttZJets_2018.root","READ");
+	TFile *ifile_ttV1 = new TFile("hist_APre/ttWJets_2018.root","READ");
+	TFile *ifile_ttV2 = new TFile("hist_APre/ttZJets_2018.root","READ");
 	
-	TFile *ifile_ZZ1 = new TFile("hist_test_nopair/ZZTo2L2Nu_2018.root","READ");
-	TFile *ifile_ZZ2 = new TFile("hist_test_nopair/ZZTo2Q2L_2018.root","READ");
-	TFile *ifile_ZZ3 = new TFile("hist_test_nopair/ZZTo4L_2018.root","READ");
+	TFile *ifile_ZZ1 = new TFile("hist_APre/ZZTo2L2Nu_2018.root","READ");
+	TFile *ifile_ZZ2 = new TFile("hist_APre/ZZTo2Q2L_2018.root","READ");
+	TFile *ifile_ZZ3 = new TFile("hist_APre/ZZTo4L_2018.root","READ");
 
-	TFile *ifile_ST1 = new TFile("hist_test_nopair/ST_s-channel_2018.root","READ");          
-	TFile *ifile_ST2 = new TFile("hist_test_nopair/ST_t-channel_antitop_2018.root","READ");  
-	TFile *ifile_ST3 = new TFile("hist_test_nopair/ST_t-channel_top_2018.root","READ");  
-	TFile *ifile_ST4 = new TFile("hist_test_nopair/ST_tW_antitop_2018.root","READ");  
-	TFile *ifile_ST5 = new TFile("hist_test_nopair/ST_tW_top_2018.root","READ");            
+	TFile *ifile_ST1 = new TFile("hist_APre/ST_s-channel_2018.root","READ");          
+	TFile *ifile_ST2 = new TFile("hist_APre/ST_t-channel_antitop_2018.root","READ");  
+	TFile *ifile_ST3 = new TFile("hist_APre/ST_t-channel_top_2018.root","READ");  
+	TFile *ifile_ST4 = new TFile("hist_APre/ST_tW_antitop_2018.root","READ");  
+	TFile *ifile_ST5 = new TFile("hist_APre/ST_tW_top_2018.root","READ");            
 
-	//TFile *ifile_ttH1 = new TFile("hist_test_nopair/ttHTo2L2Nu_2018.root","READ");
-	//TFile *ifile_ttH2 = new TFile("hist_test_nopair/ttHToEE_2018.root","READ");
-	//TFile *ifile_ttH3 = new TFile("hist_test_nopair/ttHToMuMu_2018.root","READ");
-	TFile *ifile_ttH4 = new TFile("hist_test_nopair/ttHToTauTau_2018.root","READ");
+	//TFile *ifile_ttH1 = new TFile("hist_APre/ttHTo2L2Nu_2018.root","READ");
+	//TFile *ifile_ttH2 = new TFile("hist_APre/ttHToEE_2018.root","READ");
+	//TFile *ifile_ttH3 = new TFile("hist_APre/ttHToMuMu_2018.root","READ");
+	TFile *ifile_ttH4 = new TFile("hist_APre/ttHToTauTau_2018.root","READ");
 	
-	TFile *ifile_ZH1 = new TFile("hist_test_nopair/ZHToMuMu_2018.root","READ");
-	TFile *ifile_ZH2 = new TFile("hist_test_nopair/ZHToTauTau_2018.root","READ");
-	TFile *ifile_ZH3 = new TFile("hist_test_nopair/GluGluZH_2018.root","READ");
+	TFile *ifile_ZH1 = new TFile("hist_APre/ZHToMuMu_2018.root","READ");
+	TFile *ifile_ZH2 = new TFile("hist_APre/ZHToTauTau_2018.root","READ");
+	TFile *ifile_ZH3 = new TFile("hist_APre/GluGluZH_2018.root","READ");
 	
-	TFile *ifile_D1 = new TFile("hist_test_nopair/EGamma_2018.root","READ");
-	//TFile *ifile_D2 = new TFile("hist_test_nopair/DoubleMuon_2018.root","READ");
-	//TFile *ifile_D3 = new TFile("hist_test_nopair/Tau_2018.root","READ");
-	//TFile *ifile_D4 = new TFile("hist_test_nopair/MuonEG_2018.root","READ");
-	TFile *ifile_D5 = new TFile("hist_test_nopair/SingleMuon_2018.root","READ");
+	TFile *ifile_D1 = new TFile("hist_APre/EGamma_2018.root","READ");
+	//TFile *ifile_D2 = new TFile("hist_APre/DoubleMuon_2018.root","READ");
+	//TFile *ifile_D3 = new TFile("hist_APre/Tau_2018.root","READ");
+	//TFile *ifile_D4 = new TFile("hist_APre/MuonEG_2018.root","READ");
+	TFile *ifile_D5 = new TFile("hist_APre/SingleMuon_2018.root","READ");
 
 	//float nEvents = 
-
+	const char *hist_list[] = {"h_Xmass_0t","h_Xmass_1t","h_Xmass_2t", "h_Xmass_3lep"};
+	
+	const char *hist_names[] = {"mll1 in SR4L region","mll1 in Z(m+m-) + l region", "mll1 in Z-veto(e+e-) + l region", "mll1 in SR3L region"};
 	/*const char *hist_list[] = {"cutflow","h_Xmass_0t","h_Xmass_1t","h_Xmass_2t", "h_Xmass_34t", "h_ST", "h_ll1_pt_4L","h_ll1_pt_3L","h_mZ1", "h_mZ2","h_mZ3","h_mZ4","h_mZ1_3L", "h_mZ2_3L","h_mZ3_3L","h_mZ4_3L","h_met","h_pT1","h_pT2","h_pT3","h_pT4","h_dR","h_dRll","h_dRll2"};*/
 	
 	/*const char *hist_names[] = {"Cutflow","mll1 in Z(e+e-) + l region","mll1 in Z(m+m-) + l region", "mll1 in Z-veto(e+e-) + l region", "mll1 in Z-veto(m+m-) + l region", "ST", "Leading pair pT in 4L","Leading pair pT in 3L","Z mass from pair (1,3) in 4L", "Z mass from pair (1,4) in 4L","Z mass from pair (2,3) in 4L","Z mass from pair (2,4) in 4L", "Z mass from pair (1,3) in 3L", "Z mass from pair (1,4) in 3L","Z mass from pair (2,3)","Z mass from pair (2,4)","MET","Leading pT","Sub-Leading pT","3rd pT","4th pT","dR (+-) leptons; DR; Events","dR between 1st pair", "dR between 2nd pair"};*/
 
 
-	const char *hist_list[] = {
+	/*const char *hist_list[] = {
 "h_mZ1","h_mZ2","h_mZ3","h_mZ4","h_mZ5","h_mZ6","h_mZ7","h_mZ8","h_mZ9","h_mZ10","h_mZ11","h_mZ12","h_mZ13","h_mZ14","h_mZ15",
 
 "h_mZv1","h_mZv2","h_mZv3","h_mZv4","h_mZv5","h_mZv6","h_mZv7","h_mZv8","h_mZv9","h_mZv10","h_mZv11","h_mZv12","h_mZv13","h_mZv14","h_mZv15",
@@ -302,7 +304,7 @@ void StackHist_test() {
 	"ISO1 (m+m-) in Z-veto","ISO2 (m+m-) in Z-veto","ISO3 (m+m-) in Z-veto","ISO4 (m+m-) in Z-veto",
 	"ISO1 (e+e- & t) in Z-veto","ISO2 (e+e- & t) in Z-veto","ISO3 (e+e- & t) in Z-veto","ISO4 (e+e- & t) in Z-veto",
 	"ISO1 (m+m- & t) in Z-veto","ISO2 (m+m- & t) in Z-veto","ISO3 (m+m- & t) in Z-veto","ISO4 (m+m- & t) in Z-veto",
-	};
+	};*/
 	TCanvas* canvas = new TCanvas("canvas", "Stacked histograms", 800, 700);//600);
 	gStyle->SetOptStat(0);	
 	
@@ -520,7 +522,7 @@ h_ratio->SetMaximum(2); // Set the maximum y-value for the ratio plot
 		canvas->Update();
 		canvas->Modified();
 		
-		std::string s =  "hist_test_nopair/", s1, s2;
+		std::string s =  "hist_APre/", s1, s2;
 		s1 = s + hist_list[i]+".png";
 		//s2 = s + hist_list[i]+".svg";
 		char* title1 = const_cast<char*>(s1.c_str());//converting string to char

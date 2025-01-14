@@ -77,7 +77,7 @@ std::string getCatName(int index) {
 
 // Histogram creation utility to avoid code duplication
 void createHistograms(std::vector<TH1D*>& histograms, const std::string& prefix, const std::string& label, int bins, double low, double high) {
-	int nCh = 15;
+	int nCh = 17;
     for (int i = 0; i <= nCh; i++) {
         histograms.push_back(new TH1D(Form("%s%d", prefix.c_str(), i), Form("%s %d", label.c_str(), i), bins, low, high));
     }
@@ -113,10 +113,9 @@ void DCH_test_nopair(const char* ext = "root"){
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
 		//cout<<filename[j]<<endl;
-		
 		std::string fname = filename[j];
 		if (fname.find("_2018.") > fname.length()) continue;
-		//if (fname.find("DY") > fname.length()) continue;
+		if (fname.find("ZHToM") > fname.length()) continue;
 		//if (XSec(filename[j])!=1) continue; 
 	
 		TH1D* hnevts;
@@ -213,6 +212,7 @@ void DCH_test_nopair(const char* ext = "root"){
 			int Nlep = cat_lepCount(cat_name,'e','m'); 
 			int Ntau = strlen(cat_name)-Nlep; 	
 			if (cat <= 21  and q_1+q_2+q_3+q_4 != 0) continue; 
+			//else if (cat <= 39 and cat > 21 and abs(q_1+q_2+q_3) == 3) continue; 
 			//if (Ntau != 0) continue;
 			//if (Nlep == 0) continue;
 			//if (cat_name != "mmt") continue;
@@ -223,9 +223,9 @@ void DCH_test_nopair(const char* ext = "root"){
 			
 			double evtwt_nom = brWeight*Generator_weight;
 			if (XSec(filename[j])!=1){
-				//evtwt_nom *= weight*L1PreFiringWeight_Nom*weightPUtruejson;
+				evtwt_nom *= L1PreFiringWeight_Nom*weightPUtruejson;
 				if(strlen(cat_name)<3){
-					evtwt_nom *= IDSF_1*IDSF_2*ISOSF_1*ISOSF_2*weightPUtruejson*L1PreFiringWeight_Nom;
+					evtwt_nom *= IDSF_1*IDSF_2*ISOSF_1*ISOSF_2*TauVsEleIDSF_1*TauVsEleIDSF_2*TauVsMuIDSF_1*TauVsMuIDSF_2*TauVsJetIDSF_1*TauVsJetIDSF_2;
 					if (isTrig_1 >=1)
 						evtwt_nom *= TrigSF_1;
 					else if (isTrig_1 == -1)
@@ -233,8 +233,8 @@ void DCH_test_nopair(const char* ext = "root"){
 					//cout<<evtwt_nom<<endl;
 				}
 				else if (strlen(cat_name)==3)
-					evtwt_nom *= IDSF_1*IDSF_2*IDSF_3*ISOSF_1*ISOSF_2*ISOSF_3*weightPUtruejson*L1PreFiringWeight_Nom;
-				else evtwt_nom *= IDSF_1*IDSF_2*IDSF_3*IDSF_4*ISOSF_1*ISOSF_2*ISOSF_3*ISOSF_4*weightPUtruejson*L1PreFiringWeight_Nom;
+					evtwt_nom *= IDSF_1*IDSF_2*IDSF_3*ISOSF_1*ISOSF_2*ISOSF_3*TauVsEleIDSF_1*TauVsEleIDSF_2*TauVsEleIDSF_3*TauVsMuIDSF_1*TauVsMuIDSF_2*TauVsMuIDSF_3*TauVsJetIDSF_1*TauVsJetIDSF_2*TauVsJetIDSF_3;
+				else evtwt_nom *= IDSF_1*IDSF_2*IDSF_3*IDSF_4*ISOSF_1*ISOSF_2*ISOSF_3*ISOSF_4*TauVsEleIDSF_1*TauVsEleIDSF_2*TauVsEleIDSF_3*TauVsEleIDSF_4*TauVsMuIDSF_1*TauVsMuIDSF_2*TauVsMuIDSF_3*TauVsMuIDSF_4*TauVsJetIDSF_1*TauVsJetIDSF_2*TauVsJetIDSF_3*TauVsJetIDSF_4;
 				if(strlen(cat_name)>=3){
 					if (isTrig_1 >=1 and isTrig_2 == 0)
 						evtwt_nom *= TrigSF_1;
@@ -302,11 +302,99 @@ void DCH_test_nopair(const char* ext = "root"){
 					mllt_2 = (L1+L4).Mt();
 					mllt_2 = (L1+L3).Mt();
 				}*/
-
+				if( cat_string =="emt" ){ 
+					//h_mZ[8]->Fill(mZ[0], evtwt_nom);
+					//h_mH[8]->Fill(mH[0], evtwt_nom);
+					h_met[8]->Fill(met*TauES_1*TauES_2*TauES_3, evtwt_nom);
+					h_pt1[8]->Fill(leptons[0].pt, evtwt_nom);
+					h_pt2[8]->Fill(leptons[1].pt, evtwt_nom);
+					h_pt3[8]->Fill(leptons[2].pt, evtwt_nom);
+					h_pt4[8]->Fill(leptons[3].pt, evtwt_nom);
+					h_eta1[8]->Fill(leptons[0].eta, evtwt_nom);
+					h_eta2[8]->Fill(leptons[1].eta, evtwt_nom);
+					h_eta3[8]->Fill(leptons[2].eta, evtwt_nom);
+					h_eta4[8]->Fill(leptons[3].eta, evtwt_nom);
+					h_phi1[8]->Fill(leptons[0].phi, evtwt_nom);
+					h_phi2[8]->Fill(leptons[1].phi, evtwt_nom);
+					h_phi3[8]->Fill(leptons[2].phi, evtwt_nom);
+					h_phi4[8]->Fill(leptons[3].phi, evtwt_nom);
+					h_dxy1[8]->Fill(leptons[0].d0, evtwt_nom);
+					h_dxy2[8]->Fill(leptons[1].d0, evtwt_nom);
+					h_dxy3[8]->Fill(leptons[2].d0, evtwt_nom);
+					h_dxy4[8]->Fill(leptons[3].d0, evtwt_nom);
+					h_dZ1[8]->Fill(leptons[0].dZ, evtwt_nom);
+					h_dZ2[8]->Fill(leptons[1].dZ, evtwt_nom);
+					h_dZ3[8]->Fill(leptons[2].dZ, evtwt_nom);
+					h_dZ4[8]->Fill(leptons[3].dZ, evtwt_nom);
+					h_iso1[8]->Fill(leptons[0].iso, evtwt_nom);
+					h_iso2[8]->Fill(leptons[1].iso, evtwt_nom);
+					h_iso3[8]->Fill(leptons[2].iso, evtwt_nom);
+					h_iso4[8]->Fill(leptons[3].iso, evtwt_nom);
+				}
+				else if( cat_string =="ett" ){ 
+					//h_mZ[16]->Fill(mZ[0], evtwt_nom);
+					//h_mH[16]->Fill(mH[0], evtwt_nom);
+					h_met[16]->Fill(met*TauES_1*TauES_2*TauES_3, evtwt_nom);
+					h_pt1[16]->Fill(leptons[0].pt, evtwt_nom);
+					h_pt2[16]->Fill(leptons[1].pt, evtwt_nom);
+					h_pt3[16]->Fill(leptons[2].pt, evtwt_nom);
+					h_pt4[16]->Fill(leptons[3].pt, evtwt_nom);
+					h_eta1[16]->Fill(leptons[0].eta, evtwt_nom);
+					h_eta2[16]->Fill(leptons[1].eta, evtwt_nom);
+					h_eta3[16]->Fill(leptons[2].eta, evtwt_nom);
+					h_eta4[16]->Fill(leptons[3].eta, evtwt_nom);
+					h_phi1[16]->Fill(leptons[0].phi, evtwt_nom);
+					h_phi2[16]->Fill(leptons[1].phi, evtwt_nom);
+					h_phi3[16]->Fill(leptons[2].phi, evtwt_nom);
+					h_phi4[16]->Fill(leptons[3].phi, evtwt_nom);
+					h_dxy1[16]->Fill(leptons[0].d0, evtwt_nom);
+					h_dxy2[16]->Fill(leptons[1].d0, evtwt_nom);
+					h_dxy3[16]->Fill(leptons[2].d0, evtwt_nom);
+					h_dxy4[16]->Fill(leptons[3].d0, evtwt_nom);
+					h_dZ1[16]->Fill(leptons[0].dZ, evtwt_nom);
+					h_dZ2[16]->Fill(leptons[1].dZ, evtwt_nom);
+					h_dZ3[16]->Fill(leptons[2].dZ, evtwt_nom);
+					h_dZ4[16]->Fill(leptons[3].dZ, evtwt_nom);
+					h_iso1[16]->Fill(leptons[0].iso, evtwt_nom);
+					h_iso2[16]->Fill(leptons[1].iso, evtwt_nom);
+					h_iso3[16]->Fill(leptons[2].iso, evtwt_nom);
+					h_iso4[16]->Fill(leptons[3].iso, evtwt_nom);
+				}
+				else if( cat_string =="mtt" ){ 
+					//h_mZ[17]->Fill(mZ[0], evtwt_nom);
+					//h_mH[17]->Fill(mH[0], evtwt_nom);
+					h_met[17]->Fill(met*TauES_1*TauES_2*TauES_3, evtwt_nom);
+					h_pt1[17]->Fill(leptons[0].pt, evtwt_nom);
+					h_pt2[17]->Fill(leptons[1].pt, evtwt_nom);
+					h_pt3[17]->Fill(leptons[2].pt, evtwt_nom);
+					h_pt4[17]->Fill(leptons[3].pt, evtwt_nom);
+					h_eta1[17]->Fill(leptons[0].eta, evtwt_nom);
+					h_eta2[17]->Fill(leptons[1].eta, evtwt_nom);
+					h_eta3[17]->Fill(leptons[2].eta, evtwt_nom);
+					h_eta4[17]->Fill(leptons[3].eta, evtwt_nom);
+					h_phi1[17]->Fill(leptons[0].phi, evtwt_nom);
+					h_phi2[17]->Fill(leptons[1].phi, evtwt_nom);
+					h_phi3[17]->Fill(leptons[2].phi, evtwt_nom);
+					h_phi4[17]->Fill(leptons[3].phi, evtwt_nom);
+					h_dxy1[17]->Fill(leptons[0].d0, evtwt_nom);
+					h_dxy2[17]->Fill(leptons[1].d0, evtwt_nom);
+					h_dxy3[17]->Fill(leptons[2].d0, evtwt_nom);
+					h_dxy4[17]->Fill(leptons[3].d0, evtwt_nom);
+					h_dZ1[17]->Fill(leptons[0].dZ, evtwt_nom);
+					h_dZ2[17]->Fill(leptons[1].dZ, evtwt_nom);
+					h_dZ3[17]->Fill(leptons[2].dZ, evtwt_nom);
+					h_dZ4[17]->Fill(leptons[3].dZ, evtwt_nom);
+					h_iso1[17]->Fill(leptons[0].iso, evtwt_nom);
+					h_iso2[17]->Fill(leptons[1].iso, evtwt_nom);
+					h_iso3[17]->Fill(leptons[2].iso, evtwt_nom);
+					h_iso4[17]->Fill(leptons[3].iso, evtwt_nom);
+				}
+				
 				std::vector<double> mZ, mZv, mH;
 				for(int m = 1; m <= strlen(cat_name); ++m){
 					for(int n = m+1; n <= strlen(cat_name); ++n){
 						string pair_name = pairFunc(m,n,cat_name,20);
+						//the vector elements are inv massses of highest pt pairs because we sotred the lepton vector by pt.
 						if(pair_name=="Zwindow") mZ.push_back((LepV(m)+LepV(n)).M());
 						else if(pair_name=="Zv") mZv.push_back((LepV(m)+LepV(n)).M());
 						else if(pair_name=="DCH") mH.push_back((LepV(m)+LepV(n)).M());
@@ -410,7 +498,7 @@ void DCH_test_nopair(const char* ext = "root"){
 					else if (cat_string== "ete" or cat_string== "eet" or cat_string == "tee"){ 
 						h_mZ[14]->Fill(mZ[0], evtwt_nom);
 						h_mH[14]->Fill(mH[0], evtwt_nom);
-						h_met[14]->Fill(met, evtwt_nom);
+						h_met[14]->Fill(met*TauES_1*TauES_2*TauES_3, evtwt_nom);
 						h_pt1[14]->Fill(leptons[0].pt, evtwt_nom);
 						h_pt2[14]->Fill(leptons[1].pt, evtwt_nom);
 						h_pt3[14]->Fill(leptons[2].pt, evtwt_nom);
@@ -439,7 +527,7 @@ void DCH_test_nopair(const char* ext = "root"){
 					else if (cat_string== "mtm" or cat_string== "mmt" or cat_string == "tmm"){ 
 						h_mZ[15]->Fill(mZ[0], evtwt_nom);
 						h_mH[15]->Fill(mH[0], evtwt_nom);
-						h_met[15]->Fill(met, evtwt_nom);
+						h_met[15]->Fill(met*TauES_1*TauES_2*TauES_3, evtwt_nom);
 						h_pt1[15]->Fill(leptons[0].pt, evtwt_nom);
 						h_pt2[15]->Fill(leptons[1].pt, evtwt_nom);
 						h_pt3[15]->Fill(leptons[2].pt, evtwt_nom);
@@ -669,35 +757,6 @@ void DCH_test_nopair(const char* ext = "root"){
 						h_iso2[7]->Fill(leptons[1].iso, evtwt_nom);
 						h_iso3[7]->Fill(leptons[2].iso, evtwt_nom);
 						h_iso4[7]->Fill(leptons[3].iso, evtwt_nom);
-					}
-					else if( cat_string =="emt" ){ 
-						h_mZ[8]->Fill(mZ[0], evtwt_nom);
-						h_mH[8]->Fill(mH[0], evtwt_nom);
-						h_met[8]->Fill(met, evtwt_nom);
-						h_pt1[8]->Fill(leptons[0].pt, evtwt_nom);
-						h_pt2[8]->Fill(leptons[1].pt, evtwt_nom);
-						h_pt3[8]->Fill(leptons[2].pt, evtwt_nom);
-						h_pt4[8]->Fill(leptons[3].pt, evtwt_nom);
-						h_eta1[8]->Fill(leptons[0].eta, evtwt_nom);
-						h_eta2[8]->Fill(leptons[1].eta, evtwt_nom);
-						h_eta3[8]->Fill(leptons[2].eta, evtwt_nom);
-						h_eta4[8]->Fill(leptons[3].eta, evtwt_nom);
-						h_phi1[8]->Fill(leptons[0].phi, evtwt_nom);
-						h_phi2[8]->Fill(leptons[1].phi, evtwt_nom);
-						h_phi3[8]->Fill(leptons[2].phi, evtwt_nom);
-						h_phi4[8]->Fill(leptons[3].phi, evtwt_nom);
-						h_dxy1[8]->Fill(leptons[0].d0, evtwt_nom);
-						h_dxy2[8]->Fill(leptons[1].d0, evtwt_nom);
-						h_dxy3[8]->Fill(leptons[2].d0, evtwt_nom);
-						h_dxy4[8]->Fill(leptons[3].d0, evtwt_nom);
-						h_dZ1[8]->Fill(leptons[0].dZ, evtwt_nom);
-						h_dZ2[8]->Fill(leptons[1].dZ, evtwt_nom);
-						h_dZ3[8]->Fill(leptons[2].dZ, evtwt_nom);
-						h_dZ4[8]->Fill(leptons[3].dZ, evtwt_nom);
-						h_iso1[8]->Fill(leptons[0].iso, evtwt_nom);
-						h_iso2[8]->Fill(leptons[1].iso, evtwt_nom);
-						h_iso3[8]->Fill(leptons[2].iso, evtwt_nom);
-						h_iso4[8]->Fill(leptons[3].iso, evtwt_nom);
 					}
 					else if( cat_lepCount(cat_name,'e','g') == 1 and cat_lepCount(cat_name,'m','g') == 3 ){ 
 						h_mZ[9]->Fill(mZ[0], evtwt_nom);
@@ -1138,35 +1197,6 @@ void DCH_test_nopair(const char* ext = "root"){
 						h_iso2v[7]->Fill(leptons[1].iso, evtwt_nom);
 						h_iso3v[7]->Fill(leptons[2].iso, evtwt_nom);
 						h_iso4v[7]->Fill(leptons[3].iso, evtwt_nom);
-					}
-					else if( cat_string =="emt" ){ 
-						h_mZv[8]->Fill(mZv[0], evtwt_nom);
-						h_mHv[8]->Fill(mH[0], evtwt_nom);
-						h_metv[8]->Fill(met, evtwt_nom);
-						h_pt1v[8]->Fill(leptons[0].pt, evtwt_nom);
-						h_pt2v[8]->Fill(leptons[1].pt, evtwt_nom);
-						h_pt3v[8]->Fill(leptons[2].pt, evtwt_nom);
-						h_pt4v[8]->Fill(leptons[3].pt, evtwt_nom);
-						h_eta1v[8]->Fill(leptons[0].eta, evtwt_nom);
-						h_eta2v[8]->Fill(leptons[1].eta, evtwt_nom);
-						h_eta3v[8]->Fill(leptons[2].eta, evtwt_nom);
-						h_eta4v[8]->Fill(leptons[3].eta, evtwt_nom);
-						h_phi1v[8]->Fill(leptons[0].phi, evtwt_nom);
-						h_phi2v[8]->Fill(leptons[1].phi, evtwt_nom);
-						h_phi3v[8]->Fill(leptons[2].phi, evtwt_nom);
-						h_phi4v[8]->Fill(leptons[3].phi, evtwt_nom);
-						h_dxy1v[8]->Fill(leptons[0].d0, evtwt_nom);
-						h_dxy2v[8]->Fill(leptons[1].d0, evtwt_nom);
-						h_dxy3v[8]->Fill(leptons[2].d0, evtwt_nom);
-						h_dxy4v[8]->Fill(leptons[3].d0, evtwt_nom);
-						h_dZ1v[8]->Fill(leptons[0].dZ, evtwt_nom);
-						h_dZ2v[8]->Fill(leptons[1].dZ, evtwt_nom);
-						h_dZ3v[8]->Fill(leptons[2].dZ, evtwt_nom);
-						h_dZ4v[8]->Fill(leptons[3].dZ, evtwt_nom);
-						h_iso1v[8]->Fill(leptons[0].iso, evtwt_nom);
-						h_iso2v[8]->Fill(leptons[1].iso, evtwt_nom);
-						h_iso3v[8]->Fill(leptons[2].iso, evtwt_nom);
-						h_iso4v[8]->Fill(leptons[3].iso, evtwt_nom);
 					}
 					else if( cat_lepCount(cat_name,'e','g') == 1 and cat_lepCount(cat_name,'m','g') == 3 ){ 
 						h_mZv[9]->Fill(mZv[0], evtwt_nom);

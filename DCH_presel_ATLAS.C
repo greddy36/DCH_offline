@@ -22,7 +22,7 @@ float XSec(std::string fname){
 	else if(fname.find("WZTo2Q2L") < fname.length()) return 6.204;
 	else if(fname.find("WZTo3LNu") < fname.length()) return 5.052;
 	else if(fname.find("WZZ_") < fname.length()) return 0.05565;
-	else if(fname.find("WZ_") < fname.length()) return 0;//return 27.6;
+	else if(fname.find("WZ_") < fname.length()) return 0;//27.6;
 	else if(fname.find("ZHToMuMu") < fname.length()) return 0.7891*0.000218;
 	else if(fname.find("ZHToTauTau") < fname.length()) return 0.7891*0.0627;
 	else if(fname.find("ZZTo2L2Nu") < fname.length()) return 1.325;
@@ -31,7 +31,7 @@ float XSec(std::string fname){
 	else if(fname.find("ZZZ_") < fname.length()) return 0.01398;
 	else if(fname.find("GluGluZH_") < fname.length()) return 0.0616;
 	else if(fname.find("DYJetsToLLM10to50") < fname.length()) return 18610;
-	else if(fname.find("DYJetsToLLM50") < fname.length()) return 6225.42;
+	else if(fname.find("DYJetsToLLM50") < fname.length()) return 6077.22;
 	else if(fname.find("ST_s-channel_") < fname.length()) return 3.74;
 	else if(fname.find("ST_t-channel_antitop_") < fname.length()) return 69.09;
 	else if(fname.find("ST_t-channel_top_") < fname.length()) return 115.3;
@@ -41,6 +41,7 @@ float XSec(std::string fname){
 	else if(fname.find("EGamma") < fname.length()) return 1;//Data
 	else if(fname.find("Muon") < fname.length()) return 1;//Data
 	else if(fname.find("Tau") < fname.length()) return 1;//Data
+	else if(fname.find("Single") < fname.length()) return 1;//Data
 	else{
 		std::cout<<"DON'T KNOW X-SEC FOR FILE "<<fname<<endl;
 		return 0;
