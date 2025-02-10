@@ -3,48 +3,62 @@
 #include <TLegend.h>
 
 void StackHist() {
-	TFile *ifile_sig = new TFile("hist_test_nopair/HppM900_2018.root","READ");               
-	TFile *ifile_DY1 = new TFile("hist_test_nopair/DYJetsToLLM10to50_2018.root","READ");     
-	TFile *ifile_DY2 = new TFile("hist_test_nopair/DYJetsToLLM50_2018.root","READ"); 
+	TFile *ifile_sig = new TFile("hist_oldXS/WW_2018.root","READ");               
+	TFile *ifile_DY1 = new TFile("hist_oldXS/DYJetsToLLM10to50_2018.root","READ");     
+	TFile *ifile_DY2 = new TFile("hist_oldXS/DYJetsToLLM50_2018.root","READ"); 
 		    
-	//TFile *ifile_VV1 = new TFile("hist_test_nopair/WGToLNuG_2018.root","READ");
-	TFile *ifile_VV2 = new TFile("hist_test_nopair/WW_2018.root","READ");
-	TFile *ifile_VV3 = new TFile("hist_test_nopair/WWTo2L2Nu_2018.root","READ");
-	//TFile *ifile_VV4 = new TFile("hist_test_nopair/WZ_2018.root","READ");
-	TFile *ifile_VV5 = new TFile("hist_test_nopair/WZTo2Q2L_2018.root","READ");
-	TFile *ifile_VV6 = new TFile("hist_test_nopair/WZTo3LNu_2018.root","READ");
+	//TFile *ifile_VV1 = new TFile("hist_oldXS/WGToLNuG_2018.root","READ");
+	TFile *ifile_VV2 = new TFile("hist_oldXS/WW_2018.root","READ");
+	TFile *ifile_VV3 = new TFile("hist_oldXS/WWTo2L2Nu_2018.root","READ");
+	//TFile *ifile_VV4 = new TFile("hist_oldXS/WZ_2018.root","READ");
+	TFile *ifile_VV5 = new TFile("hist_oldXS/WZTo2Q2L_2018.root","READ");
+	TFile *ifile_VV6 = new TFile("hist_oldXS/WZTo3LNu_2018.root","READ");
 
-	TFile *ifile_VVV1 = new TFile("hist_test_nopair/WWW_2018.root","READ");
-	TFile *ifile_VVV2 = new TFile("hist_test_nopair/WZZ_2018.root","READ");
-	TFile *ifile_VVV3 = new TFile("hist_test_nopair/ZZZ_2018.root","READ");
+	TFile *ifile_VVV1 = new TFile("hist_oldXS/WWW_2018.root","READ");
+	TFile *ifile_VVV2 = new TFile("hist_oldXS/WZZ_2018.root","READ");
+	TFile *ifile_VVV3 = new TFile("hist_oldXS/ZZZ_2018.root","READ");
 
-	TFile *ifile_ttV1 = new TFile("hist_test_nopair/ttWJets_2018.root","READ");
-	TFile *ifile_ttV2 = new TFile("hist_test_nopair/ttZJets_2018.root","READ");
+	TFile *ifile_ttV1 = new TFile("hist_oldXS/ttWJets_2018.root","READ");
+	TFile *ifile_ttV2 = new TFile("hist_oldXS/ttZJets_2018.root","READ");
 	
-	TFile *ifile_ZZ1 = new TFile("hist_test_nopair/ZZTo2L2Nu_2018.root","READ");
-	TFile *ifile_ZZ2 = new TFile("hist_test_nopair/ZZTo2Q2L_2018.root","READ");
-	TFile *ifile_ZZ3 = new TFile("hist_test_nopair/ZZTo4L_2018.root","READ");
-
-	TFile *ifile_ST1 = new TFile("hist_test_nopair/ST_s-channel_2018.root","READ");          
-	TFile *ifile_ST2 = new TFile("hist_test_nopair/ST_t-channel_antitop_2018.root","READ");  
-	TFile *ifile_ST3 = new TFile("hist_test_nopair/ST_t-channel_top_2018.root","READ");  
-	TFile *ifile_ST4 = new TFile("hist_test_nopair/ST_tW_antitop_2018.root","READ");  
-	TFile *ifile_ST5 = new TFile("hist_test_nopair/ST_tW_top_2018.root","READ");            
-
-	//TFile *ifile_ttH1 = new TFile("hist_test_nopair/ttHTo2L2Nu_2018.root","READ");
-	//TFile *ifile_ttH2 = new TFile("hist_test_nopair/ttHToEE_2018.root","READ");
-	//TFile *ifile_ttH3 = new TFile("hist_test_nopair/ttHToMuMu_2018.root","READ");
-	TFile *ifile_ttH4 = new TFile("hist_test_nopair/ttHToTauTau_2018.root","READ");
+	TFile *ifile_WJ1 = new TFile("hist_oldXS/WJetsToLNu_2018.root","READ");
+	TFile *ifile_WJ2 = new TFile("hist_oldXS/WJetsToLNu_HT-70To100_2018.root","READ");
+	TFile *ifile_WJ3 = new TFile("hist_oldXS/WJetsToLNu_HT-100To200_2018.root","READ");
+	TFile *ifile_WJ4 = new TFile("hist_oldXS/WJetsToLNu_HT-200To400_2018.root","READ");
+	TFile *ifile_WJ5 = new TFile("hist_oldXS/WJetsToLNu_HT-400To600_2018.root","READ");
+	TFile *ifile_WJ6 = new TFile("hist_oldXS/WJetsToLNu_HT-600To800_2018.root","READ");
+	TFile *ifile_WJ7 = new TFile("hist_oldXS/WJetsToLNu_HT-800To1200_2018.root","READ");
+	TFile *ifile_WJ8 = new TFile("hist_oldXS/WJetsToLNu_HT-1200To2500_2018.root","READ");
+	TFile *ifile_WJ9 = new TFile("hist_oldXS/WJetsToLNu_HT-2500ToInf_2018.root","READ");
 	
-	TFile *ifile_ZH1 = new TFile("hist_test_nopair/ZHToMuMu_2018.root","READ");
-	TFile *ifile_ZH2 = new TFile("hist_test_nopair/ZHToTauTau_2018.root","READ");
-	TFile *ifile_ZH3 = new TFile("hist_test_nopair/GluGluZH_2018.root","READ");
+	TFile *ifile_ZZ1 = new TFile("hist_oldXS/ZZTo2L2Nu_2018.root","READ");
+	TFile *ifile_ZZ2 = new TFile("hist_oldXS/ZZTo2Q2L_2018.root","READ");
+	TFile *ifile_ZZ3 = new TFile("hist_oldXS/ZZTo4L_2018.root","READ");
+
+	TFile *ifile_ST1 = new TFile("hist_oldXS/ST_s-channel_2018.root","READ");          
+	TFile *ifile_ST2 = new TFile("hist_oldXS/ST_t-channel_antitop_2018.root","READ");  
+	TFile *ifile_ST3 = new TFile("hist_oldXS/ST_t-channel_top_2018.root","READ");  
+	TFile *ifile_ST4 = new TFile("hist_oldXS/ST_tW_antitop_2018.root","READ");  
+	TFile *ifile_ST5 = new TFile("hist_oldXS/ST_tW_top_2018.root","READ");            
+
+	//TFile *ifile_ttH1 = new TFile("hist_oldXS/ttHTo2L2Nu_2018.root","READ");
+	//TFile *ifile_ttH2 = new TFile("hist_oldXS/ttHToEE_2018.root","READ");
+	//TFile *ifile_ttH3 = new TFile("hist_oldXS/ttHToMuMu_2018.root","READ");
+	TFile *ifile_ttH4 = new TFile("hist_oldXS/ttHToTauTau_2018.root","READ");
 	
-	TFile *ifile_D1 = new TFile("hist_test_nopair/EGamma_2018.root","READ");
-	//TFile *ifile_D2 = new TFile("hist_test_nopair/DoubleMuon_2018.root","READ");
-	//TFile *ifile_D3 = new TFile("hist_test_nopair/Tau_2018.root","READ");
-	//TFile *ifile_D4 = new TFile("hist_test_nopair/MuonEG_2018.root","READ");
-	TFile *ifile_D5 = new TFile("hist_test_nopair/SingleMuon_2018.root","READ");
+	TFile *ifile_TTbar1 = new TFile("hist_oldXS/TTTo2L2Nu_2018.root","READ");
+	TFile *ifile_TTbar2 = new TFile("hist_oldXS/TTToSemiLeptonic_2018.root","READ");
+	TFile *ifile_TTbar3 = new TFile("hist_oldXS/TTToHadronic_2018.root","READ");
+	
+	TFile *ifile_ZH1 = new TFile("hist_oldXS/ZHToMuMu_2018.root","READ");
+	TFile *ifile_ZH2 = new TFile("hist_oldXS/ZHToTauTau_2018.root","READ");
+	TFile *ifile_ZH3 = new TFile("hist_oldXS/GluGluZH_2018.root","READ");
+	
+	TFile *ifile_D1 = new TFile("hist_oldXS/EGamma_2018.root","READ");
+	//TFile *ifile_D2 = new TFile("hist_oldXS/DoubleMuon_2018.root","READ");
+	//TFile *ifile_D3 = new TFile("hist_oldXS/Tau_2018.root","READ");
+	//TFile *ifile_D4 = new TFile("hist_oldXS/MuonEG_2018.root","READ");
+	TFile *ifile_D5 = new TFile("hist_oldXS/SingleMuon_2018.root","READ");
 
 	//float nEvents = 
 
@@ -73,7 +87,7 @@ void StackHist() {
 "h_eta11", "h_eta21","h_eta31","h_eta41","h_eta12", "h_eta22","h_eta32","h_eta42","h_eta13", "h_eta23","h_eta33","h_eta43","h_eta14", "h_eta24","h_eta34","h_eta44","h_eta15", "h_eta25","h_eta35","h_eta45","h_eta16", "h_eta26","h_eta36","h_eta46","h_eta17", "h_eta27","h_eta37","h_eta47","h_eta18", "h_eta28","h_eta38","h_eta48","h_eta19", "h_eta29","h_eta39","h_eta49","h_eta110", "h_eta210","h_eta310","h_eta410","h_eta111", "h_eta211","h_eta311","h_eta411","h_eta112", "h_eta212","h_eta312","h_eta412","h_eta113", "h_eta213","h_eta313","h_eta413","h_eta114","h_eta214","h_eta314","h_eta414","h_eta115","h_eta215","h_eta315","h_eta415","h_eta116","h_eta216","h_eta316","h_eta416","h_eta117","h_eta217","h_eta317","h_eta417",
 
 
-"h_eta1v1", "h_eta2v1","h_eta3v1","h_eta4v1","h_eta1v2", "h_eta2v2","h_eta3v2","h_eta4v2","h_eta1v3", "h_eta2v3","h_eta3v3","h_eta4v3","h_eta1v4", "h_eta2v4","h_eta3v4","h_eta4v4","h_eta1v5", "h_eta2v5","h_eta3v5","h_eta4v5","h_eta1v6", "h_eta2v6","h_eta3v6","h_eta4v6","h_eta1v7", "h_eta2v7","h_eta3v7","h_eta4v7","h_eta1v8", "h_eta2v8","h_eta3v8","h_eta4v8","h_eta1v9", "h_eta2v9","h_eta3v9","h_eta4v9","h_eta1v10", "h_eta2v10","h_eta3v10","h_eta4v10","h_eta1v11","h_eta2v11","h_eta3v11","h_eta4v11","h_eta1v12", "h_eta2v12","h_eta3v12","h_eta4v12","h_eta1v13", "h_eta2v13","h_eta3v13","h_eta4v13","h_eta1v14","h_eta2v14","h_eta3v14","h_eta4v14","h_eta1v15","h_eta2v15","h_eta3v15","h_eta4v15","h_eta1v16","h_eta2v16","h_eta3v16","h_eta4v16","h_eta1v17","h_eta2v17","h_eta3v17","h_eta4v17","h_eta1v16","h_eta2v16","h_eta3v16","h_eta4v16","h_eta1v17","h_eta2v17","h_eta3v17","h_eta4v17",
+"h_eta1v1", "h_eta2v1","h_eta3v1","h_eta4v1","h_eta1v2", "h_eta2v2","h_eta3v2","h_eta4v2","h_eta1v3", "h_eta2v3","h_eta3v3","h_eta4v3","h_eta1v4", "h_eta2v4","h_eta3v4","h_eta4v4","h_eta1v5", "h_eta2v5","h_eta3v5","h_eta4v5","h_eta1v6", "h_eta2v6","h_eta3v6","h_eta4v6","h_eta1v7", "h_eta2v7","h_eta3v7","h_eta4v7","h_eta1v8", "h_eta2v8","h_eta3v8","h_eta4v8","h_eta1v9", "h_eta2v9","h_eta3v9","h_eta4v9","h_eta1v10", "h_eta2v10","h_eta3v10","h_eta4v10","h_eta1v11","h_eta2v11","h_eta3v11","h_eta4v11","h_eta1v12", "h_eta2v12","h_eta3v12","h_eta4v12","h_eta1v13", "h_eta2v13","h_eta3v13","h_eta4v13","h_eta1v14","h_eta2v14","h_eta3v14","h_eta4v14","h_eta1v15","h_eta2v15","h_eta3v15","h_eta4v15","h_eta1v16","h_eta2v16","h_eta3v16","h_eta4v16","h_eta1v17","h_eta2v17","h_eta3v17","h_eta4v17",
 
 "h_phi11", "h_phi21","h_phi31","h_phi41","h_phi12", "h_phi22","h_phi32","h_phi42","h_phi13", "h_phi23","h_phi33","h_phi43","h_phi14", "h_phi24","h_phi34","h_phi44","h_phi15", "h_phi25","h_phi35","h_phi45","h_phi16", "h_phi26","h_phi36","h_phi46","h_phi17", "h_phi27","h_phi37","h_phi47","h_phi18", "h_phi28","h_phi38","h_phi48","h_phi19", "h_phi29","h_phi39","h_phi49","h_phi110", "h_phi210","h_phi310","h_phi410","h_phi111", "h_phi211","h_phi311","h_phi411","h_phi112", "h_phi212","h_phi312","h_phi412","h_phi113", "h_phi213","h_phi313","h_phi413","h_phi114","h_phi214","h_phi314","h_phi414","h_phi115","h_phi215","h_phi315","h_phi415","h_phi116","h_phi216","h_phi316","h_phi416","h_phi117","h_phi217","h_phi317","h_phi417",
 
@@ -347,7 +361,17 @@ void StackHist() {
 		
 		TH1D *h_ttV1 = (TH1D*)ifile_ttV1->Get(hist_list[i]);h_ttV1->SetFillColor(4);//h_ttV1->SetLineColor(4);
 		TH1D *h_ttV2 = (TH1D*)ifile_ttV2->Get(hist_list[i]);h_ttV2->SetFillColor(4);//h_ttV2->SetLineColor(4);
-				
+		
+		TH1D *h_WJ1 = (TH1D*)ifile_WJ1->Get(hist_list[i]);h_WJ1->SetFillColor(9);
+		TH1D *h_WJ2 = (TH1D*)ifile_WJ2->Get(hist_list[i]);h_WJ2->SetFillColor(9);
+		TH1D *h_WJ3 = (TH1D*)ifile_WJ3->Get(hist_list[i]);h_WJ3->SetFillColor(9);
+		TH1D *h_WJ4 = (TH1D*)ifile_WJ4->Get(hist_list[i]);h_WJ4->SetFillColor(9);
+		TH1D *h_WJ5 = (TH1D*)ifile_WJ5->Get(hist_list[i]);h_WJ5->SetFillColor(9);
+		TH1D *h_WJ6 = (TH1D*)ifile_WJ6->Get(hist_list[i]);h_WJ6->SetFillColor(9);
+		TH1D *h_WJ7 = (TH1D*)ifile_WJ7->Get(hist_list[i]);h_WJ7->SetFillColor(9);
+		TH1D *h_WJ8 = (TH1D*)ifile_WJ8->Get(hist_list[i]);h_WJ8->SetFillColor(9);
+		TH1D *h_WJ9 = (TH1D*)ifile_WJ9->Get(hist_list[i]);h_WJ9->SetFillColor(9);
+			
 		TH1D *h_ZZ1 = (TH1D*)ifile_ZZ1->Get(hist_list[i]);h_ZZ1->SetFillColor(5);//h_ZZ1->SetLineColor(5);
 		TH1D *h_ZZ2 = (TH1D*)ifile_ZZ2->Get(hist_list[i]);h_ZZ2->SetFillColor(5);//h_ZZ2->SetLineColor(5);
 		TH1D *h_ZZ3 = (TH1D*)ifile_ZZ3->Get(hist_list[i]);h_ZZ3->SetFillColor(5);//h_ZZ3->SetLineColor(5);
@@ -358,6 +382,9 @@ void StackHist() {
 		TH1D *h_ST4 = (TH1D*)ifile_ST4->Get(hist_list[i]);h_ST4->SetFillColor(30);
 		TH1D *h_ST5 = (TH1D*)ifile_ST4->Get(hist_list[i]);h_ST5->SetFillColor(30);
 
+		TH1D *h_TTbar1 = (TH1D*)ifile_TTbar1->Get(hist_list[i]);h_TTbar1->SetFillColor(46);
+		TH1D *h_TTbar2 = (TH1D*)ifile_TTbar2->Get(hist_list[i]);h_TTbar2->SetFillColor(46);
+		TH1D *h_TTbar3 = (TH1D*)ifile_TTbar3->Get(hist_list[i]);h_TTbar3->SetFillColor(46);
 		//TH1D *h_ttH1 = (TH1D*)ifile_ttH1->Get(hist_list[i]);h_ttH1->SetFillColor(28);
 		//TH1D *h_ttH2 = (TH1D*)ifile_ttH2->Get(hist_list[i]);h_ttH2->SetFillColor(28);
 		//TH1D *h_ttH3 = (TH1D*)ifile_ttH3->Get(hist_list[i]);h_ttH3->SetFillColor(28);
@@ -372,7 +399,7 @@ void StackHist() {
 		//TH1D *h_D4 = (TH1D*)ifile_D4->Get(hist_list[i]);
 		TH1D *h_D5 = (TH1D*)ifile_D5->Get(hist_list[i]);
 		
-		for (auto hist : {h_DY1, h_DY2, /*h_VV1,*/ h_VV2, h_VV3, /*h_VV4,*/ h_VV5, h_VV6, h_VVV1, h_VVV2, h_VVV3, h_ttV1, h_ttV2, h_ZZ1, h_ZZ2, h_ZZ3, h_ST1, h_ST2, h_ST3, h_ST4, h_ST5, /*h_ttH1, h_ttH2, h_ttH3,*/ h_ttH4, h_ZH1, h_ZH2, h_ZH3, h_D1, /*h_D2,hD3,h_D4,*/ h_D5}) {
+		for (auto hist : {h_DY1, h_DY2, /*h_VV1,*/ h_VV2, h_VV3, /*h_VV4,*/ h_VV5, h_VV6, h_VVV1, h_VVV2, h_VVV3, h_ttV1, h_ttV2, h_ZZ1, h_ZZ2, h_ZZ3, h_WJ1, h_WJ2, h_WJ3, h_WJ4, h_WJ5, h_WJ6, h_WJ7, h_WJ8, h_WJ9, h_ST1, h_ST2, h_ST3, h_ST4, h_ST5, h_TTbar1, h_TTbar2, h_TTbar3,/*h_ttH1, h_ttH2, h_ttH3,*/ h_ttH4, h_ZH1, h_ZH2, h_ZH3, h_D1, /*h_D2,hD3,h_D4,*/ h_D5}) {
 		    int nbins = hist->GetNbinsX();  // number of bins in X-axis
 		    double overflowContent = hist->GetBinContent(nbins + 1);  // overflow bin content
 		    double overflowError = hist->GetBinError(nbins + 1);      // overflow bin error
@@ -386,8 +413,10 @@ void StackHist() {
 		float VV_count = /*h_VV1->Integral()+*/h_VV2->Integral()+h_VV3->Integral()+/*h_VV4->Integral()+*/h_VV5->Integral()+h_VV6->Integral();
 		float VVV_count = h_VVV1->Integral()+h_VVV2->Integral()+h_VVV3->Integral();
 		float ttV_count = h_ttV1->Integral()+h_ttV2->Integral();
+		float WJ_count = h_WJ1->Integral()+h_WJ2->Integral()+h_WJ3->Integral()+h_WJ4->Integral()+h_WJ5->Integral()+h_WJ6->Integral()+h_WJ7->Integral()+h_WJ8->Integral()+h_WJ9->Integral();
 		float ZZ_count = h_ZZ1->Integral()+h_ZZ2->Integral()+h_ZZ3->Integral();
 		float ST_count = h_ST1->Integral()+h_ST2->Integral()+h_ST3->Integral()+h_ST4->Integral()+h_ST5->Integral();
+		float TT_count = h_TTbar1->Integral()+h_TTbar2->Integral()+h_TTbar3->Integral();
 		float other_count = /*h_ttH1->Integral()+h_ttH2->Integral()+h_ttH3->Integral()+*/h_ttH4->Integral()+h_ZH1->Integral()+h_ZH2->Integral()+h_ZH3->Integral();
 		float data_count = h_D1->Integral()/*+h_D2->Integral()+h_D3->Integral()+h_D4->Integral()+h_D5->Integral()*/;
 		//float data_count1 = h_D2->Integral();
@@ -398,8 +427,10 @@ void StackHist() {
 		TString VV_legend = "VV"+ TString::Format("\t %.2f", VV_count);
 		TString VVV_legend = "VVV"+ TString::Format("\t %.2f", VVV_count);
 		TString ttV_legend = "ttV"+ TString::Format("\t %.2f", ttV_count);
+		TString WJ_legend = "WJ"+ TString::Format("\t %.2f", WJ_count);
 		TString ZZ_legend = "ZZ"+ TString::Format("\t %.2f", ZZ_count);
 		TString ST_legend = "ST"+ TString::Format("\t %.2f", ST_count);
+		TString TT_legend = "TTbar"+ TString::Format("\t %.2f", TT_count);
 		TString other_legend = "other Bkg"+ TString::Format("\t %.2f", other_count);
 		TString data_legend = "EGamma Data"+ TString::Format("\t %.0f", data_count);
 		//TString data_legend1 = "DoubleMu Data"+ TString::Format("\t %.0f", data_count1);
@@ -421,6 +452,15 @@ void StackHist() {
 		bkg_stack->Add(h_VVV3);
 		bkg_stack->Add(h_ttV1);
 		bkg_stack->Add(h_ttV2);
+		bkg_stack->Add(h_WJ1);
+		bkg_stack->Add(h_WJ2);
+		bkg_stack->Add(h_WJ3);
+		bkg_stack->Add(h_WJ4);
+		bkg_stack->Add(h_WJ5);
+		bkg_stack->Add(h_WJ6);
+		bkg_stack->Add(h_WJ7);
+		bkg_stack->Add(h_WJ8);
+		bkg_stack->Add(h_WJ9);
 		bkg_stack->Add(h_ZZ1);
 		bkg_stack->Add(h_ZZ2);
 		bkg_stack->Add(h_ZZ3);
@@ -429,10 +469,14 @@ void StackHist() {
 		bkg_stack->Add(h_ST3);
 		bkg_stack->Add(h_ST4);
 		bkg_stack->Add(h_ST5);
+		bkg_stack->Add(h_TTbar1);
+		bkg_stack->Add(h_TTbar2);
+		bkg_stack->Add(h_TTbar3);
 		//bkg_stack->Add(h_ttH1);
 		//bkg_stack->Add(h_ttH2);
 		//bkg_stack->Add(h_ttH3);
 		bkg_stack->Add(h_ttH4);
+		
 		bkg_stack->Add(h_ZH1);
 		bkg_stack->Add(h_ZH2);
 		bkg_stack->Add(h_ZH3);
@@ -451,6 +495,15 @@ void StackHist() {
 		h_bkg_total->Add(h_VVV3);
 		h_bkg_total->Add(h_ttV1);
 		h_bkg_total->Add(h_ttV2);
+		h_bkg_total->Add(h_WJ1);
+		h_bkg_total->Add(h_WJ2);
+		h_bkg_total->Add(h_WJ3);
+		h_bkg_total->Add(h_WJ4);
+		h_bkg_total->Add(h_WJ5);
+		h_bkg_total->Add(h_WJ6);
+		h_bkg_total->Add(h_WJ7);
+		h_bkg_total->Add(h_WJ8);
+		h_bkg_total->Add(h_WJ9);
 		h_bkg_total->Add(h_ZZ1);
 		h_bkg_total->Add(h_ZZ2);
 		h_bkg_total->Add(h_ZZ3);
@@ -459,6 +512,9 @@ void StackHist() {
 		h_bkg_total->Add(h_ST3);
 		h_bkg_total->Add(h_ST4);
 		h_bkg_total->Add(h_ST5);
+		h_bkg_total->Add(h_TTbar1);
+		h_bkg_total->Add(h_TTbar2);
+		h_bkg_total->Add(h_TTbar3);
 		//h_bkg_total->Add(h_ttH1);
 		//h_bkg_total->Add(h_ttH2);
 		//h_bkg_total->Add(h_ttH3);
@@ -499,7 +555,9 @@ void StackHist() {
 		legend->AddEntry(h_DY1, DY_legend, "f");
 		legend->AddEntry(h_ZZ1, ZZ_legend, "f");
 		legend->AddEntry(h_ttV1, ttV_legend, "f");
+		legend->AddEntry(h_WJ1, WJ_legend, "f");
 		legend->AddEntry(h_ST1, ST_legend, "f");
+		legend->AddEntry(h_TTbar1, TT_legend, "f");
 		legend->AddEntry(h_ttH4, other_legend, "f");
 		legend->AddEntry(h_data_total, data_legend);
 		legend->AddEntry(h_data_total, data_legend3);
@@ -542,7 +600,7 @@ h_ratio->SetMaximum(2); // Set the maximum y-value for the ratio plot
 		canvas->Update();
 		canvas->Modified();
 		
-		std::string s =  "hist_test_nopair/", s1, s2;
+		std::string s =  "hist_oldXS/", s1, s2;
 		s1 = s + hist_list[i]+".png";
 		//s2 = s + hist_list[i]+".svg";
 		char* title1 = const_cast<char*>(s1.c_str());//converting string to char
