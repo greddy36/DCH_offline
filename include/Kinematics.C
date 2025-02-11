@@ -23,6 +23,35 @@ double* SortPt(string cat, string tau){
 	return pt_arr;
 }
 
+string applyHEMveto(string cat){
+	if (cat[0]=='e' and eta_1 > -3.0 and eta_1 < -1.3 and phi_1 > -1.57 and phi_1 < -0.87 and pt_1 >15) return "yes";
+	if (cat[2]=='e' and eta_2 > -3.0 and eta_2 < -1.3 and phi_2 > -1.57 and phi_2 < -0.87 and pt_2 >15) return "yes";
+	if (cat[3]=='e' and eta_3 > -3.0 and eta_3 < -1.3 and phi_3 > -1.57 and phi_3 < -0.87 and pt_3 >15) return "yes";
+	if (cat[4]=='e' and eta_4 > -3.0 and eta_4 < -1.3 and phi_4 > -1.57 and phi_4 < -0.87 and pt_4 >15) return "yes";
+	else return "no";
+}
+	
+
+void applyTauES(string cat){//need to add extra lines to apply on MET
+	if (cat[0] == 't'){
+		pt_1 *= TauES_1;
+		m_1 *= TauES_1;
+	}
+	if (cat[1] == 't'){
+		pt_2 *= TauES_2;
+		m_2 *= TauES_2;
+	}
+	if (cat[2] == 't'){
+		pt_3 *= TauES_3;
+		m_3 *= TauES_3;
+	}
+	if (cat[3] == 't'){
+		pt_4 *= TauES_4;
+		m_4 *= TauES_4;
+	}
+}
+
+
 double ST(string cat){//for only leptons
 	double st = 0;
 	if (cat.find("e")+1==1 or cat.find("m")+1==1)

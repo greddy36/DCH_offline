@@ -3,62 +3,62 @@
 #include <TLegend.h>
 
 void StackHist() {
-	TFile *ifile_sig = new TFile("hist_oldXS/WW_2018.root","READ");               
-	TFile *ifile_DY1 = new TFile("hist_oldXS/DYJetsToLLM10to50_2018.root","READ");     
-	TFile *ifile_DY2 = new TFile("hist_oldXS/DYJetsToLLM50_2018.root","READ"); 
+	TFile *ifile_sig = new TFile("hist_newXS/WW_2018.root","READ");               
+	TFile *ifile_DY1 = new TFile("hist_newXS/DYJetsToLLM10to50_2018.root","READ");     
+	TFile *ifile_DY2 = new TFile("hist_newXS/DYJetsToLLM50_2018.root","READ"); 
 		    
-	//TFile *ifile_VV1 = new TFile("hist_oldXS/WGToLNuG_2018.root","READ");
-	TFile *ifile_VV2 = new TFile("hist_oldXS/WW_2018.root","READ");
-	TFile *ifile_VV3 = new TFile("hist_oldXS/WWTo2L2Nu_2018.root","READ");
-	//TFile *ifile_VV4 = new TFile("hist_oldXS/WZ_2018.root","READ");
-	TFile *ifile_VV5 = new TFile("hist_oldXS/WZTo2Q2L_2018.root","READ");
-	TFile *ifile_VV6 = new TFile("hist_oldXS/WZTo3LNu_2018.root","READ");
+	//TFile *ifile_VV1 = new TFile("hist_newXS/WGToLNuG_2018.root","READ");
+	TFile *ifile_VV2 = new TFile("hist_newXS/WW_2018.root","READ");
+	TFile *ifile_VV3 = new TFile("hist_newXS/WWTo2L2Nu_2018.root","READ");
+	//TFile *ifile_VV4 = new TFile("hist_newXS/WZ_2018.root","READ");
+	TFile *ifile_VV5 = new TFile("hist_newXS/WZTo2Q2L_2018.root","READ");
+	TFile *ifile_VV6 = new TFile("hist_newXS/WZTo3LNu_2018.root","READ");
 
-	TFile *ifile_VVV1 = new TFile("hist_oldXS/WWW_2018.root","READ");
-	TFile *ifile_VVV2 = new TFile("hist_oldXS/WZZ_2018.root","READ");
-	TFile *ifile_VVV3 = new TFile("hist_oldXS/ZZZ_2018.root","READ");
+	TFile *ifile_VVV1 = new TFile("hist_newXS/WWW_2018.root","READ");
+	TFile *ifile_VVV2 = new TFile("hist_newXS/WZZ_2018.root","READ");
+	TFile *ifile_VVV3 = new TFile("hist_newXS/ZZZ_2018.root","READ");
 
-	TFile *ifile_ttV1 = new TFile("hist_oldXS/ttWJets_2018.root","READ");
-	TFile *ifile_ttV2 = new TFile("hist_oldXS/ttZJets_2018.root","READ");
+	TFile *ifile_ttV1 = new TFile("hist_newXS/ttWJets_2018.root","READ");
+	TFile *ifile_ttV2 = new TFile("hist_newXS/ttZJets_2018.root","READ");
 	
-	TFile *ifile_WJ1 = new TFile("hist_oldXS/WJetsToLNu_2018.root","READ");
-	TFile *ifile_WJ2 = new TFile("hist_oldXS/WJetsToLNu_HT-70To100_2018.root","READ");
-	TFile *ifile_WJ3 = new TFile("hist_oldXS/WJetsToLNu_HT-100To200_2018.root","READ");
-	TFile *ifile_WJ4 = new TFile("hist_oldXS/WJetsToLNu_HT-200To400_2018.root","READ");
-	TFile *ifile_WJ5 = new TFile("hist_oldXS/WJetsToLNu_HT-400To600_2018.root","READ");
-	TFile *ifile_WJ6 = new TFile("hist_oldXS/WJetsToLNu_HT-600To800_2018.root","READ");
-	TFile *ifile_WJ7 = new TFile("hist_oldXS/WJetsToLNu_HT-800To1200_2018.root","READ");
-	TFile *ifile_WJ8 = new TFile("hist_oldXS/WJetsToLNu_HT-1200To2500_2018.root","READ");
-	TFile *ifile_WJ9 = new TFile("hist_oldXS/WJetsToLNu_HT-2500ToInf_2018.root","READ");
+	TFile *ifile_WJ1 = new TFile("hist_newXS/WJetsToLNu_2018.root","READ");
+	TFile *ifile_WJ2 = new TFile("hist_newXS/WJetsToLNu_HT-70To100_2018.root","READ");
+	TFile *ifile_WJ3 = new TFile("hist_newXS/WJetsToLNu_HT-100To200_2018.root","READ");
+	TFile *ifile_WJ4 = new TFile("hist_newXS/WJetsToLNu_HT-200To400_2018.root","READ");
+	TFile *ifile_WJ5 = new TFile("hist_newXS/WJetsToLNu_HT-400To600_2018.root","READ");
+	TFile *ifile_WJ6 = new TFile("hist_newXS/WJetsToLNu_HT-600To800_2018.root","READ");
+	TFile *ifile_WJ7 = new TFile("hist_newXS/WJetsToLNu_HT-800To1200_2018.root","READ");
+	TFile *ifile_WJ8 = new TFile("hist_newXS/WJetsToLNu_HT-1200To2500_2018.root","READ");
+	TFile *ifile_WJ9 = new TFile("hist_newXS/WJetsToLNu_HT-2500ToInf_2018.root","READ");
 	
-	TFile *ifile_ZZ1 = new TFile("hist_oldXS/ZZTo2L2Nu_2018.root","READ");
-	TFile *ifile_ZZ2 = new TFile("hist_oldXS/ZZTo2Q2L_2018.root","READ");
-	TFile *ifile_ZZ3 = new TFile("hist_oldXS/ZZTo4L_2018.root","READ");
+	TFile *ifile_ZZ1 = new TFile("hist_newXS/ZZTo2L2Nu_2018.root","READ");
+	TFile *ifile_ZZ2 = new TFile("hist_newXS/ZZTo2Q2L_2018.root","READ");
+	TFile *ifile_ZZ3 = new TFile("hist_newXS/ZZTo4L_2018.root","READ");
 
-	TFile *ifile_ST1 = new TFile("hist_oldXS/ST_s-channel_2018.root","READ");          
-	TFile *ifile_ST2 = new TFile("hist_oldXS/ST_t-channel_antitop_2018.root","READ");  
-	TFile *ifile_ST3 = new TFile("hist_oldXS/ST_t-channel_top_2018.root","READ");  
-	TFile *ifile_ST4 = new TFile("hist_oldXS/ST_tW_antitop_2018.root","READ");  
-	TFile *ifile_ST5 = new TFile("hist_oldXS/ST_tW_top_2018.root","READ");            
+	TFile *ifile_ST1 = new TFile("hist_newXS/ST_s-channel_2018.root","READ");          
+	TFile *ifile_ST2 = new TFile("hist_newXS/ST_t-channel_antitop_2018.root","READ");  
+	TFile *ifile_ST3 = new TFile("hist_newXS/ST_t-channel_top_2018.root","READ");  
+	TFile *ifile_ST4 = new TFile("hist_newXS/ST_tW_antitop_2018.root","READ");  
+	TFile *ifile_ST5 = new TFile("hist_newXS/ST_tW_top_2018.root","READ");            
 
-	//TFile *ifile_ttH1 = new TFile("hist_oldXS/ttHTo2L2Nu_2018.root","READ");
-	//TFile *ifile_ttH2 = new TFile("hist_oldXS/ttHToEE_2018.root","READ");
-	//TFile *ifile_ttH3 = new TFile("hist_oldXS/ttHToMuMu_2018.root","READ");
-	TFile *ifile_ttH4 = new TFile("hist_oldXS/ttHToTauTau_2018.root","READ");
+	//TFile *ifile_ttH1 = new TFile("hist_newXS/ttHTo2L2Nu_2018.root","READ");
+	//TFile *ifile_ttH2 = new TFile("hist_newXS/ttHToEE_2018.root","READ");
+	//TFile *ifile_ttH3 = new TFile("hist_newXS/ttHToMuMu_2018.root","READ");
+	TFile *ifile_ttH4 = new TFile("hist_newXS/ttHToTauTau_2018.root","READ");
 	
-	TFile *ifile_TTbar1 = new TFile("hist_oldXS/TTTo2L2Nu_2018.root","READ");
-	TFile *ifile_TTbar2 = new TFile("hist_oldXS/TTToSemiLeptonic_2018.root","READ");
-	TFile *ifile_TTbar3 = new TFile("hist_oldXS/TTToHadronic_2018.root","READ");
+	TFile *ifile_TTbar1 = new TFile("hist_newXS/TTTo2L2Nu_2018.root","READ");
+	TFile *ifile_TTbar2 = new TFile("hist_newXS/TTToSemiLeptonic_2018.root","READ");
+	TFile *ifile_TTbar3 = new TFile("hist_newXS/TTToHadronic_2018.root","READ");
 	
-	TFile *ifile_ZH1 = new TFile("hist_oldXS/ZHToMuMu_2018.root","READ");
-	TFile *ifile_ZH2 = new TFile("hist_oldXS/ZHToTauTau_2018.root","READ");
-	TFile *ifile_ZH3 = new TFile("hist_oldXS/GluGluZH_2018.root","READ");
+	TFile *ifile_ZH1 = new TFile("hist_newXS/ZHToMuMu_2018.root","READ");
+	TFile *ifile_ZH2 = new TFile("hist_newXS/ZHToTauTau_2018.root","READ");
+	TFile *ifile_ZH3 = new TFile("hist_newXS/GluGluZH_2018.root","READ");
 	
-	TFile *ifile_D1 = new TFile("hist_oldXS/EGamma_2018.root","READ");
-	//TFile *ifile_D2 = new TFile("hist_oldXS/DoubleMuon_2018.root","READ");
-	//TFile *ifile_D3 = new TFile("hist_oldXS/Tau_2018.root","READ");
-	//TFile *ifile_D4 = new TFile("hist_oldXS/MuonEG_2018.root","READ");
-	TFile *ifile_D5 = new TFile("hist_oldXS/SingleMuon_2018.root","READ");
+	TFile *ifile_D1 = new TFile("hist_newXS/EGamma_2018.root","READ");
+	//TFile *ifile_D2 = new TFile("hist_newXS/DoubleMuon_2018.root","READ");
+	//TFile *ifile_D3 = new TFile("hist_newXS/Tau_2018.root","READ");
+	//TFile *ifile_D4 = new TFile("hist_newXS/MuonEG_2018.root","READ");
+	TFile *ifile_D5 = new TFile("hist_newXS/SingleMuon_2018.root","READ");
 
 	//float nEvents = 
 
@@ -380,7 +380,7 @@ void StackHist() {
 		TH1D *h_ST2 = (TH1D*)ifile_ST2->Get(hist_list[i]);h_ST2->SetFillColor(30);
 		TH1D *h_ST3 = (TH1D*)ifile_ST3->Get(hist_list[i]);h_ST3->SetFillColor(30);
 		TH1D *h_ST4 = (TH1D*)ifile_ST4->Get(hist_list[i]);h_ST4->SetFillColor(30);
-		TH1D *h_ST5 = (TH1D*)ifile_ST4->Get(hist_list[i]);h_ST5->SetFillColor(30);
+		TH1D *h_ST5 = (TH1D*)ifile_ST5->Get(hist_list[i]);h_ST5->SetFillColor(30);
 
 		TH1D *h_TTbar1 = (TH1D*)ifile_TTbar1->Get(hist_list[i]);h_TTbar1->SetFillColor(46);
 		TH1D *h_TTbar2 = (TH1D*)ifile_TTbar2->Get(hist_list[i]);h_TTbar2->SetFillColor(46);
@@ -407,6 +407,7 @@ void StackHist() {
 		    // Update the last visible bin with overflow content
 		    hist->SetBinContent(nbins, hist->GetBinContent(nbins) + overflowContent);
 		    hist->SetBinError(nbins, sqrt(pow(hist->GetBinError(nbins), 2) + pow(overflowError, 2)));
+		    hist->Rebin(5);		    
 		}
 		
 		float DY_count = h_DY1->Integral()+h_DY2->Integral();
@@ -475,8 +476,7 @@ void StackHist() {
 		//bkg_stack->Add(h_ttH1);
 		//bkg_stack->Add(h_ttH2);
 		//bkg_stack->Add(h_ttH3);
-		bkg_stack->Add(h_ttH4);
-		
+		bkg_stack->Add(h_ttH4);	
 		bkg_stack->Add(h_ZH1);
 		bkg_stack->Add(h_ZH2);
 		bkg_stack->Add(h_ZH3);
@@ -522,7 +522,6 @@ void StackHist() {
 		h_bkg_total->Add(h_ZH1);
 		h_bkg_total->Add(h_ZH2);
 		h_bkg_total->Add(h_ZH3);
-		
 		TH1D *h_data_total = (TH1D*)h_D1->Clone("h_data_total");
 		h_data_total->SetTitle(hist_names[i]);
 		h_data_total->SetMarkerColor(1);
@@ -600,7 +599,7 @@ h_ratio->SetMaximum(2); // Set the maximum y-value for the ratio plot
 		canvas->Update();
 		canvas->Modified();
 		
-		std::string s =  "hist_oldXS/", s1, s2;
+		std::string s =  "hist_newXS/", s1, s2;
 		s1 = s + hist_list[i]+".png";
 		//s2 = s + hist_list[i]+".svg";
 		char* title1 = const_cast<char*>(s1.c_str());//converting string to char
