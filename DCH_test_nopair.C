@@ -50,7 +50,7 @@ void DCH_test_nopair(const char* ext = "root"){
 		TFile *ifile = new TFile(filename[j],"READ");
 		std::string fname = filename[j];
 		if (fname.find("_2018.") > fname.length()) continue;
-		if (fname.find("TTTo") > fname.length()) continue;
+		if (fname.find("DY") > fname.length()) continue;
 		//if (fname.find("EGam") < fname.length()) continue;
 		if (XSec(filename[j])==1) continue; 
 
