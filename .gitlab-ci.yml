@@ -1,0 +1,12 @@
+# The Docker image that will be used to build your app
+image: debian:latest
+
+pages:
+  script:
+    - mkdir public
+    - cp -r index.html public/  # Copy everything from repo root to 'public/'
+  artifacts:
+    paths:
+      - public
+  only:
+    - work  # Or 'master' if that's your branch
