@@ -5,6 +5,7 @@ pages:
   script:
     - mkdir public
     - cp -r index.html public/  # Copy everything from repo root to 'public/'
+    - cp -r MC_validation_plots public/
   artifacts:
     paths:
       - public
