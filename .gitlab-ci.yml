@@ -1,7 +1,7 @@
 # The Docker image that will be used to build your app
 image: alpine:latest
 
-docs:
+pages:
   script:
     - mkdir public
     - cp -r index.html public/  # Copy everything from repo root to 'public/'
