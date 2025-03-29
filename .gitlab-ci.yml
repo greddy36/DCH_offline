@@ -1,5 +1,5 @@
 # The Docker image that will be used to build your app
-image: debian:latest
+image: alpine:latest
 
 pages:
   script:
