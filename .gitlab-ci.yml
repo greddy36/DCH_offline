@@ -10,5 +10,5 @@ pages:
   artifacts:
     paths:
       - public
-  only:
-    - work  # Or 'master' if that's your branch
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
