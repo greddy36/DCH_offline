@@ -1,242 +1,276 @@
-//To apply various kinematics selections right after online analysis.
-#include "TMath.h"
-#include <cmath>
-#include <vector>
-#include "TH1F.h"
-#include "TF1.h"
-#include "TFile.h"
-#include "include/MyBranch.C"//branch definitons
-#include "include/Kinematics.C"//Kine fns
-#include "include/MET_split.C"
 
+#include <TH1D.h>
+#include <TCanvas.h>
+#include <TLegend.h>
 
-double XSec(std::string fname){
-	if(fname.find("ttHTo2L2Nu") < fname.length()) return 0.5418;
-	else if(fname.find("ttHToEE") < fname.length()) return 0;
-	else if(fname.find("ttHToMuMu") < fname.length()) return 0.5269*0.000218;
-	else if(fname.find("ttHToTauTau") < fname.length()) return 0.5269*0.0627;
-	else if(fname.find("ttWJets") < fname.length()) return 0.4611;
-	else if(fname.find("ttZJets") < fname.length()) return 0.5407;
-	else if(fname.find("WWTo2L2Nu") < fname.length()) return 12.178;
-	else if(fname.find("WWW_") < fname.length()) return 0.2086;
-	else if(fname.find("WW_") < fname.length()) return 75.8;
-	else if(fname.find("WZTo2Q2L") < fname.length()) return 6.204;
-	else if(fname.find("WZTo3LNu") < fname.length()) return 5.052;
-	else if(fname.find("WZZ_") < fname.length()) return 0.05565;
-	else if(fname.find("WZ_") < fname.length()) return 0;//27.6;
-	else if(fname.find("ZHToMuMu") < fname.length()) return 0.7891*0.000218;
-	else if(fname.find("ZHToTauTau") < fname.length()) return 0.7891*0.0627;
-	else if(fname.find("ZZTo2L2Nu") < fname.length()) return 1.325;
-	else if(fname.find("ZZTo2Q2L") < fname.length()) return 3.22;
-	else if(fname.find("ZZTo4L") < fname.length()) return 1.325;
-	else if(fname.find("ZZZ_") < fname.length()) return 0.01398;
-	else if(fname.find("GluGluZH_") < fname.length()) return 0.0616;
-	else if(fname.find("DYJetsToLLM10to50") < fname.length()) return 18610;
-	else if(fname.find("DYJetsToLLM50") < fname.length()) return 6077.22;
-	else if(fname.find("ST_s-channel_") < fname.length()) return 3.74;
-	else if(fname.find("ST_t-channel_antitop_") < fname.length()) return 69.09;
-	else if(fname.find("ST_t-channel_top_") < fname.length()) return 115.3;
-	else if(fname.find("ST_tW_antitop_") < fname.length()) return 35.85;
-	else if(fname.find("ST_tW_top_") < fname.length()) return 35.85;
-	else if(fname.find("HppM") < fname.length()) return 0.001;//Signal
-	else if(fname.find("EGamma") < fname.length()) return 1;//Data
-	else if(fname.find("Muon") < fname.length()) return 1;//Data
-	else if(fname.find("Tau") < fname.length()) return 1;//Data
-	else if(fname.find("Single") < fname.length()) return 1;//Data
-	else{
-		//std::cout<<"DON'T KNOW X-SEC FOR FILE "<<fname<<endl;
-		return 0;
-	}
-}
+void test() {
+	TFile *ifile_sig = new TFile("hist_test_nopair/WW_2018.root","READ");               
+	TFile *ifile_DY1 = new TFile("hist_test_nopair/DYJetsToLLM10to50_2018.root","READ");     
+	TFile *ifile_DY2 = new TFile("hist_test_nopair/DYJetsToLLM50_2018.root","READ"); 
+		    
+	//TFile *ifile_VV1 = new TFile("hist_test_nopair/WGToLNuG_2018.root","READ");
+	TFile *ifile_VV2 = new TFile("hist_test_nopair/WW_2018.root","READ");
+	TFile *ifile_VV3 = new TFile("hist_test_nopair/WWTo2L2Nu_2018.root","READ");
+	//TFile *ifile_VV4 = new TFile("hist_test_nopair/WZ_2018.root","READ");
+	TFile *ifile_VV5 = new TFile("hist_test_nopair/WZTo2Q2L_2018.root","READ");
+	TFile *ifile_VV6 = new TFile("hist_test_nopair/WZTo3LNu_2018.root","READ");
 
-std::string getCatName(int index) {
-    std::vector<std::string> catNames = {
-        "eeee", "eeem", "eeet", "eemm", "eemt", "eett",
-        "emem", "emet", "emmm", "emmt", "emtt",
-        "etet", "etmm", "etmt", "ettt",
-        "mmmm", "mmmt", "mmtt",
-        "mtmt", "mttt",
-        "tttt",
-        "eee", "eem", "eet",
-        "eme", "emm", "emt",
-        "ete", "etm", "ett",
-        "mme", "mmm", "mmt",
-        "mte", "mtm", "mtt",
-        "tte", "ttm", "ttt",
-        "ee","em","et","mm","mt","tt"
-    };
+	TFile *ifile_VVV1 = new TFile("hist_test_nopair/WWW_2018.root","READ");
+	TFile *ifile_VVV2 = new TFile("hist_test_nopair/WZZ_2018.root","READ");
+	TFile *ifile_VVV3 = new TFile("hist_test_nopair/ZZZ_2018.root","READ");
 
-    // Check if the index is within the valid range
-    if (index < 1 || index > catNames.size()) {
-        return "Invalid index";
-    }
-
-    // Return the corresponding cat name
-    return catNames[index - 1];
-}
-
-void test(const char* ext = "root"){
-	const char* inDir = "inputs_nopair";
-	char* dir = gSystem->ExpandPathName(inDir);
-	void* dirp = gSystem->OpenDirectory(dir);
-	const char* entry;
-	const char* filename[100];
-	TString str; Int_t nfiles = 0;
-	while((entry = (char*)gSystem->GetDirEntry(dirp))){
-	  	str = entry;
-	  	if(str.EndsWith(ext)){
-			filename[nfiles++] = gSystem->ConcatFileName(dir, entry);
-	  	}
-	}
-	gROOT->Reset();
+	TFile *ifile_ttV1 = new TFile("hist_test_nopair/ttWJets_2018.root","READ");
+	TFile *ifile_ttV2 = new TFile("hist_test_nopair/ttZJets_2018.root","READ");
 	
-	const char* selection = "test";
-
-	double mDCH = 500.0, mZ = 91.2, lumi_2018 = 58900.0;//139000;
-	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
-	for(int j = 0; j < nfiles; j++){
-		TFile *ifile = new TFile(filename[j],"READ");
-		cout<<filename[j]<<endl;
-		
-		std::string fname = filename[j];
-		if (fname.find("EGamma_2018_old") > fname.length()) continue;
-		//if (fname.find("DY") > fname.length()) continue;
-		//if (XSec(filename[j])!=1) continue; 
+	TFile *ifile_WJ1 = new TFile("hist_test_nopair/WJetsToLNu_NLO_2018.root","READ");
+	TFile *ifile_WJ2 = new TFile("hist_test_nopair/WJetsToLNu_HT-70To100_2018.root","READ");
+	TFile *ifile_WJ3 = new TFile("hist_test_nopair/WJetsToLNu_HT-100To200_2018.root","READ");
+	TFile *ifile_WJ4 = new TFile("hist_test_nopair/WJetsToLNu_HT-200To400_2018.root","READ");
+	TFile *ifile_WJ5 = new TFile("hist_test_nopair/WJetsToLNu_HT-400To600_2018.root","READ");
+	TFile *ifile_WJ6 = new TFile("hist_test_nopair/WJetsToLNu_HT-600To800_2018.root","READ");
+	TFile *ifile_WJ7 = new TFile("hist_test_nopair/WJetsToLNu_HT-800To1200_2018.root","READ");
+	//TFile *ifile_WJ8 = new TFile("hist_test_nopair/WJetsToLNu_HT-1200To2500_2018.root","READ");
+	//TFile *ifile_WJ9 = new TFile("hist_test_nopair/WJetsToLNu_HT-2500ToInf_2018.root","READ");
 	
-		TH1D* hnevts;
-		double xs_weight = 1.0;
-		if(XSec(filename[j])!=1){
-			hnevts = (TH1D*)ifile->Get("hNWEvts");
-			if (!hnevts) hnevts = (TH1D*)ifile->Get("hNEvts");
-			xs_weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
-		}
-		else hnevts = (TH1D*)ifile->Get("hNEvts");
-		
-		const char* o_name;
-		if (selection =="none") o_name = "hist";
-		else if (selection =="Pre") o_name = "hist_MY";
-		else if (selection =="APre") o_name = "hist_APre";
-		else if (selection =="CR") o_name = "hist_CR";
-		else if (selection =="VR") o_name = "hist_VR";
-		else if (selection =="test") o_name = "../hist_test_nopair";
-		else cout<< "SELECTION NOT DEFINED!!!"<<endl;
-		char *oname = gSystem->ConcatFileName(o_name, filename[j]);
-		TFile* ofile = new TFile(oname, "RECREATE"); 
-		TTree *tree = (TTree*)ifile->Get("Events");
-		MyBranch(tree);
-        
-		for (int i =0; i < tree->GetEntries(); i++){
-			tree->GetEntry(i);
-			string cat_string = getCatName(cat);
-			char* cat_name = const_cast<char*>(cat_string.c_str());
-			int Nlep = cat_lepCount(cat_name,'e','m'); 
-			int Ntau = strlen(cat_name)-Nlep; 	
-			if (cat <= 21  and q_1+q_2+q_3+q_4 != 0) continue; 
-			//if (Ntau != 0) continue;
-			//if (Nlep == 0) continue;
-			//if (cat_name != "mmt") continue;
+	TFile *ifile_ZZ1 = new TFile("hist_test_nopair/ZZTo2L2Nu_2018.root","READ");
+	TFile *ifile_ZZ2 = new TFile("hist_test_nopair/ZZTo2Q2L_2018.root","READ");
+	TFile *ifile_ZZ3 = new TFile("hist_test_nopair/ZZTo4L_2018.root","READ");
 
-			//cout<<"BEFORE"<<"\t"<<q_1<<"\t"<<q_2<<"\t"<<q_3<<"\t"<<q_4<<"\t"<<cat_name<<endl;			
-			// (strlen(cat_name) == 3 and (abs(q_1+q_2+q_3)!=1 or abs(q_1) !=1 or abs(q_2) != 1 or abs(q_3)!=1))continue;
-			// (strlen(cat_name) == 4 and (abs(q_1+q_2+q_3+q_4)!=0 or abs(q_1) !=1 or abs(q_2) != 1 or abs(q_3)!=1 or abs(q_4)!=1))continue;
+	TFile *ifile_ST1 = new TFile("hist_test_nopair/ST_s-channel_2018.root","READ");          
+	TFile *ifile_ST2 = new TFile("hist_test_nopair/ST_t-channel_antitop_2018.root","READ");  
+	TFile *ifile_ST3 = new TFile("hist_test_nopair/ST_t-channel_top_2018.root","READ");  
+	TFile *ifile_ST4 = new TFile("hist_test_nopair/ST_tW_antitop_2018.root","READ");  
+	TFile *ifile_ST5 = new TFile("hist_test_nopair/ST_tW_top_2018.root","READ");            
+
+	//TFile *ifile_ttH1 = new TFile("hist_test_nopair/ttHTo2L2Nu_2018.root","READ");
+	//TFile *ifile_ttH2 = new TFile("hist_test_nopair/ttHToEE_2018.root","READ");
+	//TFile *ifile_ttH3 = new TFile("hist_test_nopair/ttHToMuMu_2018.root","READ");
+	TFile *ifile_ttH4 = new TFile("hist_test_nopair/ttHToTauTau_2018.root","READ");
+	
+	TFile *ifile_TTbar1 = new TFile("hist_test_nopair/TTTo2L2Nu_2018.root","READ");
+	TFile *ifile_TTbar2 = new TFile("hist_test_nopair/TTToSemiLeptonic_2018.root","READ");
+	TFile *ifile_TTbar3 = new TFile("hist_test_nopair/TTToHadronic_2018.root","READ");
+	
+	TFile *ifile_ZH1 = new TFile("hist_test_nopair/ZHToMuMu_2018.root","READ");
+	//TFile *ifile_ZH2 = new TFile("hist_test_nopair/ZHToTauTau_2018.root","READ");
+	TFile *ifile_ZH3 = new TFile("hist_test_nopair/GluGluZH_2018.root","READ");
+	
+	TFile *ifile_D1 = new TFile("hist_test_nopair/EGamma_2018.root","READ");
+	//TFile *ifile_D2 = new TFile("hist_test_nopair/DoubleMuon_2018.root","READ");
+	//TFile *ifile_D3 = new TFile("hist_test_nopair/Tau_2018.root","READ");
+	//TFile *ifile_D4 = new TFile("hist_test_nopair/MuonEG_2018.root","READ");
+	TFile *ifile_D5 = new TFile("hist_test_nopair/SingleMuon_2018.root","READ");
+
+	const char *hist_list[] = { 
+"h_metv11","h_metv1","h_metv2","h_metv14","h_metv13","h_metv3","h_metv4","h_metv15",
+
+/*"h_metv5","h_metv6","h_metv7","h_metv9","h_metv10",*/
+	};
+	
+	TCanvas* canvas = new TCanvas("canvas", "Stacked histograms", 800, 700);//600);
+	gStyle->SetOptStat(0);	
+	int num = sizeof(hist_list)/sizeof(hist_list[0]);
+	
+	TH1F* h_summary_DY = new TH1F("h_summary_DY", "Channel Yields;;Yield", num, 0.5, num + 0.5);
+	TH1F* h_summary_VV = new TH1F("h_summary_VV", " Yields;;Yield", num, 0.5, num + 0.5);
+	TH1F* h_summary_VVV = new TH1F("h_summary_VVV", " Yields;;Yield", num, 0.5, num + 0.5);
+	TH1F* h_summary_ttV = new TH1F("h_summary_ttV", " Yields;;Yield", num, 0.5, num + 0.5);
+	TH1F* h_summary_WJ = new TH1F("h_summary_WJ", " Yields;;Yield", num, 0.5, num + 0.5);
+	TH1F* h_summary_ZZ = new TH1F("h_summary_ZZ", " Yields;;Yield", num, 0.5, num + 0.5);
+	TH1F* h_summary_ST = new TH1F("h_summary_ST", " Yields;;Yield", num, 0.5, num + 0.5);
+	TH1F* h_summary_TTbar = new TH1F("h_summary_TTbar", " Yields;;Yield", num, 0.5, num + 0.5);
+	TH1F* h_summary_other = new TH1F("h_summary_other", " Yields;;Yield", num, 0.5, num + 0.5);
+	TH1F* h_summary_data = new TH1F("h_summary_DY", " Yields;;Yield", num, 0.5, num + 0.5);
+	// make changes to take in xs from a csv file
+	for(int i = 0; i < num; i++){
+		TH1D *h_DY1 = (TH1D*)ifile_DY1->Get(hist_list[i]);
+		TH1D *h_DY2 = (TH1D*)ifile_DY2->Get(hist_list[i]);
+		
+		TH1D *h_VV2 = (TH1D*)ifile_VV2->Get(hist_list[i]);
+		TH1D *h_VV3 = (TH1D*)ifile_VV3->Get(hist_list[i]);
+		TH1D *h_VV5 = (TH1D*)ifile_VV5->Get(hist_list[i]);
+		TH1D *h_VV6 = (TH1D*)ifile_VV6->Get(hist_list[i]);
+		
+		TH1D *h_VVV1 = (TH1D*)ifile_VVV1->Get(hist_list[i]);
+		TH1D *h_VVV2 = (TH1D*)ifile_VVV2->Get(hist_list[i]);
+		TH1D *h_VVV3 = (TH1D*)ifile_VVV3->Get(hist_list[i]);
+		
+		TH1D *h_ttV1 = (TH1D*)ifile_ttV1->Get(hist_list[i]);
+		TH1D *h_ttV2 = (TH1D*)ifile_ttV2->Get(hist_list[i]);
+		
+		TH1D *h_WJ1 = (TH1D*)ifile_WJ1->Get(hist_list[i]);
+		TH1D *h_WJ2 = (TH1D*)ifile_WJ2->Get(hist_list[i]);
+		TH1D *h_WJ3 = (TH1D*)ifile_WJ3->Get(hist_list[i]);
+		TH1D *h_WJ4 = (TH1D*)ifile_WJ4->Get(hist_list[i]);
+		TH1D *h_WJ5 = (TH1D*)ifile_WJ5->Get(hist_list[i]);
+		TH1D *h_WJ6 = (TH1D*)ifile_WJ6->Get(hist_list[i]);
+		TH1D *h_WJ7 = (TH1D*)ifile_WJ7->Get(hist_list[i]);
+		//TH1D *h_WJ8 = (TH1D*)ifile_WJ8->Get(hist_list[i]);
+		//TH1D *h_WJ9 = (TH1D*)ifile_WJ9->Get(hist_list[i]);
 			
-			double evtwt_nom = brWeight*Generator_weight;
-			if (XSec(filename[j])!=1){
-				//evtwt_nom *= weight*L1PreFiringWeight_Nom*weightPUtruejson;
-				if(strlen(cat_name)<3){
-					evtwt_nom *= IDSF_1*IDSF_2*ISOSF_1*ISOSF_2*weightPUtruejson*L1PreFiringWeight_Nom;
-					if (isTrig_1 >=1)
-						evtwt_nom *= TrigSF_1;
-					else if (isTrig_1 == -1)
-						evtwt_nom *= TrigSF_2;
-					//cout<<evtwt_nom<<endl;
-				}
-				else if (strlen(cat_name)==3)
-					evtwt_nom *= IDSF_1*IDSF_2*IDSF_3*ISOSF_1*ISOSF_2*ISOSF_3*weightPUtruejson*L1PreFiringWeight_Nom;
-				else evtwt_nom *= IDSF_1*IDSF_2*IDSF_3*IDSF_4*ISOSF_1*ISOSF_2*ISOSF_3*ISOSF_4*weightPUtruejson*L1PreFiringWeight_Nom;
-				if(strlen(cat_name)>=3){
-					if (isTrig_1 >=1 and isTrig_2 == 0)
-						evtwt_nom *= TrigSF_1;
-					else if (isTrig_1 == -1 and isTrig_2 == 0)
-						evtwt_nom *= TrigSF_2;
-					//else if (isTrig_1 == 2 and)
-					//	evtwt_nom *= TrigSF_1*TrigSF_2;
-					else if (isTrig_2 >= 1 and isTrig_1 == 0)
-						evtwt_nom *= TrigSF_3;
-					else if (isTrig_2 == -1 and isTrig_1 == 0)
-						evtwt_nom *= TrigSF_4;
-					else if (isTrig_1 == 2 and isTrig_2 == 2)
-						evtwt_nom *= TrigSF_1;
-					//cout<<evtwt_nom<<endl;
-				}
-			}		 			
-			//cout<<evtwt_nom<<endl;
-
-			bool foundDup = false;
-			std::vector<Lepton> leptons = {
-				Lepton(pt_1, eta_1, phi_1, m_1, q_1, d0_1, dZ_1, iso_1),
-				Lepton(pt_2, eta_2, phi_2, m_2, q_2, d0_2, dZ_2, iso_2),
-				Lepton(pt_3, eta_3, phi_3, m_3, q_3, d0_3, dZ_3, iso_3),
-				Lepton(pt_4, eta_4, phi_4, m_4, q_4, d0_4, dZ_4, iso_4),
-			};
-			//cout<<cat_name<<"\t"<<leptons[0].d0<<"\t"<<"\t"<<leptons[1].d0<<"\t"<<leptons[2].d0<<"\t"<<leptons[3].d0<<endl;
-			for (int w = 0; w < strlen(cat_name) && !foundDup; ++w) {
-				for (int x = w + 1; x < strlen(cat_name); ++x) {
-					if (isDuplicate(leptons[w], leptons[x])){
-						foundDup = true;
-						break;
-					}
-				}
-			}
-			if (foundDup == true ) continue;
-			// Sort the lepton variables in descending order based on pt
-			std::sort(leptons.begin(), leptons.end(), [](const Lepton& a, const Lepton& b) {
-				return a.pt > b.pt;
-			});
-				/*std::vector<int> Zcands = ZCandMaker(cat_name, 20);					TLorentzVector L1 = LepV(Zcands[0]), L2 = LepV(Zcands[1]), L3 = epV(Zcands[2]), L4 = LepV(Zcands[3]);
-			int Q[] = {-99, -99, -99, -99};
-			for(int iq = 0; iq <= 3; iq++){
-				if (Zcands[iq] == 1) Q[iq] = q_1;
-				else if (Zcands[iq] == 2) Q[iq] = q_2;
-				else if (Zcands[iq] == 3) Q[iq] = q_3;
-				else if (Zcands[iq] == 4) Q[iq] = q_4;
-			}
-			int q1=Q[0],q2=Q[1],q3=Q[2],q4=Q[3];
-			double mll_1=-99, mll_2=-99, mllt_2=-99;
-			if (q1==q3 and (L1+L3).Pt() >= (L2+L4).Pt()){
-				mll_1 = (L1+L3).M();
-				mllt_2 = (L2+L4).Mt();
-			}
-			else if (q1==q3 and (L2+L4).Pt() >= (L1+L3).Pt()){
-				mll_1 = (L2+L4).M();
-			}
-			else if (q1==q4 and (L1+L4).Pt() >= (L2+L3).Pt()){
-				mll_1 = (L1+L4).M();
-				mllt_2 = (L2+L3).Mt();
-			}
-			else if (q1==q4 and (L2+L3).Pt() >= (L1+L4).Pt()){
-				mll_1 = (L2+L3).M();
-				mllt_2 = (L1+L4).Mt();
-				mllt_2 = (L1+L3).Mt();
-			}*/
-			std::vector<double> mZ, mZv, mH;
-			for(int m = 1; m <= strlen(cat_name); ++m){
-				for(int n = m+1; n <= strlen(cat_name); ++n){
-					string pair_name = pairFunc(m,n,cat_name,20);
-					if(pair_name=="Zwindow") mZ.push_back((LepV(m)+LepV(n)).M());
-					else if(pair_name=="Zv") mZv.push_back((LepV(m)+LepV(n)).M());
-					else if(pair_name=="DCH") mH.push_back((LepV(m)+LepV(n)).M());
-					//else if(pair_name=="found nothing") cout<<"found nothing"<<endl;
-					else continue;
-				}
-			}
-			//std::sort(mH.begin(), mH.end(), [](double a, double b){return a > b;});
-			if (mZ.size() >0 ) {
-				if (cat_string== "eee") cout<<run<<endl;
-			}
-		}//evt loop 
-		delete tree;
+		TH1D *h_ZZ1 = (TH1D*)ifile_ZZ1->Get(hist_list[i]);
+		TH1D *h_ZZ2 = (TH1D*)ifile_ZZ2->Get(hist_list[i]);
+		TH1D *h_ZZ3 = (TH1D*)ifile_ZZ3->Get(hist_list[i]);
+		
+		TH1D *h_ST1 = (TH1D*)ifile_ST1->Get(hist_list[i]);
+		TH1D *h_ST2 = (TH1D*)ifile_ST2->Get(hist_list[i]);
+		TH1D *h_ST3 = (TH1D*)ifile_ST3->Get(hist_list[i]);
+		TH1D *h_ST4 = (TH1D*)ifile_ST4->Get(hist_list[i]);
+		TH1D *h_ST5 = (TH1D*)ifile_ST5->Get(hist_list[i]);
+		
+		TH1D *h_TTbar1 = (TH1D*)ifile_TTbar1->Get(hist_list[i]);
+		TH1D *h_TTbar2 = (TH1D*)ifile_TTbar2->Get(hist_list[i]);
+		TH1D *h_TTbar3 = (TH1D*)ifile_TTbar3->Get(hist_list[i]);
+		//TH1D *h_ttH1 = (TH1D*)ifile_ttH1->Get(hist_list[i]);
+		//TH1D *h_ttH2 = (TH1D*)ifile_ttH2->Get(hist_list[i]);
+		//TH1D *h_ttH3 = (TH1D*)ifile_ttH3->Get(hist_list[i]);
+		TH1D *h_ttH4 = (TH1D*)ifile_ttH4->Get(hist_list[i]);
+		TH1D *h_ZH1 = (TH1D*)ifile_ZH1->Get(hist_list[i]);
+		//TH1D *h_ZH2 = (TH1D*)ifile_ZH2->Get(hist_list[i]);
+		TH1D *h_ZH3 = (TH1D*)ifile_ZH3->Get(hist_list[i]);
+		
+		TH1D *h_D1 = (TH1D*)ifile_D1->Get(hist_list[i]);
+		//TH1D *h_D2 = (TH1D*)ifile_D2->Get(hist_list[i]);
+		//TH1D *h_D3 = (TH1D*)ifile_D3->Get(hist_list[i]);
+		//TH1D *h_D4 = (TH1D*)ifile_D4->Get(hist_list[i]);
+		TH1D *h_D5 = (TH1D*)ifile_D5->Get(hist_list[i]);
+		
+	
+		
+		float DY_count = h_DY1->Integral()+h_DY2->Integral();
+		float VV_count = /*h_VV1->Integral()+*/h_VV2->Integral()+h_VV3->Integral()+/*h_VV4->Integral()+*/h_VV5->Integral()+h_VV6->Integral();
+		float VVV_count = h_VVV1->Integral()+h_VVV2->Integral()+h_VVV3->Integral();
+		float ttV_count = h_ttV1->Integral()+h_ttV2->Integral();
+		float WJ_count = h_WJ1->Integral()+h_WJ2->Integral()+h_WJ3->Integral()+h_WJ4->Integral()+h_WJ5->Integral()+h_WJ6->Integral()+h_WJ7->Integral()/*+h_WJ8->Integral()+h_WJ9->Integral()*/;
+		float ZZ_count = h_ZZ1->Integral()+h_ZZ2->Integral()+h_ZZ3->Integral();
+		float ST_count = h_ST1->Integral()+h_ST2->Integral()+h_ST3->Integral()+h_ST4->Integral()+h_ST5->Integral();
+		float TT_count = h_TTbar1->Integral()+h_TTbar2->Integral()+h_TTbar3->Integral();
+		float other_count = /*h_ttH1->Integral()+h_ttH2->Integral()+h_ttH3->Integral()+*/h_ttH4->Integral()+h_ZH1->Integral()+/*h_ZH2->Integral()+*/h_ZH3->Integral();
+		float data_count = h_D1->Integral()/*+h_D2->Integral()+h_D3->Integral()+h_D4->Integral()+h_D5->Integral()*/;
+		//float data_count1 = h_D2->Integral();
+		//float data_count2 = h_D4->Integral();
+		float data_count3 = h_D5->Integral();
+		
+		h_summary_DY->SetBinContent(i+1,DY_count);h_summary_DY->SetFillColor(7);
+		h_summary_VV->SetBinContent(i+1,VV_count);h_summary_VV->SetFillColor(8);
+		h_summary_VVV->SetBinContent(i+1,VVV_count);h_summary_VVV->SetFillColor(6);
+		h_summary_ttV->SetBinContent(i+1,ttV_count);h_summary_ttV->SetFillColor(4);
+		h_summary_WJ->SetBinContent(i+1,WJ_count);h_summary_WJ->SetFillColor(9);
+		h_summary_ZZ->SetBinContent(i+1,ZZ_count);h_summary_ZZ->SetFillColor(5);
+		h_summary_ST->SetBinContent(i+1,ST_count);h_summary_ST->SetFillColor(30);
+		h_summary_TTbar->SetBinContent(i+1,TT_count);h_summary_TTbar->SetFillColor(46);
+		h_summary_other->SetBinContent(i+1,other_count);h_summary_other->SetFillColor(28);
+		h_summary_data->SetBinContent(i+1,data_count+data_count3);
 	}
-	gSystem->FreeDirectory(dirp);
-}
 
+	THStack* bkg_stack = new THStack("bkg_stack", "2l and 3l channel summary in Z-veto");
+	bkg_stack->Add(h_summary_DY);
+	bkg_stack->Add(h_summary_VV);
+	bkg_stack->Add(h_summary_VVV);
+	bkg_stack->Add(h_summary_ttV);
+	bkg_stack->Add(h_summary_WJ);
+	bkg_stack->Add(h_summary_ST);
+	bkg_stack->Add(h_summary_ZZ);
+	bkg_stack->Add(h_summary_TTbar);
+	bkg_stack->Add(h_summary_other);
+		
+	TH1D *h_bkg_total = (TH1D*)h_summary_DY->Clone("h_bkg_total");
+    h_bkg_total->Add(h_summary_VV);
+	h_bkg_total->Add(h_summary_VVV);
+	h_bkg_total->Add(h_summary_ttV);
+	h_bkg_total->Add(h_summary_WJ);
+	h_bkg_total->Add(h_summary_ST);
+	h_bkg_total->Add(h_summary_ZZ);
+	h_bkg_total->Add(h_summary_TTbar);
+	h_bkg_total->Add(h_summary_other);
+	
+	TH1D *h_data_total = (TH1D*)h_summary_data->Clone("h_data_total");
+	h_data_total->SetMarkerColor(1);
+	h_data_total->SetMarkerStyle(kFullDotLarge);
+	for(int i = 0; i < num; i++){
+		h_bkg_total->SetBinError(i+1,sqrt(h_bkg_total->GetBinContent(i+1)));
+		h_data_total->SetBinError(i+1,sqrt(h_data_total->GetBinContent(i+1)));
+	}
+	canvas->Divide(1, 2);				
+	// Adjust the upper pad (stacked plot)
+	TPad *pad1 = (TPad*)canvas->cd(1);
+	pad1->SetPad(0, 0.3, 1, 1);
+	pad1->SetBottomMargin(0.01); // Remove bottom margin to reduce gap
+	double max_data = h_data_total->GetMaximum();
+	double max_bkg = bkg_stack->GetMaximum();
+	bkg_stack->SetMaximum(std::max(max_data, max_bkg)*1.1);//give 10% extra space
+	gPad->SetLogy(1);
+	bkg_stack->Draw("HIST");		
+	h_data_total->Draw("E SAME");
+	
+	/*TPaveText *textbox = new TPaveText(0.4, 0.85, 0.6, 0.9, "NDC");
+	textbox->AddText("Era D");
+	textbox->Draw();*/
+	
+	//TLegend* legend = new TLegend(0.1, 0.9, 0.3, 0.55);
+	TLegend* legend = new TLegend(0.65, 0.5, 0.9, 0.9);	
+	//legend->AddEntry(h_sig, "M900*1000");
+	legend->AddEntry(h_summary_VV, "VV", "f");
+	legend->AddEntry(h_summary_VVV, "VVV", "f");
+	legend->AddEntry(h_summary_DY, "DY", "f");
+	legend->AddEntry(h_summary_ZZ, "ZZ", "f");
+	legend->AddEntry(h_summary_ttV, "ttV", "f");
+	legend->AddEntry(h_summary_WJ, "WJ", "f");
+	legend->AddEntry(h_summary_ST, "ST", "f");
+	legend->AddEntry(h_summary_TTbar, "TTbar", "f");
+	legend->AddEntry(h_summary_other, "Others", "f");
+	legend->AddEntry(h_summary_data, "Data");
+	legend->Draw();		
+
+
+	// Adjust the lower pad (ratio plot)
+	TPad *pad2 = (TPad*)canvas->cd(2);
+	pad2->SetPad(0, 0, 1, 0.3);
+	pad2->SetTopMargin(0.01);
+	pad2->SetBottomMargin(0.3);
+	
+	// Create the Data/MC ratio plot
+	//auto h_ratio = new TRatioPlot(h_data_total, h_bkg_total);
+	TH1D *h_ratio = (TH1D*)h_data_total->Clone("h_ratio");
+	h_ratio->Divide(h_bkg_total);
+	h_ratio->SetLineColor(kBlack);
+	h_ratio->SetMarkerStyle(2);
+	h_ratio->SetTitle(""); // Remove the title for the ratio plot
+	h_ratio->GetYaxis()->SetTitle("Data/MC");
+	h_ratio->GetYaxis()->SetNdivisions(505);
+	h_ratio->GetYaxis()->SetTitleSize(0.1);
+	h_ratio->GetYaxis()->SetTitleOffset(0.5);
+	h_ratio->GetYaxis()->SetLabelSize(0.07);
+	h_ratio->GetXaxis()->SetTitleSize(0.1);
+	/*h_ratio->GetXaxis()->SetBinLabel(1,"eeee");
+	h_ratio->GetXaxis()->SetBinLabel(2,"eee#mu");
+	h_ratio->GetXaxis()->SetBinLabel(3,"ee#mu#mu");
+	h_ratio->GetXaxis()->SetBinLabel(4,"#mu#mue#mu");
+	h_ratio->GetXaxis()->SetBinLabel(5,"#mu#mu#mu#mu");*/
+	h_ratio->GetXaxis()->SetBinLabel(1,"ee");
+	h_ratio->GetXaxis()->SetBinLabel(2,"ee+e");
+	h_ratio->GetXaxis()->SetBinLabel(3,"ee+#mu");
+	h_ratio->GetXaxis()->SetBinLabel(4,"ee+#tau");
+	h_ratio->GetXaxis()->SetBinLabel(5,"#mu#mu");
+	h_ratio->GetXaxis()->SetBinLabel(6,"#mu#mu+e");
+	h_ratio->GetXaxis()->SetBinLabel(7,"#mu#mu+#mu");
+	h_ratio->GetXaxis()->SetBinLabel(8,"#mu#mu+#tau");
+	h_ratio->GetXaxis()->SetLabelSize(0.15);
+	h_ratio->SetMinimum(0); // Set the minimum y-value for the ratio plot
+	h_ratio->SetMaximum(2); // Set the maximum y-value for the ratio plot
+	h_ratio->Draw("E");
+		
+	// Draw lines for reference
+	TLine *line1 = new TLine(h_ratio->GetXaxis()->GetXmin(), 1, h_ratio->GetXaxis()->GetXmax(), 1);
+	TLine *line2 = new TLine(h_ratio->GetXaxis()->GetXmin(), 0.5, h_ratio->GetXaxis()->GetXmax(), 0.5);
+	TLine *line3 = new TLine(h_ratio->GetXaxis()->GetXmin(), 1.5, h_ratio->GetXaxis()->GetXmax(), 1.5);
+	line1->SetLineStyle(2);line2->SetLineStyle(2);line3->SetLineStyle(2);
+	line1->Draw();line2->Draw();line3->Draw();
+
+	// Show the canvas
+	canvas->Update();
+	canvas->Modified();
+		
+	canvas->SaveAs("hist_test_nopair/summary.png");
+	canvas->Clear();
+}

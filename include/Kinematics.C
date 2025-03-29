@@ -1,33 +1,21 @@
 #include "Kinematics.h"
 #include "cat.h" //cat sort funs
 
-double* SortPt(string cat, string tau){
+std::vector<double> SortPt(){
 	double pt[] = {pt_1,pt_2,pt_3,pt_4};
-	int n = cat_lepCount(cat, 'e','m');
-	std::vector<double> sort_pt;
-	if (tau=="t"){
-		for (int j = 0; j < cat.length(); j++){
-			if (cat[j] == 't')
-				sort_pt.push_back(pt[j]);
-		}
-	}	
-	else{
-		for (int j = 0; j < cat.length(); j++){
-			if (cat[j] != 't')
-				sort_pt.push_back(pt[j]);
-		}
-	}	
-	double *pt_arr = new double[0]; //any number to initialize it.
-	std::sort(sort_pt.begin(), sort_pt.end(), greater());//descending order
-	std::copy(sort_pt.begin(), sort_pt.begin()+n, pt_arr);//vector->array	
-	return pt_arr;
+	std::vector<double> sorted_pt;
+	for (int j = 0; j < 4; j++){
+		sorted_pt.push_back(pt[j]);
+	}
+	std::sort(sorted_pt.begin(), sorted_pt.end(), greater());//descending order
+	return sorted_pt;
 }
 
 string applyHEMveto(string cat){
 	if (cat[0]=='e' and eta_1 > -3.0 and eta_1 < -1.3 and phi_1 > -1.57 and phi_1 < -0.87 and pt_1 >15) return "yes";
-	if (cat[2]=='e' and eta_2 > -3.0 and eta_2 < -1.3 and phi_2 > -1.57 and phi_2 < -0.87 and pt_2 >15) return "yes";
-	if (cat[3]=='e' and eta_3 > -3.0 and eta_3 < -1.3 and phi_3 > -1.57 and phi_3 < -0.87 and pt_3 >15) return "yes";
-	if (cat[4]=='e' and eta_4 > -3.0 and eta_4 < -1.3 and phi_4 > -1.57 and phi_4 < -0.87 and pt_4 >15) return "yes";
+	if (cat[1]=='e' and eta_2 > -3.0 and eta_2 < -1.3 and phi_2 > -1.57 and phi_2 < -0.87 and pt_2 >15) return "yes";
+	if (cat[2]=='e' and eta_3 > -3.0 and eta_3 < -1.3 and phi_3 > -1.57 and phi_3 < -0.87 and pt_3 >15) return "yes";
+	if (cat[3]=='e' and eta_4 > -3.0 and eta_4 < -1.3 and phi_4 > -1.57 and phi_4 < -0.87 and pt_4 >15) return "yes";
 	else return "no";
 }
 	
@@ -88,7 +76,7 @@ struct Lepton{
 };
 
 bool isDuplicate(const Lepton &lepton1, const Lepton &lepton2){
-	 if ( lepton1.charge == lepton2.charge and getDR(lepton1.eta, lepton1.phi, lepton2.eta, lepton2.phi) <= 0.4)
+	 if ( getDR(lepton1.eta, lepton1.phi, lepton2.eta, lepton2.phi) <= 0.4)
 	 	return true;
 	 else return false;
 }

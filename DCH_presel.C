@@ -8,47 +8,9 @@
 #include "include/MyBranch.C"//branch definitons
 #include "include/Kinematics.C"//Kine fns
 #include "include/MET_split.C"
+#include "include/Xsections.c"
 
-float XSec(std::string fname){
-	if(fname.find("ttHTo2L2Nu") < fname.length()) return 0.5418;
-	else if(fname.find("ttHToEE") < fname.length()) return 0;
-	else if(fname.find("ttHToMuMu") < fname.length()) return 0.5269*0.000218;
-	else if(fname.find("ttHToTauTau") < fname.length()) return 0.5269*0.0627;
-	else if(fname.find("ttWJets") < fname.length()) return 0.4611;
-	else if(fname.find("ttZJets") < fname.length()) return 0.5407;
-	else if(fname.find("WWTo2L2Nu") < fname.length()) return 12.178;
-	else if(fname.find("WWW_") < fname.length()) return 0.2086;
-	else if(fname.find("WW_") < fname.length()) return 75.8;
-	else if(fname.find("WZTo2Q2L") < fname.length()) return 6.204;
-	else if(fname.find("WZTo3LNu") < fname.length()) return 5.052;
-	else if(fname.find("WZZ_") < fname.length()) return 0.05565;
-	else if(fname.find("WZ_") < fname.length()) return 0;//27.6;
-	else if(fname.find("ZHToMuMu") < fname.length()) return 0.7891*0.000218;
-	else if(fname.find("ZHToTauTau") < fname.length()) return 0.7891*0.0627;
-	else if(fname.find("ZZTo2L2Nu") < fname.length()) return 1.325;
-	else if(fname.find("ZZTo2Q2L") < fname.length()) return 3.22;
-	else if(fname.find("ZZTo4L") < fname.length()) return 1.325;
-	else if(fname.find("ZZZ_") < fname.length()) return 0.01398;
-	else if(fname.find("GluGluZH_") < fname.length()) return 0.0616;
-	else if(fname.find("DYJetsToLLM10to50") < fname.length()) return 18610;
-	else if(fname.find("DYJetsToLLM50") < fname.length()) return 6077.22;
-	else if(fname.find("ST_s-channel_") < fname.length()) return 3.74;
-	else if(fname.find("ST_t-channel_antitop_") < fname.length()) return 69.09;
-	else if(fname.find("ST_t-channel_top_") < fname.length()) return 115.3;
-	else if(fname.find("ST_tW_antitop_") < fname.length()) return 35.85;
-	else if(fname.find("ST_tW_top_") < fname.length()) return 35.85;
-	else if(fname.find("HppM") < fname.length()) return 0.001;//Signal
-	else if(fname.find("EGamma") < fname.length()) return 1;//Data
-	else if(fname.find("Muon") < fname.length()) return 1;//Data
-	else if(fname.find("Tau") < fname.length()) return 1;//Data
-	else if(fname.find("Single") < fname.length()) return 1;//Data
-	else{
-		std::cout<<"DON'T KNOW X-SEC FOR FILE "<<fname<<endl;
-		return 0;
-	}
-}
-
-void DCH_presel(const char* ext = "2018.root"){
+void DCH_presel(const char* ext = "2016.root"){
 	const char* inDir = ".";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
@@ -65,13 +27,13 @@ void DCH_presel(const char* ext = "2018.root"){
 	
 	const char* selection = "APre";
 
-	float mDCH = 500, mZ = 91.2, lumi_2018 = 139000;
+	double mDCH = 500, mZ = 91.2, lumi_2016 = 35900, lumi_2017 = 41500, lumi_2018 = 58900.0;
 	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
 		TH1D* hnevts = (TH1D*)ifile->Get("hNEvts");
-		float weight = 1;
-		if(XSec(filename[j])!=1) weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
+		double weight = 1;
+		if(XSec(filename[j])!=1) weight = lumi_2016*XSec(filename[j])/hnevts->Integral();
 
 		std::string fname = filename[j];
 		//if (fname.find("HppM100") > fname.length()) continue;
@@ -89,7 +51,7 @@ void DCH_presel(const char* ext = "2018.root"){
 		TFile* ofile = new TFile(oname, "RECREATE"); 
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
-		float xmin = 0, xmax = 3000; int binw = 100; int nbins = (xmax-xmin)/binw; 
+		double xmin = 0, xmax = 3000; int binw = 100; int nbins = (xmax-xmin)/binw; 
 		TH1F* cutflow = new TH1F("cutflow", "cutflow", 6, 0, 6);     
 		TH1F* h_mll_1 = new TH1F("h_mll_1", "mll_1", nbins, xmin, xmax);
 		TH1F* h_mll_2 = new TH1F("h_mll_2", "mll_2", nbins, xmin, xmax);
@@ -127,27 +89,11 @@ void DCH_presel(const char* ext = "2018.root"){
 		TH1F* h_Xmass_3lep = new TH1F("h_Xmass_3lep", "mDCH1", nbins, xmin, xmax);
 		for (int i =0; i < tree->GetEntries(); i++){
 			tree->GetEntry(i);			
-			float *lep_pt, *tau_pt;
+			double *lep_pt, *tau_pt;
 			const char *cat_name = numberToCat(cat);
 			int Nlep = cat_lepCount(cat_name,'e','m'); 
 			int Ntau = strlen(cat_name)-Nlep;  
 			//if (cat_name != "mmmm") continue;
-			float brWeight = 1;
-			if (fname.find("HppM") < fname.length()){
-				std::string Gencat_str = numberToCat(gen_cat);
-				if (Gencat_str.substr(0,2) == "ee" || Gencat_str.substr(0,2) == "mm" || Gencat_str.substr(0,2) == "tt")
-					brWeight = brWeight*3/2;
-				else if (Gencat_str.substr(0,2) == "em" || Gencat_str.substr(0,2) == "et" || Gencat_str.substr(0,2) == "mt")
-					brWeight = brWeight*3/4;
-				if (Gencat_str.substr(2,2) == "ee" || Gencat_str.substr(2,2) == "mm" || Gencat_str.substr(0,2) == "tt")
-					brWeight = brWeight*3/2;
-				else if (Gencat_str.substr(2,2) == "em" || Gencat_str.substr(2,2) == "et" || Gencat_str.substr(0,2) == "mt")
-					brWeight = brWeight*3/4;
-					
-				//if (Gencat_str.substr(0,2) == Gencat_str.substr(2,2))
-					//brWeight = brWeight*2;
-				//cout<<brWeight<<"\t"<<Gencat_str<<endl;
-			}
 			
 			//if (Ntau != 0) continue;
 			//if (Ntau != 1) continue;
