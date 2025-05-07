@@ -60,6 +60,15 @@ double getDR(double eta1, double phi1, double eta2, double phi2) {
     return DR;
 }
 
+
+double deltaR(const TLorentzVector& v1, const TLorentzVector& v2) {
+    double eta1 = v1.Eta();
+    double phi1 = v1.Phi();
+    double eta2 = v2.Eta();
+    double phi2 = v2.Phi();
+    return getDR(eta1, phi1, eta2, phi2);
+}
+
 // Structure to represent a lepton
 struct Lepton{
     double pt;      
@@ -117,12 +126,14 @@ string pairFunc(int m, int n, string cat, double Zwindow){//checks if a pair is 
 		c2 = q_4;
 	}
 	if (c1 == c2 ) return "DCH";
-	else if (c1 == -c2){
-		if (cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) < Zwindow) return "Zwindow";
-		else if (cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) >= Zwindow) return "Zv";
+	else if (c1 == -c2){//doing Z window only for light leptons for now
+		if ( (cat[m-1] == 'e' or cat[m-1] == 'm' ) and cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) < Zwindow) return "Zwindow";
+		else if ( (cat[m-1] == 'e' or cat[m-1] == 'm' ) and cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) >= Zwindow) return "Zv";
+		else if (cat[m-1] == 't' and cat[m-1] == cat[n-1]) return "ZttPair" ;
+		else if (cat[m-1] != cat[n-1]) return "oppPair";
 		else return "found nothing";
 	}
-	else "found nothing";
+	else "messed up";
 }
 
 

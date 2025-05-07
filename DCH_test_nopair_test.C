@@ -122,7 +122,7 @@ void scaleAndWriteHistograms(std::map<std::string, TH1D*>& histograms, double xs
     }
 }
 
-void DCH_test_nopair(const char* ext = "root"){
+void DCH_test_nopair_test(const char* ext = "root"){
 	const char* inDir = ".";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);

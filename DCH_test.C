@@ -179,9 +179,9 @@ void DCH_test(const char* ext = ".root"){
 					brWeight = brWeight*3/2;
 				else if (Gencat_str.substr(0,2) == "em" || Gencat_str.substr(0,2) == "et" || Gencat_str.substr(0,2) == "mt")
 					brWeight = brWeight*3/4;
-				if (Gencat_str.substr(2,2) == "ee" || Gencat_str.substr(2,2) == "mm" || Gencat_str.substr(0,2) == "tt")
+				if (Gencat_str.substr(2,2) == "ee" || Gencat_str.substr(2,2) == "mm" || Gencat_str.substr(2,2) == "tt")
 					brWeight = brWeight*3/2;
-				else if (Gencat_str.substr(2,2) == "em" || Gencat_str.substr(2,2) == "et" || Gencat_str.substr(0,2) == "mt")
+				else if (Gencat_str.substr(2,2) == "em" || Gencat_str.substr(2,2) == "et" || Gencat_str.substr(2,2) == "mt")
 					brWeight = brWeight*3/4;
 					
 				//if (Gencat_str.substr(0,2) == Gencat_str.substr(2,2))

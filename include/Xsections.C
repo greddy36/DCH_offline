@@ -23,12 +23,12 @@ double XSec(std::string fname){
 	else if(fname.find("WZ_") < fname.length()) return 27.55;//0;
 	else if(fname.find("ZHToMuMu") < fname.length()) return 0.7891*0.000218;
 	else if(fname.find("ZHToTauTau") < fname.length()) return 0.7891*0.06256;
-	else if(fname.find("ZZTo2L2Nu") < fname.length()) return 1.031;//1.325;
-	else if(fname.find("ZZTo2Q2L") < fname.length()) return 6.788;//3.22;
-	else if(fname.find("ZZTo4L") < fname.length()) return 1.390;//1.325;
+	else if(fname.find("ZZTo2L2Nu") < fname.length()) return 0.9738;
+	else if(fname.find("ZZTo2Q2L") < fname.length()) return 3.698;
+	else if(fname.find("ZZTo4L") < fname.length()) return 1.325;
 	else if(fname.find("ZZZ_") < fname.length()) return 0.01476;//0.01398;
 	else if(fname.find("GluGluZH_") < fname.length()) return 0.0616;
-	else if(fname.find("DYJetsToLLM10to50") < fname.length()) return 15810;//18610;
+	else if(fname.find("DYJetsToLLM10to50") < fname.length()) return 18610;
 	else if(fname.find("DYJetsToLLM50") < fname.length()) return 6077.22;
 	else if(fname.find("ST_s-channel_") < fname.length()) return 10.4;//3.74;
 	else if(fname.find("ST_t-channel_antitop_") < fname.length()) return 80.0;//69.09;
@@ -43,6 +43,35 @@ double XSec(std::string fname){
 	else if(fname.find("Muon") < fname.length()) return 1;//Data
 	else if(fname.find("Tau") < fname.length()) return 1;//Data
 	else if(fname.find("Single") < fname.length()) return 1;//Data
+	else{
+		//std::cout<<"DON'T KNOW X-SEC FOR FILE "<<fname<<endl;
+		return 0;
+	}
+}
+
+double XSec_Uncert(std::string fname){//in %
+	if(fname.find("ttHTo") < fname.length()) return 6.96;
+	else if(fname.find("ttWJets") < fname.length()) return 7.47;
+	else if(fname.find("ttZJets") < fname.length()) return 8.22;
+	else if(fname.find("WW_") < fname.length()) return 5.77;
+	else if(fname.find("WZTo2Q2L") < fname.length()) return 4.12;
+	else if(fname.find("WZTo3LNu") < fname.length()) return 4.12;
+	else if(fname.find("WZ_") < fname.length()) return 4.12;
+	else if(fname.find("ZHToMuMu") < fname.length()) return 4.1;
+	else if(fname.find("ZHToTauTau") < fname.length()) return 4.1;
+	else if(fname.find("ZZTo2L2Nu") < fname.length()) return 4.41;
+	else if(fname.find("ZZTo2Q2L") < fname.length()) return 4.41;
+	else if(fname.find("ZZTo4L") < fname.length()) return 4.41;
+	else if(fname.find("GluGluZH_") < fname.length()) return 4.1;
+	else if(fname.find("DYJetsToLLM10to50") < fname.length()) return 0;
+	else if(fname.find("DYJetsToLLM50") < fname.length()) return 2.49;
+	else if(fname.find("ST_t-channel_antitop_") < fname.length()) return 18.82;
+	else if(fname.find("ST_t-channel_top_") < fname.length()) return 14.29;
+	else if(fname.find("ST_tW_antitop_") < fname.length()) return 11.05;
+	else if(fname.find("ST_tW_top_") < fname.length()) return 11.05;
+	else if(fname.find("TTTo") < fname.length()) return 3.19;
+	else if(fname.find("WWW") < fname.length()) return 27.12;
+	else if(fname.find("WZZ") < fname.length()) return 40.00;
 	else{
 		//std::cout<<"DON'T KNOW X-SEC FOR FILE "<<fname<<endl;
 		return 0;
