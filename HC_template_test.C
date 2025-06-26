@@ -55,7 +55,7 @@ void HC_template_test(const char* ext = ".root"){
 	gROOT->Reset();
 
     // Create output file
-    TFile* ofile = new TFile("hist_APre/nuisance_hist_test.root", "RECREATE");
+    TFile* ofile = new TFile("hist_APre/nuisance_hist_Atlas_tau.root", "RECREATE");
 	const char* prompt__channel;
 	const char* fake__channel;
 	

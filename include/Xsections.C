@@ -14,7 +14,7 @@ double XSec(std::string fname){
 	else if(fname.find("WJetsToLNu_HT-800To1200") < fname.length()) return 4.933*1.1421;
 	else if(fname.find("WJetsToLNu_HT-1200To2500") < fname.length()) return 1.160*1.1421;
 	else if(fname.find("WJetsToLNu_HT-2500ToInf") < fname.length()) return 0.02624*1.1421;
-	else if(fname.find("WWTo2L2Nu") < fname.length()) return 12.178;
+	else if(fname.find("WWTo2L2Nu") < fname.length() and fname.find("HZJ") > fname.length()) return 12.178;
 	else if(fname.find("WWW_") < fname.length()) return 0.2086;
 	else if(fname.find("WW_") < fname.length()) return 118.7;//75.8;
 	else if(fname.find("WZTo2Q2L") < fname.length()) return 6.565;//6.204;
@@ -38,6 +38,9 @@ double XSec(std::string fname){
 	else if(fname.find("TTTo2L2Nu_") < fname.length()) return 88.51;
 	else if(fname.find("TTToSemiLeptonic_") < fname.length()) return 366.29;
 	else if(fname.find("TTToHadronic_") < fname.length()) return 378.93;
+	else if(fname.find("ttHJetToNonbb") < fname.length()) return 0.24111;
+	else if(fname.find("TWZToLL") < fname.length()) return 0.001669;
+	else if(fname.find("HZJ") < fname.length()) return 0.00177;
 	else if(fname.find("HppM") < fname.length()) return 0.001;//Signal
 	else if(fname.find("EGamma") < fname.length()) return 1;//Data
 	else if(fname.find("Muon") < fname.length()) return 1;//Data
@@ -76,4 +79,22 @@ double XSec_Uncert(std::string fname){//in %
 		//std::cout<<"DON'T KNOW X-SEC FOR FILE "<<fname<<endl;
 		return 0;
 	}
+}
+
+double fake_uncert_squared(std::string lep_ch, std::string fname){//in relative value
+	double quadr_uncert = 0;//needs more bkgs
+	if(lep_ch == "3lep"){
+		if(fname.find("DYJetsToLL") < fname.length()) return 0.03;
+		else if(fname.find("TTTo2L2Nu") < fname.length()) return 0.03;
+		else if(fname.find("TTToSemi") < fname.length()) return 0.03*0.03;
+		else if(fname.find("TTToHadro") < fname.length()) return 0.03*0.03*0.03;
+	}
+	else if(lep_ch == "4lep"){
+		if(fname.find("DYJetsToLL") < fname.length()) return 0.03*0.03;
+		else if(fname.find("WZ") < fname.length() and fname.find("TWZ") > fname.length() and fname.find("WZZ") > fname.length()) return 0.03;
+		else if(fname.find("TTTo2L2Nu") < fname.length()) return 0.03*.03;
+		else if(fname.find("TTToSemi") < fname.length()) return 0.03*0.03*0.3;
+		else if(fname.find("TTToHadro") < fname.length()) return 0.03*0.03*0.03*0.3;
+	}
+	return quadr_uncert;
 }

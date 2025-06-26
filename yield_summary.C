@@ -24,7 +24,7 @@ void yield_summary() {
     pad2->Draw();
 	
 	THStack* bkg_stack;
-	std::string summary_type = "3lep", year = "2016";
+	std::string summary_type = "tau_ch", year = "Run2";
     // Define histograms to retrieve
     std::vector<std::string> hist_list;
     if (summary_type == "tau_ch") {
@@ -32,11 +32,11 @@ void yield_summary() {
     	bkg_stack = new THStack("bkg_stack", "Yield summary in CR;;Events");
     }
     else if  (summary_type == "3lep") {
-    	hist_list = {"h_met_ee","h_met_eee","h_met_eem","h_met_eet","h_met_ett","h_met_mm","h_met_emm","h_met_mmm","h_met_mmt","h_met_mtt"};
+    	hist_list = {"h_met_ee","h_met_eee","h_met_eem","h_met_eet","h_metv_ett","h_met_mm","h_met_emm","h_met_mmm","h_met_mmt","h_metv_mtt"};
    		bkg_stack = new THStack("bkg_stack", "2l and 3l channel summary in Z-window;;Events");
     }
     else if  (summary_type == "3lep-veto") {
-    	hist_list = {"h_metv_ee","h_metv_eee","h_metv_eem","h_metv_eet","h_metv_ett","h_metv_mm","h_metv_emm","h_metv_mmm","h_metv_mmt","h_metv_mtt"};
+    	hist_list = {"h_metv_ee","h_metv_eee","h_metv_eem","h_metv_eet","h_met_ett","h_metv_mm","h_metv_emm","h_metv_mmm","h_metv_mmt","h_met_mtt"};
     	bkg_stack = new THStack("bkg_stack", "2l and 3l channel summary in Z-veto;;Events");
     }
     else if  (summary_type == "4lep") { 
@@ -63,7 +63,7 @@ void yield_summary() {
         {"ST",    {"ST_s-channel_2016.root", "ST_t-channel_antitop_2016.root", "ST_t-channel_top_2016.root", 
                    "ST_tW_antitop_2016.root", "ST_tW_top_2016.root"}},
         {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root"}},
-        {"other", {"ttHToTauTau_2016.root", "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root"}},
+        {"other", {"ttHToTauTau_2016.root", "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root","ttHToEE_2016.root","ttHTo2L2Nu_2016.root"}},
         {"data",  {"SingleElectron_2016.root","EGamma_2016.root", "SingleMuon_2016.root"}}
     };
     else if (year == "2017") files = {
@@ -78,7 +78,7 @@ void yield_summary() {
         {"ST",    {"ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", 
                    "ST_tW_antitop_2017.root", "ST_tW_top_2017.root"}},
         {"TTbar", {"TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root"}},
-        {"other", {"ttHToTauTau_2017.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root"}},
+        {"other", {"ttHToTauTau_2017.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root","ttHToEE_2017.root", "ttHTo2L2Nu_2017.root"}},
         {"data",  {"SingleElectron_2017.root","EGamma_2017.root", "SingleMuon_2017.root"}}
     };
     else if (year == "2018") files = {
@@ -93,10 +93,10 @@ void yield_summary() {
         {"ST",    {"ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", 
                    "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
         {"TTbar", {"TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
-        {"other", {"ttHToTauTau_2018.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root"}},
+        {"other", {"ttHToTauTau_2018.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root", "ttHToEE_2018.root", "ttHTo2L2Nu_2018.root"}},
         {"data",  {"SingleElectron_2018.root","EGamma_2018.root", "SingleMuon_2018.root"}}
     };
-    else if (year == "run2") files = {
+    else if (year == "Run2") files = {
         {"DY",    {"DYJetsToLLM10to50_2016.root", "DYJetsToLLM50_2016.root","DYJetsToLLM10to50_2017.root", "DYJetsToLLM50_2017.root","DYJetsToLLM10to50_2018.root", "DYJetsToLLM50_2018.root"}},
         {"VV",    {"WW_2016.root", "WWTo2L2Nu_2016.root", "WZTo2Q2L_2016.root", "WZTo3LNu_2016.root","WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root","WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
         {"VVV",   {"WWW_2016.root", "WZZ_2016.root", "ZZZ_2016.root","WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root","WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
@@ -109,16 +109,17 @@ void yield_summary() {
                    "WJetsToLNu_HT-200To400_2018.root", "WJetsToLNu_HT-400To600_2018.root", 
                    "WJetsToLNu_HT-600To800_2018.root", "WJetsToLNu_HT-800To1200_2018.root", "WJetsToLNu_HT-1200To2500_2018.root", "WJetsToLNu_HT-2500ToInf_2018.root"}},
         {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo4L_2016.root","ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root","ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
+      /*  {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root"}},
+        {"ZZto4L",    {"ZZTo4L_2016.root","ZZTo4L_2017.root","ZZTo4L_2018.root"}},*/
         {"ST",    {"ST_s-channel_2016.root", "ST_t-channel_antitop_2016.root", "ST_t-channel_top_2016.root", 
                    "ST_tW_antitop_2016.root", "ST_tW_top_2016.root","ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", 
                    "ST_tW_antitop_2017.root", "ST_tW_top_2017.root","ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", 
                    "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
         {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root","TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root","TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
-        {"other", {"ttHToTauTau_2016.root", "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root","ttHToTauTau_2017.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root","ttHToTauTau_2018.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root"}},
+        {"other", { "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root",/*"ttHToTauTau_2016.root","ttHToTauTau_2017.root","ttHToTauTau_2018.root","ttHToEE_2016.root","ttHToEE_2017.root", "ttHToEE_2018.root","ttHTo2L2Nu_2016.root","ttHTo2L2Nu_2017.root",*/ "ttHTo2L2Nu_2018.root","ttHJetToNonbb_2016.root","ttHJetToNonbb_2017.root","ttHJetToNonbb_2018.root","TWZToLL_2016.root","TWZToLL_2017.root","TWZToLL_2018.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016.root","HZJ_HToWWTo2L2Nu_ZTo2L_2017.root","HZJ_HToWWTo2L2Nu_ZTo2L_2018.root"}},
         {"data",  {"SingleElectron_2016.root","EGamma_2016.root", "SingleMuon_2016.root","SingleElectron_2017.root","EGamma_2017.root", "SingleMuon_2017.root","SingleElectron_2018.root","EGamma_2018.root", "SingleMuon_2018.root"}}
     };
-  
-
+	   
     std::map<std::string, TH1D*> h_summaries;
     std::map<std::string, int> fill_colors = {
         {"DY", 7}, {"VV", 8}, {"VVV", 6}, {"ttV", 4}, {"WJ", 9}, {"ZZ", 5},
@@ -129,15 +130,20 @@ void yield_summary() {
     std::map<std::string, std::vector<TFile*>> open_files;
     for (auto& kv : files) {
         for (const auto& fname : kv.second) {
-            open_files[kv.first].push_back(new TFile(("hist_test_nopair/" + fname).c_str(), "READ"));
+        	TFile* file;
+            if (summary_type == "tau_ch") file = new TFile(("hist_CR/" + fname).c_str(), "READ");
+            else file = new TFile(("hist_test_nopair/" + fname).c_str(), "READ");
+            if (!file || file->IsZombie()) continue;
+	        open_files[kv.first].push_back(file);
         }
         h_summaries[kv.first] = new TH1D(("h_summary_" + kv.first).c_str(), "Yields;;Yield", bins, 0.5, bins + 0.5);
+        h_summaries[kv.first]->Sumw2();
         h_summaries[kv.first]->SetFillColor(fill_colors[kv.first]);
     }
 
 	
     // Loop over histograms and fill yield summaries and ratio plot
-    double tot_uncert_quadr[bins];
+    //double tot_uncert_quadr[bins];
     for (int i = 0; i < bins; ++i) {
         std::string hist_name = hist_list[i];
         for (auto& kv : open_files) {
@@ -146,41 +152,60 @@ void yield_summary() {
             for (auto* f : kv.second) {
                 TH1D* h = (TH1D*)f->Get(hist_name.c_str());
                 if (h) {
+                	h_sum->Sumw2();
                 	h->Rebin(h->GetNbinsX());
-                	h_sum->Add(h);
-                	//total += h->Integral();
-                	double stat_err = h->GetBinError(1);//sqrt(abs(h->Integral()));//poisson error
+                	double stat_err = h->GetBinError(1);//poisson error
                 	double sys_err = h->GetBinContent(1)*XSec_Uncert(f->GetName())/100;
-                	if (kv.first != "data")tot_uncert_quadr[i] += (stat_err*stat_err + sys_err*sys_err);
-                	if (i+1==4) cout<<i+1<<"\t"<<f->GetName()<<"\t"<<h->GetBinContent(1)<<"\t"<<stat_err<<"\t"<<sys_err<<endl;
+                	double tot_uncert_quadr = (stat_err*stat_err + sys_err*sys_err);
+                	if (kv.first != "data") {
+                		if(summary_type == "tau_ch"){
+                			if (hist_name.find("3lep") < hist_name.length()) tot_uncert_quadr += fake_uncert_squared("3lep", f->GetName())*h->GetBinContent(1)*h->GetBinContent(1);
+                			else tot_uncert_quadr += fake_uncert_squared("4lep", f->GetName())*h->GetBinContent(1)*h->GetBinContent(1);
+                		}
+                		else if(hist_name != "h_met_ee" and hist_name != "h_met_mm" and hist_name != "h_metv_ee" and hist_name != "h_metv_mm") tot_uncert_quadr += fake_uncert_squared(summary_type, f->GetName())*h->GetBinContent(1)*h->GetBinContent(1);
+                	}
+                	h->SetBinError(1,sqrt(tot_uncert_quadr));
+                	h_sum->Add(h);
                 }
             }
-            
-            //h_summaries[kv.first]->SetBinContent(i+1, total);
             h_summaries[kv.first]->SetBinContent(i+1, h_sum->GetBinContent(1));
+            h_summaries[kv.first]->SetBinError(i+1, h_sum->GetBinError(1));
+            cout<<i+1<<"\t"<<kv.first<<"\t"<<h_summaries[kv.first]->GetBinContent(i+1)<<endl;
         }
     }
-
+    //========================scale facotrs===============
+	h_summaries["VV"]->Scale(1.12631);
+	h_summaries["ZZ"]->Scale(1.31366);
+	//h_summaries["DY"]->SetBinContent(4, h_summaries["DY"]->GetBinContent(4)*1.21);
+	//h_summaries["DY"]->SetBinContent(9, h_summaries["DY"]->GetBinContent(9)*1.21);
+	//h_summaries["TTbar"]->SetBinContent(6, h_summaries["TTbar"]->GetBinContent(6)*2.5);
+	//h_summaries["TTbar"]->SetBinContent(1, h_summaries["TTbar"]->GetBinContent(1)*1.5);
+	
+	//====================================================
     // Stack backgrounds
-    //THStack* bkg_stack = new THStack("bkg_stack", "2l and 3l channel summary in Z-window;;Events");
     TH1D* h_bkg_total = (TH1D*)h_summaries["DY"]->Clone("h_bkg_total");
     h_bkg_total->Reset(); h_bkg_total->Sumw2();
     for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttV", "WJ", "ZZ", "ST", "TTbar", "other"}) {
         bkg_stack->Add(h_summaries[bkg_group]);
+        bkg_stack->SetMinimum(1); // Show zero bins
         h_bkg_total->Add(h_summaries[bkg_group]);
     }
     
     TH1D* h_mc_uncert_band = (TH1D*) h_bkg_total->Clone("h_mc_uncert_band");
+    h_mc_uncert_band->Sumw2();
 	h_mc_uncert_band->Reset(); // we'll fill the error by hand
 	for (int i = 0; i < bins; ++i) {
 		h_mc_uncert_band->SetBinContent(i+1, 1.0);  // center at ratio = 1
-		h_mc_uncert_band->SetBinError(i+1, sqrt(tot_uncert_quadr[i])/h_bkg_total->GetBinContent(i+1));
+		if (h_bkg_total->GetBinContent(i+1) != 0) h_mc_uncert_band->SetBinError(i+1, h_bkg_total->GetBinError(i+1)/h_bkg_total->GetBinContent(i+1));//scaling error with bin content
+		else h_mc_uncert_band->SetBinError(i+1,0);
 	} 
 	
     // Draw main plot
     pad1->cd();
     gPad->SetLogy(1);
     bkg_stack->Draw("hist");
+    double pad_max = std::max(bkg_stack->GetMaximum(),h_summaries["data"]->GetMaximum());
+	bkg_stack->SetMaximum(1.1*pad_max);
     h_summaries["data"]->SetMarkerStyle(20);
     h_summaries["data"]->SetMarkerColor(kBlack);
     h_summaries["data"]->Draw("E SAME");
@@ -198,7 +223,7 @@ void yield_summary() {
         legend->AddEntry(h_summaries[bkg_group], bkg_group.c_str(), "f");
     }
     legend->AddEntry(h_summaries["data"], "Data", "lep");
-    legend->Draw();
+    //legend->Draw();
 
     // Ratio histogram: data / MC
     TH1D* h_ratio = (TH1D*)h_summaries["data"]->Clone("h_ratio");
@@ -274,8 +299,8 @@ void yield_summary() {
 	line1->Draw();line2->Draw();line3->Draw();
 
     // Output
-    std::string pdfname = "yield_summary_CR_"+year+".pdf";
-    std::string pngname = "yield_summary_CR_"+year+".png";
-    canvas->SaveAs(const_cast<char*>(pdfname.c_str()));
+    //std::string pdfname = "summary_"+summary_type+"_"+year+".pdf";
+    std::string pngname = "summary_"+summary_type+"_"+year+".png";
+    //canvas->SaveAs(const_cast<char*>(pdfname.c_str()));
     canvas->SaveAs(const_cast<char*>(pngname.c_str()));
 }

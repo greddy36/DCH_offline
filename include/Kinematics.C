@@ -11,6 +11,42 @@ std::vector<double> SortPt(){
 	return sorted_pt;
 }
 
+double calculateMT(TLorentzVector l1, TLorentzVector l2) {
+	TLorentzVector LLpair = l1+l2;
+	double pt_ll = LLpair.Pt();
+	double phi_ll = LLpair.Phi();
+    double delta_phi = phi_ll - metphi;
+    // Normalize delta_phi to [-π, π]
+    while (delta_phi > M_PI) delta_phi -= 2 * M_PI;
+    while (delta_phi < -M_PI) delta_phi += 2 * M_PI;
+    return std::sqrt(2 * pt_ll * met * (1 - std::cos(delta_phi)));
+}
+
+double calculateMTtot(TLorentzVector l1, TLorentzVector l2) {
+	TLorentzVector LLpair = l1+l2;
+    // Get LLpairton transverse components
+    double px_ll = LLpair.Px();
+    double py_ll = LLpair.Py();
+
+    // Calculate MET components
+    double px_met = met * std::cos(metphi);
+    double py_met = met * std::sin(metphi);
+
+    // Total transverse momentum components
+    double px_total = px_ll + px_met;
+    double py_total = py_ll + py_met;
+
+    // Magnitudes
+    double Et_ll = LLpair.Et();
+    double pt_total = std::sqrt(px_total * px_total + py_total * py_total);
+
+    // Compute total transverse mass
+    double mt_tot = std::sqrt(std::pow(Et_ll + met, 2) - pt_total * pt_total);
+
+    return mt_tot;
+}
+
+
 string applyHEMveto(string cat){
 	if (cat[0]=='e' and eta_1 > -3.0 and eta_1 < -1.3 and phi_1 > -1.57 and phi_1 < -0.87 and pt_1 >15) return "yes";
 	if (cat[1]=='e' and eta_2 > -3.0 and eta_2 < -1.3 and phi_2 > -1.57 and phi_2 < -0.87 and pt_2 >15) return "yes";
@@ -53,10 +89,30 @@ double ST(string cat){//for only leptons
 	return st;
 }
 
-double getDR(double eta1, double phi1, double eta2, double phi2) {
-    double pi = TMath::Pi();
-    double dPhi = fmin(fabs(phi2 - phi1), 2.0 * pi - fabs(phi2 - phi1));
-    double DR = sqrt(pow(dPhi, 2) + pow(eta2 - eta1, 2));
+int remaining_idx(vector<pair<int, int>>& pair, std::string cat_name){//finds idxs not in the pair list
+	int catSize = cat_name.length();
+    std::set<int> used_indices;
+
+    for (const auto& p : pair) {
+        used_indices.insert(p.first);
+        used_indices.insert(p.second);
+    }
+    for (int i = 0; i < catSize; ++i) {
+        if (used_indices.find(i) == used_indices.end()) return i;
+    }
+}
+
+double dPhi(double phi1, double phi2){
+	double pi = TMath::Pi();
+    double DPhi = fmin(fabs(phi2 - phi1), 2.0 * pi - fabs(phi2 - phi1));
+    return DPhi;
+}
+double deltaPhi(const TLorentzVector& v1, const TLorentzVector& v2){
+	return dPhi(v1.Phi(), v2.Phi());
+}
+
+double getDR(double eta1, double phi1, double eta2, double phi2) {   
+    double DR = sqrt(pow(dPhi(phi1, phi2), 2) + pow(eta2 - eta1, 2));
     return DR;
 }
 

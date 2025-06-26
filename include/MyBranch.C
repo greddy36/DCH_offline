@@ -14,7 +14,7 @@
    ULong64_t       nElectron;
    ULong64_t       nMuon;
    ULong64_t       nTau;
-   Int_t           lumi;
+   //Int_t           lumi;
    ULong64_t       evt;
    Int_t           nPU;
    Int_t           nPUEOOT;
@@ -229,7 +229,7 @@ void MyBranch(TTree* tree){
 	tree->SetBranchAddress("nElectron",&nElectron);
 	tree->SetBranchAddress("nMuon",&nMuon);
 	tree->SetBranchAddress("nTau",&nTau);
-	tree->SetBranchAddress("lumi",&lumi);
+	//tree->SetBranchAddress("lumi",&lumi);
 	tree->SetBranchAddress("evt",&evt);
 	tree->SetBranchAddress("nPU",&nPU);
 	tree->SetBranchAddress("nPUEOOT",&nPUEOOT);

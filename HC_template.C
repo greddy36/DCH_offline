@@ -3,43 +3,85 @@
 #include <TH1.h>
 #include <TList.h>
 
-const char* sampleKind_3Ch(std::string fname){
-	int len = fname.length();
-	if (fname.find("HppM500_") < len) return "M500";
-	else if (fname.find("HppM500_") < len) return "M500";
-	else if (fname.find("HppM600_") < len) return "M600";
-	else if (fname.find("HppM700_") < len) return "M700";
-	else if (fname.find("HppM800_") < len) return "M800";
-	else if (fname.find("HppM900_") < len) return "M900";
-	else if (fname.find("HppM1000_") < len) return "M1000";
-	else if (fname.find("HppM1100_") < len) return "M1100";
-	else if (fname.find("HppM1200_") < len) return "M1200";
-	else if (fname.find("HppM1300_") < len) return "M1300";
-	else if (fname.find("HppM1400_") < len) return "M1400";
-	else if (fname.find("ZZ_") < len ||
-		fname.find("ZZTo4L") < len ||
-		fname.find("ttH") < len ||
-		fname.find("ttZ") < len ||
-		fname.find("ZH") < len )
-		return "prompt";
-	else if (fname.find("WWW_") < len ||
-		fname.find("WZ_") < len ||
-		fname.find("WZTo3LNu") < len ||
-		fname.find("DY") < len ||
-		fname.find("WGToLNuG") < len ||
-		fname.find("WWTo2L2Nu") < len ||
-		fname.find("ZZTo2L2Nu") < len ||
-		fname.find("ZZTo2Q2L") < len ||
-		fname.find("WZTo2Q2L") < len ||
-		fname.find("ttW") < len ||
-		fname.find("ST_") < len)
-		return "fake";
-	else if (fname.find("EGamma") < len || fname.find("Single") < len)
-		return "data";
-	else return "BLABLA";
+const char* sampleKind(std::string fname, std::string hist_name){
+	if (hist_name.find("3lep") > hist_name.length()){//4lep
+		int len = fname.length();
+		if (fname.find("HppM500_") < len) return "M500";
+		else if (fname.find("HppM500_") < len) return "M500";
+		else if (fname.find("HppM600_") < len) return "M600";
+		else if (fname.find("HppM700_") < len) return "M700";
+		else if (fname.find("HppM800_") < len) return "M800";
+		else if (fname.find("HppM900_") < len) return "M900";
+		else if (fname.find("HppM1000_") < len) return "M1000";
+		else if (fname.find("HppM1100_") < len) return "M1100";
+		else if (fname.find("HppM1200_") < len) return "M1200";
+		else if (fname.find("HppM1300_") < len) return "M1300";
+		else if (fname.find("HppM1400_") < len) return "M1400";
+		else if (fname.find("ZZ_") < len ||
+			fname.find("ZZTo4L") < len ||
+			fname.find("ttH") < len ||
+			fname.find("ttZ") < len ||
+			fname.find("ZH") < len  ||
+			fname.find("HZJ") < len ||
+			fname.find("TWZ") < len )
+			return "prompt";
+		else if (fname.find("WWW_") < len ||
+			fname.find("WZ_") < len ||
+			fname.find("WZTo3LNu") < len ||
+			fname.find("DY") < len ||
+			fname.find("WGToLNuG") < len ||
+			fname.find("WWTo2L2Nu") < len ||
+			fname.find("ZZTo2L2Nu") < len ||
+			fname.find("ZZTo2Q2L") < len ||
+			fname.find("WZTo2Q2L") < len ||
+			fname.find("ttW") < len ||
+			fname.find("ST_") < len)
+			return "fake";
+		else if (fname.find("EGamma") < len || fname.find("Single") < len)
+			return "data";
+		else return "BLABLA in 4lep";
+	}
+	else if (hist_name.find("3lep") < hist_name.length()){
+		int len = fname.length();
+		if (fname.find("HppM500_") < len) return "M500";
+		else if (fname.find("HppM500_") < len) return "M500";
+		else if (fname.find("HppM600_") < len) return "M600";
+		else if (fname.find("HppM700_") < len) return "M700";
+		else if (fname.find("HppM800_") < len) return "M800";
+		else if (fname.find("HppM900_") < len) return "M900";
+		else if (fname.find("HppM1000_") < len) return "M1000";
+		else if (fname.find("HppM1100_") < len) return "M1100";
+		else if (fname.find("HppM1200_") < len) return "M1200";
+		else if (fname.find("HppM1300_") < len) return "M1300";
+		else if (fname.find("HppM1400_") < len) return "M1400";
+		else if (fname.find("ZZ_") < len ||
+			fname.find("ZZTo4L") < len ||
+			fname.find("ttH") < len ||
+			fname.find("ttZ") < len ||
+			fname.find("ZH") < len ||
+			fname.find("HZJ") < len ||
+			fname.find("TWZ") < len ||
+			fname.find("WWW_") < len ||
+			fname.find("WZ_") < len ||
+			fname.find("WZTo3LNu") < len ||
+			fname.find("ttW") < len )
+			return "prompt";
+		else if (
+			fname.find("DY") < len ||
+			fname.find("WGToLNuG") < len ||
+			fname.find("WWTo2L2Nu") < len ||
+			fname.find("ZZTo2L2Nu") < len ||
+			fname.find("ZZTo2Q2L") < len ||
+			fname.find("WZTo2Q2L") < len ||
+			fname.find("ST_") < len)
+			return "fake";
+		else if (fname.find("EGamma") < len || fname.find("Single") < len)
+			return "data";
+		else return "BLABLA in 3lep";
+	}
 }
 
-void HC_template(const char* ext = ".root"){
+void HC_template(const char* ext = "2016.root"){
 	const char* inDir = "hist_MY";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
@@ -55,24 +97,28 @@ void HC_template(const char* ext = ".root"){
 	gROOT->Reset();
 
     // Create output file
-    TFile* ofile = new TFile("hist_MY/nuisance_hist_test.root", "RECREATE");
+    TFile* ofile = new TFile("hist_MY/nuisance_hist_2016.root", "RECREATE");
 	const char* prompt__channel;
 	const char* fake__channel;
 	
-	float xmin = 0, xmax = 3000; int binw = 100; int nbins = (xmax-xmin)/binw; 
+	float xmin = 0, xmax = 1500; int binw = 100; int nbins = (xmax-xmin)/binw; 
 	TH1F* h_data_t0 = new TH1F("data_obs__t0", "mll1", nbins, xmin, xmax);	
 	TH1F* h_data_t1 = new TH1F("data_obs__t1", "mll1", nbins, xmin, xmax);			
 	TH1F* h_data_t2 = new TH1F("data_obs__t2", "mll1", nbins, xmin, xmax);			
-	TH1F* h_data_t34 = new TH1F("data_obs__t34", "mll1", nbins, xmin, xmax);
-	TH1F* h_data_t3lep = new TH1F("data_obs__t3lep", "mll1", nbins, xmin, xmax);
+	TH1F* h_data_t3 = new TH1F("data_obs__t3", "mll1", nbins, xmin, xmax);
+	TH1F* h_data_t03l = new TH1F("data_obs__t03l", "mll1", nbins, xmin, xmax);
+	TH1F* h_data_t13l = new TH1F("data_obs__t13l", "mll1", nbins, xmin, xmax);
+	TH1F* h_data_t23l = new TH1F("data_obs__t23l", "mll1", nbins, xmin, xmax);
 	ofile->cd();
 	h_data_t0->Write();
 	h_data_t1->Write();
 	h_data_t2->Write();
-	h_data_t34->Write();
-	h_data_t3lep->Write();
+	h_data_t3->Write();
+	h_data_t03l->Write();
+	h_data_t13l->Write();
+	h_data_t23l->Write();
 
-	const char *hist_list[] = {"h_Xmass_0t","h_Xmass_1t","h_Xmass_2t","h_Xmass_34t","h_Xmass_3lep"};
+	const char *hist_list[] = {"0tau/h_mll1","1tau/h_mll1","2tau/h_mll1","3tau/h_mll1","3lep0tau/h_mll1","3lep1tau/h_mll1","3lep2tau/h_mll1"};
 	for(int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++){
 		const char *signal500__channel;
 		const char *signal600__channel;
@@ -88,7 +134,7 @@ void HC_template(const char* ext = ".root"){
 		const char *one_fake__channel;
 		const char *prompt_red__channel;
 		const char *fake__channel;
-		if (hist_list[i] == "h_Xmass_0t"){
+		if (hist_list[i] == "0tau/h_mll1"){
 			signal500__channel = "signal500__t0";
 			signal600__channel = "signal600__t0";
 			signal700__channel = "signal700__t0";
@@ -104,7 +150,7 @@ void HC_template(const char* ext = ".root"){
 			prompt_red__channel = "prompt_red__t0";
 			fake__channel = "fake__t0";	
 		}
-		else if (hist_list[i] == "h_Xmass_1t"){
+		else if (hist_list[i] == "1tau/h_mll1"){
 			signal500__channel = "signal500__t1";
 			signal600__channel = "signal600__t1";
 			signal700__channel = "signal700__t1";
@@ -120,7 +166,7 @@ void HC_template(const char* ext = ".root"){
 			prompt_red__channel = "prompt_red__t1";
 			fake__channel = "fake__t1";
 		}
-		else if (hist_list[i] == "h_Xmass_2t"){ 
+		else if (hist_list[i] == "2tau/h_mll1"){ 
 			signal500__channel = "signal500__t2";
 			signal600__channel = "signal600__t2";
 			signal700__channel = "signal700__t2";
@@ -136,38 +182,71 @@ void HC_template(const char* ext = ".root"){
 			prompt_red__channel = "prompt_red__t2";
 			fake__channel = "fake__t2";
 		}
-		else if (hist_list[i] == "h_Xmass_34t"){
-			signal500__channel = "signal500__t34";
-			signal600__channel = "signal600__t34";
-			signal700__channel = "signal700__t34";
-			signal800__channel = "signal800__t34";
-			signal900__channel = "signal900__t34";
-			signal1000__channel = "signal1000__t34";
-			signal1100__channel = "signal1100__t34";
-			signal1200__channel = "signal1200__t34";
-			signal1300__channel = "signal1300__t34";
-			signal1400__channel = "signal1400__t34";
-			prompt__channel = "prompt__t34";
-			one_fake__channel = "one_fake__t34";
-			prompt_red__channel = "prompt_red__t34";
-			fake__channel = "fake__t34";
+		else if (hist_list[i] == "3tau/h_mll1"){
+			signal500__channel = "signal500__t3";
+			signal600__channel = "signal600__t3";
+			signal700__channel = "signal700__t3";
+			signal800__channel = "signal800__t3";
+			signal900__channel = "signal900__t3";
+			signal1000__channel = "signal1000__t3";
+			signal1100__channel = "signal1100__t3";
+			signal1200__channel = "signal1200__t3";
+			signal1300__channel = "signal1300__t3";
+			signal1400__channel = "signal1400__t3";
+			prompt__channel = "prompt__t3";
+			one_fake__channel = "one_fake__t3";
+			prompt_red__channel = "prompt_red__t3";
+			fake__channel = "fake__t3";
 		}
-		else if (hist_list[i] == "h_Xmass_3lep"){
-			signal500__channel = "signal500__t3lep";
-			signal600__channel = "signal600__t3lep";
-			signal700__channel = "signal700__t3lep";
-			signal800__channel = "signal800__t3lep";
-			signal900__channel = "signal900__t3lep";
-			signal1000__channel = "signal1000__t3lep";
-			signal1100__channel = "signal1100__t3lep";
-			signal1200__channel = "signal1200__t3lep";
-			signal1300__channel = "signal1300__t3lep";
-			signal1400__channel = "signal1400__t3lep";
-			prompt__channel = "prompt__t3lep";
-			one_fake__channel = "one_fake__t3lep";
-			prompt_red__channel = "prompt_red__t3lep";
-			fake__channel = "fake__t3lep";
+		else if (hist_list[i] == "3lep0tau/h_mll1"){
+			signal500__channel = "signal500__t03l";
+			signal600__channel = "signal600__t03l";
+			signal700__channel = "signal700__t03l";
+			signal800__channel = "signal800__t03l";
+			signal900__channel = "signal900__t03l";
+			signal1000__channel = "signal1000__t03l";
+			signal1100__channel = "signal1100__t03l";
+			signal1200__channel = "signal1200__t03l";
+			signal1300__channel = "signal1300__t03l";
+			signal1400__channel = "signal1400__t03l";
+			prompt__channel = "prompt__t03l";
+			one_fake__channel = "one_fake__t03l";
+			prompt_red__channel = "prompt_red__t03l";
+			fake__channel = "fake__t03l";
 		}
+		else if (hist_list[i] == "3lep1tau/h_mll1"){
+			signal500__channel = "signal500__t13l";
+			signal600__channel = "signal600__t13l";
+			signal700__channel = "signal700__t13l";
+			signal800__channel = "signal800__t13l";
+			signal900__channel = "signal900__t13l";
+			signal1000__channel = "signal1000__t13l";
+			signal1100__channel = "signal1100__t13l";
+			signal1200__channel = "signal1200__t13l";
+			signal1300__channel = "signal1300__t13l";
+			signal1400__channel = "signal1400__t13l";
+			prompt__channel = "prompt__t13l";
+			one_fake__channel = "one_fake__t13l";
+			prompt_red__channel = "prompt_red__t13l";
+			fake__channel = "fake__t13l";
+		}
+		else if (hist_list[i] == "3lep2tau/h_mll1"){
+			signal500__channel = "signal500__t23l";
+			signal600__channel = "signal600__t23l";
+			signal700__channel = "signal700__t23l";
+			signal800__channel = "signal800__t23l";
+			signal900__channel = "signal900__t23l";
+			signal1000__channel = "signal1000__t23l";
+			signal1100__channel = "signal1100__t23l";
+			signal1200__channel = "signal1200__t23l";
+			signal1300__channel = "signal1300__t23l";
+			signal1400__channel = "signal1400__t23l";
+			prompt__channel = "prompt__t23l";
+			one_fake__channel = "one_fake__t23l";
+			prompt_red__channel = "prompt_red__t23l";
+			fake__channel = "fake__t23l";
+		}
+
 		TH1F* h_M500 = new TH1F(signal500__channel, "mll1", nbins, xmin, xmax);
 		TH1F* h_M600 = new TH1F(signal600__channel, "mll1", nbins, xmin, xmax);
 		TH1F* h_M700 = new TH1F(signal700__channel, "mll1", nbins, xmin, xmax);
@@ -186,20 +265,20 @@ void HC_template(const char* ext = ".root"){
 			TFile *ifile = new TFile(filename[j],"READ");
 			TH1F *h = (TH1F*)ifile->Get(hist_list[i]);
 			
-			if (sampleKind_3Ch(filename[j])== "M500") h_M500->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "M600") h_M600->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "M700") h_M700->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "M800") h_M800->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "M900") h_M900->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "M1000") h_M1000->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "M1100") h_M1100->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "M1200") h_M1200->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "M1300") h_M1300->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "M1400") h_M1400->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "fake") h_fake->Add(h);
-			else if (sampleKind_3Ch(filename[j])== "prompt") h_prompt->Add(h);
+			if (sampleKind(filename[j],hist_list[i])== "M500") h_M500->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "M600") h_M600->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "M700") h_M700->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "M800") h_M800->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "M900") h_M900->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "M1000") h_M1000->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "M1100") h_M1100->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "M1200") h_M1200->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "M1300") h_M1300->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "M1400") h_M1400->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "fake") h_fake->Add(h);
+			else if (sampleKind(filename[j],hist_list[i])== "prompt") h_prompt->Add(h);
 			else continue;
-			cout<<sampleKind_3Ch(filename[j])<<";"<<filename[j]<<";"<<h->Integral()<<endl;
+			cout<<sampleKind(filename[j],hist_list[i])<<";"<<filename[j]<<";"<<h->Integral()<<endl;
 		}
 		//setting overflow bins
 		h_prompt->SetBinContent(nbins, h_prompt->GetBinContent(nbins+1));
