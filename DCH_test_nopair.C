@@ -145,8 +145,8 @@ void DCH_test_nopair(const char* ext = "root"){
 		cout<<filename[j]<<endl;
 		TFile *ifile = new TFile(filename[j],"READ");
 		std::string fname = filename[j];
-		if (fname.find("_2018.") > fname.length()) continue;
-		if (fname.find("HZJ") > fname.length()) continue;
+		if (fname.find("_2016.") > fname.length()) continue;
+		//if (fname.find("HZJ") > fname.length()) continue;
 		//if (XSec(filename[j])==1) continue; 
 
 		
@@ -155,7 +155,7 @@ void DCH_test_nopair(const char* ext = "root"){
 		if(XSec(filename[j])!=1){
 			hnevts = (TH1D*)ifile->Get("hNWEvts");
 			if (!hnevts) hnevts = (TH1D*)ifile->Get("hNEvts");
-			xs_weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
+			xs_weight = lumi_2016*XSec(filename[j])/hnevts->Integral();
 		}
 		else hnevts = (TH1D*)ifile->Get("hNEvts");
 		cout<<XSec(filename[j])<<endl;

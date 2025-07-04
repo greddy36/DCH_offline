@@ -276,6 +276,7 @@ void StackHist_test() {
 		        TH1D* h = dynamic_cast<TH1D*>(f->Get(hist_list[i]));
 		        if (!h) continue;
 		        h->Sumw2();
+		        h->Scale(applyXSec(f->GetName(), f->Get("hnevts")->Integral()));
 		        h->Rebin(5);
 				if (kv.first != "data") {
 					for (int ib = 1; ib <= h->GetNbinsX(); ib++) {
@@ -301,6 +302,7 @@ void StackHist_test() {
 
 		hist["VV"]->Scale(1.12631);
 		hist["ZZ"]->Scale(1.31366);
+		hist["ZH"]->Scale(2.34888);
 		// Stack backgrounds
 		//THStack* bkg_stack = new THStack("bkg_stack", "2l and 3l channel summary in Z-window;;Events");
 		TH1D* h_bkg_total = (TH1D*)hist["DY"]->Clone("h_bkg_total");

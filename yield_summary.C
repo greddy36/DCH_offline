@@ -29,7 +29,7 @@ void yield_summary() {
     std::vector<std::string> hist_list;
     if (summary_type == "tau_ch") {
     	hist_list = { "0tau/h_cat","1tau/h_cat","2tau/h_cat","3tau/h_cat","3lep0tau/h_cat","3lep1tau/h_cat","3lep2tau/h_cat"};
-    	bkg_stack = new THStack("bkg_stack", "Yield summary in CR;;Events");
+    	bkg_stack = new THStack("bkg_stack", "Yield summary in VR;;Events");
     }
     else if  (summary_type == "3lep") {
     	hist_list = {"h_met_ee","h_met_eee","h_met_eem","h_met_eet","h_metv_ett","h_met_mm","h_met_emm","h_met_mmm","h_met_mmt","h_metv_mtt"};
@@ -97,10 +97,12 @@ void yield_summary() {
         {"data",  {"SingleElectron_2018.root","EGamma_2018.root", "SingleMuon_2018.root"}}
     };
     else if (year == "Run2") files = {
+                        {"signal",    {"HppM1000_2016.root", "HppM1000_2017.root", "HppM1000_2018.root"}},
         {"DY",    {"DYJetsToLLM10to50_2016.root", "DYJetsToLLM50_2016.root","DYJetsToLLM10to50_2017.root", "DYJetsToLLM50_2017.root","DYJetsToLLM10to50_2018.root", "DYJetsToLLM50_2018.root"}},
         {"VV",    {"WW_2016.root", "WWTo2L2Nu_2016.root", "WZTo2Q2L_2016.root", "WZTo3LNu_2016.root","WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root","WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
         {"VVV",   {"WWW_2016.root", "WZZ_2016.root", "ZZZ_2016.root","WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root","WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
-        {"ttV",   {"ttWJets_2016.root", "ttZJets_2016.root","ttWJets_2017.root", "ttZJets_2017.root","ttWJets_2018.root", "ttZJets_2018.root"}},
+        {"ttW",   {"ttWJets_2016.root", "ttWJets_2017.root","ttWJets_2018.root"}},
+        {"ttZ",   {"ttZJets_2016.root", "ttZJets_2017.root","ttZJets_2018.root"}},
         {"WJ",    {"WJetsToLNu_NLO_2016.root", "WJetsToLNu_HT-70To100_2016.root", "WJetsToLNu_HT-100To200_2016.root", 
                    "WJetsToLNu_HT-200To400_2016.root", "WJetsToLNu_HT-400To600_2016.root", 
                    "WJetsToLNu_HT-600To800_2016.root", "WJetsToLNu_HT-800To1200_2016.root", "WJetsToLNu_HT-1200To2500_2016.root", "WJetsToLNu_HT-2500ToInf_2016.root","WJetsToLNu_NLO_2017.root", "WJetsToLNu_HT-70To100_2017.root", "WJetsToLNu_HT-100To200_2017.root", 
@@ -109,21 +111,20 @@ void yield_summary() {
                    "WJetsToLNu_HT-200To400_2018.root", "WJetsToLNu_HT-400To600_2018.root", 
                    "WJetsToLNu_HT-600To800_2018.root", "WJetsToLNu_HT-800To1200_2018.root", "WJetsToLNu_HT-1200To2500_2018.root", "WJetsToLNu_HT-2500ToInf_2018.root"}},
         {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo4L_2016.root","ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root","ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
-      /*  {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root"}},
-        {"ZZto4L",    {"ZZTo4L_2016.root","ZZTo4L_2017.root","ZZTo4L_2018.root"}},*/
         {"ST",    {"ST_s-channel_2016.root", "ST_t-channel_antitop_2016.root", "ST_t-channel_top_2016.root", 
                    "ST_tW_antitop_2016.root", "ST_tW_top_2016.root","ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", 
                    "ST_tW_antitop_2017.root", "ST_tW_top_2017.root","ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", 
                    "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
         {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root","TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root","TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
-        {"other", { "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root",/*"ttHToTauTau_2016.root","ttHToTauTau_2017.root","ttHToTauTau_2018.root","ttHToEE_2016.root","ttHToEE_2017.root", "ttHToEE_2018.root","ttHTo2L2Nu_2016.root","ttHTo2L2Nu_2017.root",*/ "ttHTo2L2Nu_2018.root","ttHJetToNonbb_2016.root","ttHJetToNonbb_2017.root","ttHJetToNonbb_2018.root","TWZToLL_2016.root","TWZToLL_2017.root","TWZToLL_2018.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016.root","HZJ_HToWWTo2L2Nu_ZTo2L_2017.root","HZJ_HToWWTo2L2Nu_ZTo2L_2018.root"}},
+        {"ZH", {"ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root"}},
+        {"other", {"ttHJetToNonbb_2016.root","ttHJetToNonbb_2017.root","ttHJetToNonbb_2018.root","TWZToLL_2016.root","TWZToLL_2017.root","TWZToLL_2018.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016.root","HZJ_HToWWTo2L2Nu_ZTo2L_2017.root","HZJ_HToWWTo2L2Nu_ZTo2L_2018.root"}},
         {"data",  {"SingleElectron_2016.root","EGamma_2016.root", "SingleMuon_2016.root","SingleElectron_2017.root","EGamma_2017.root", "SingleMuon_2017.root","SingleElectron_2018.root","EGamma_2018.root", "SingleMuon_2018.root"}}
     };
 	   
     std::map<std::string, TH1D*> h_summaries;
     std::map<std::string, int> fill_colors = {
-        {"DY", 7}, {"VV", 8}, {"VVV", 6}, {"ttV", 4}, {"WJ", 9}, {"ZZ", 5},
-        {"ST", 30}, {"TTbar", 46}, {"other", 28}, {"data", 1}
+        {"DY", 7}, {"VV", 8}, {"VVV", 6}, {"ttW", 4}, {"ttZ", 2}, {"WJ", 9}, {"ZZ", 5},
+		    {"ST", 30}, {"TTbar", 46}, {"other", 28},{"ZH", 29}, {"data", 1}
     };
 
     // Open files
@@ -131,7 +132,7 @@ void yield_summary() {
     for (auto& kv : files) {
         for (const auto& fname : kv.second) {
         	TFile* file;
-            if (summary_type == "tau_ch") file = new TFile(("hist_CR/" + fname).c_str(), "READ");
+            if (summary_type == "tau_ch") file = new TFile(("hist_VR/" + fname).c_str(), "READ");
             else file = new TFile(("hist_test_nopair/" + fname).c_str(), "READ");
             if (!file || file->IsZombie()) continue;
 	        open_files[kv.first].push_back(file);
@@ -153,6 +154,7 @@ void yield_summary() {
                 TH1D* h = (TH1D*)f->Get(hist_name.c_str());
                 if (h) {
                 	h_sum->Sumw2();
+                	h->Scale(applyXSec(f->GetName(), f->Get("hnevts")->Integral()));
                 	h->Rebin(h->GetNbinsX());
                 	double stat_err = h->GetBinError(1);//poisson error
                 	double sys_err = h->GetBinContent(1)*XSec_Uncert(f->GetName())/100;
@@ -174,8 +176,8 @@ void yield_summary() {
         }
     }
     //========================scale facotrs===============
-	h_summaries["VV"]->Scale(1.12631);
-	h_summaries["ZZ"]->Scale(1.31366);
+	h_summaries["ZZ"]->Scale(1.30291);
+	h_summaries["VV"]->Scale(1.03002);
 	//h_summaries["DY"]->SetBinContent(4, h_summaries["DY"]->GetBinContent(4)*1.21);
 	//h_summaries["DY"]->SetBinContent(9, h_summaries["DY"]->GetBinContent(9)*1.21);
 	//h_summaries["TTbar"]->SetBinContent(6, h_summaries["TTbar"]->GetBinContent(6)*2.5);
@@ -185,7 +187,7 @@ void yield_summary() {
     // Stack backgrounds
     TH1D* h_bkg_total = (TH1D*)h_summaries["DY"]->Clone("h_bkg_total");
     h_bkg_total->Reset(); h_bkg_total->Sumw2();
-    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttV", "WJ", "ZZ", "ST", "TTbar", "other"}) {
+    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW","ttZ", "WJ", "ZZ","ZH", "ST", "TTbar", "other"}) {
         bkg_stack->Add(h_summaries[bkg_group]);
         bkg_stack->SetMinimum(1); // Show zero bins
         h_bkg_total->Add(h_summaries[bkg_group]);
@@ -219,7 +221,7 @@ void yield_summary() {
 
     //auto legend = new TLegend(0.7, 0.6, 0.88, 0.88);
     auto legend = new TLegend(0.12, 0.6, 0.3, 0.88);
-    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttV", "WJ", "ZZ", "ST", "TTbar", "other"}) {
+    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW","ttZ", "WJ", "ZZ","ZH", "ST", "TTbar", "other"}) {
         legend->AddEntry(h_summaries[bkg_group], bkg_group.c_str(), "f");
     }
     legend->AddEntry(h_summaries["data"], "Data", "lep");

@@ -272,6 +272,7 @@ void StackHist() {
 		        TH1D* h = dynamic_cast<TH1D*>(f->Get(hist_list[i]));
 		        if (!h) continue;
 		        h->Sumw2();
+		        h->Scale(applyXSec(f->GetName(), f->Get("hnevts")->Integral()));
 		        h->Rebin(5);
 				if (kv.first != "data") {
 					for (int ib = 1; ib <= h->GetNbinsX(); ib++) {

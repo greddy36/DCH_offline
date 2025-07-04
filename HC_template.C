@@ -19,6 +19,7 @@ const char* sampleKind(std::string fname, std::string hist_name){
 		else if (fname.find("HppM1400_") < len) return "M1400";
 		else if (fname.find("ZZ_") < len ||
 			fname.find("ZZTo4L") < len ||
+			fname.find("HZJ") < len ||
 			fname.find("ttH") < len ||
 			fname.find("ttZ") < len ||
 			fname.find("ZH") < len  ||
@@ -57,6 +58,7 @@ const char* sampleKind(std::string fname, std::string hist_name){
 		else if (fname.find("ZZ_") < len ||
 			fname.find("ZZTo4L") < len ||
 			fname.find("ttH") < len ||
+			fname.find("HZJ") < len ||
 			fname.find("ttZ") < len ||
 			fname.find("ZH") < len ||
 			fname.find("HZJ") < len ||
@@ -81,7 +83,7 @@ const char* sampleKind(std::string fname, std::string hist_name){
 	}
 }
 
-void HC_template(const char* ext = "2016.root"){
+void HC_template(const char* ext = "2018.root"){
 	const char* inDir = "hist_MY";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
@@ -97,7 +99,7 @@ void HC_template(const char* ext = "2016.root"){
 	gROOT->Reset();
 
     // Create output file
-    TFile* ofile = new TFile("hist_MY/nuisance_hist_2016.root", "RECREATE");
+    TFile* ofile = new TFile("hist_MY/nuisance_hist_2018.root", "RECREATE");
 	const char* prompt__channel;
 	const char* fake__channel;
 	

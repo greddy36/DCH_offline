@@ -11,42 +11,6 @@ std::vector<double> SortPt(){
 	return sorted_pt;
 }
 
-double calculateMT(TLorentzVector l1, TLorentzVector l2) {
-	TLorentzVector LLpair = l1+l2;
-	double pt_ll = LLpair.Pt();
-	double phi_ll = LLpair.Phi();
-    double delta_phi = phi_ll - metphi;
-    // Normalize delta_phi to [-π, π]
-    while (delta_phi > M_PI) delta_phi -= 2 * M_PI;
-    while (delta_phi < -M_PI) delta_phi += 2 * M_PI;
-    return std::sqrt(2 * pt_ll * met * (1 - std::cos(delta_phi)));
-}
-
-double calculateMTtot(TLorentzVector l1, TLorentzVector l2) {
-	TLorentzVector LLpair = l1+l2;
-    // Get LLpairton transverse components
-    double px_ll = LLpair.Px();
-    double py_ll = LLpair.Py();
-
-    // Calculate MET components
-    double px_met = met * std::cos(metphi);
-    double py_met = met * std::sin(metphi);
-
-    // Total transverse momentum components
-    double px_total = px_ll + px_met;
-    double py_total = py_ll + py_met;
-
-    // Magnitudes
-    double Et_ll = LLpair.Et();
-    double pt_total = std::sqrt(px_total * px_total + py_total * py_total);
-
-    // Compute total transverse mass
-    double mt_tot = std::sqrt(std::pow(Et_ll + met, 2) - pt_total * pt_total);
-
-    return mt_tot;
-}
-
-
 string applyHEMveto(string cat){
 	if (cat[0]=='e' and eta_1 > -3.0 and eta_1 < -1.3 and phi_1 > -1.57 and phi_1 < -0.87 and pt_1 >15) return "yes";
 	if (cat[1]=='e' and eta_2 > -3.0 and eta_2 < -1.3 and phi_2 > -1.57 and phi_2 < -0.87 and pt_2 >15) return "yes";
@@ -97,7 +61,7 @@ int remaining_idx(vector<pair<int, int>>& pair, std::string cat_name){//finds id
         used_indices.insert(p.first);
         used_indices.insert(p.second);
     }
-    for (int i = 0; i < catSize; ++i) {
+    for (int i = 1; i <= catSize; ++i) {
         if (used_indices.find(i) == used_indices.end()) return i;
     }
 }
@@ -123,6 +87,37 @@ double deltaR(const TLorentzVector& v1, const TLorentzVector& v2) {
     double eta2 = v2.Eta();
     double phi2 = v2.Phi();
     return getDR(eta1, phi1, eta2, phi2);
+}
+
+double calculateMT(const TLorentzVector& V, const TLorentzVector& MET) {
+    //double delta_phi = deltaPhi(V, MET);
+    //return std::sqrt(2 * V.Pt() * MET.Pt() * (1 - std::cos(delta_phi)));
+    double pt_total = (V+MET).Pt();
+    return std::sqrt(std::pow(V.Et() + MET.Et(), 2) - pt_total * pt_total);
+}
+
+double calculateMTtot(const TLorentzVector& l1, const TLorentzVector& l2) {
+	TLorentzVector LLpair = l1+l2;
+    // Get LLpairton transverse components
+    double px_ll = LLpair.Px();
+    double py_ll = LLpair.Py();
+
+    // Calculate MET components
+    double px_met = met * std::cos(metphi);
+    double py_met = met * std::sin(metphi);
+
+    // Total transverse momentum components
+    double px_total = px_ll + px_met;
+    double py_total = py_ll + py_met;
+
+    // Magnitudes
+    double Et_ll = LLpair.Et();
+    double pt_total = std::sqrt(px_total * px_total + py_total * py_total);
+
+    // Compute total transverse mass
+    double mt_tot = std::sqrt(std::pow(Et_ll + met, 2) - pt_total * pt_total);
+
+    return mt_tot;
 }
 
 // Structure to represent a lepton

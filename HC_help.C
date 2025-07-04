@@ -20,6 +20,7 @@ const char* sampleKind(std::string fname, std::string hist_name){
 		else if (fname.find("HppM1400_") < len) return "M1400";
 		else if (fname.find("ZZ_") < len ||
 			fname.find("ZZTo4L") < len ||
+			fname.find("HZJ") < len ||
 			fname.find("ttH") < len ||
 			fname.find("ttZ") < len ||
 			fname.find("ZH") < len )
@@ -55,6 +56,7 @@ const char* sampleKind(std::string fname, std::string hist_name){
 		else if (fname.find("HppM1400_") < len) return "M1400";
 		else if (fname.find("ZZ_") < len ||
 			fname.find("ZZTo4L") < len ||
+			fname.find("HZJ") < len ||
 			fname.find("ttH") < len ||
 			fname.find("ttZ") < len ||
 			fname.find("ZH") < len ||
@@ -76,21 +78,6 @@ const char* sampleKind(std::string fname, std::string hist_name){
 			return "data";
 		else return "BLABLA in 3lep";
 	}
-}
-double fake_uncert(std::string summary_type, std::string fname){
-	float uncert = 0;
-	if (summary_type == "3lep" or summary_type == "3lep-veto"){
-		if (fname.find("DY") < fname.length()) uncert = 0.3*0.3;
-		else if (fname.find("TTTo") < fname.length()) uncert = 0.3*0.3;
-		else if (fname.find("WZTo") < fname.length()) uncert = 0.038979/1.1771 * 0.038979/1.1771 ;//made without met  cut
-	}
-	else if (summary_type == "4lep" or summary_type == "4lep-veto"){
-		if (fname.find("WZTo") < fname.length()) uncert = 0.3*0.3;
-		else if (fname.find("TTW") < fname.length()) uncert = 0.3*0.3;
-		else if (fname.find("DY") < fname.length()) uncert = 0.3*0.3+0.3*0.3;
-		else if (fname.find("ZZTo") < fname.length()) uncert = 0.0410187/1.32608 * 0.0410187/1.32608 ;
-	}
-	return uncert;	
 }
 void HC_help(const char* ext = "2018.root"){
 	const char* inDir = "hist_MY";
@@ -114,7 +101,17 @@ void HC_help(const char* ext = "2018.root"){
 			TH1D* h = (TH1D*)ifile->Get(hist_name.c_str());
 			if (h) {
                 	double sys_err = h->Integral()*XSec_Uncert(ifile->GetName())/100;
-					if (sampleKind(filename[j],hist_list[i]) == "prompt") cout<<"prompt"<<"\t"<<filename[j]<<"\t"<<hist_list[i]<<"\t"<<h->Integral()<<"\t"<<sys_err*sys_err<<endl;
+					//if (sampleKind(filename[j],hist_list[i]) == "prompt") cout<<"XSprompt"<<"\t"<<filename[j]<<"\t"<<hist_list[i]<<"\t"<< h->Integral()<<"\t"<<sys_err*sys_err<<endl;
+					//if (sampleKind(filename[j],hist_list[i]) == "fake") cout<<"XSfake"<<"\t"<<filename[j]<<"\t"<<hist_list[i]<<"\t"<< h->Integral()<<"\t"<<sys_err*sys_err<<endl;
+					
+					std::string hist_name = hist_list[i];
+					if (sampleKind(filename[j],hist_list[i]) == "fake"){
+						if (hist_name.find("3lep") > hist_name.length())//4lep
+							cout<<"fakeNorm"<<"\t"<<filename[j]<<"\t"<<hist_list[i]<<"\t"<< h->Integral()<<"\t"<<fake_uncert_squared("4lep", ifile->GetName())<<endl;
+						else if (hist_name.find("3lep") < hist_name.length())//3lep
+							cout<<"fakeNorm"<<"\t"<<filename[j]<<"\t"<<hist_list[i]<<"\t"<< h->Integral()<<"\t"<<fake_uncert_squared("3lep", ifile->GetName())<<endl;
+						
+					}
 			}
 		}
 		cout<<""<<endl;
