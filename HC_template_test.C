@@ -250,6 +250,7 @@ void HC_template_test(const char* ext = ".root"){
 		for(int j = 0; j < nfiles; j++){
 			TFile *ifile = new TFile(filename[j],"READ");
 			TH1F *h = (TH1F*)ifile->Get(hist_list[i]);
+			h->Scale(applyXSec(filename[j], ifile->Get("hnevts")->Integral()));
 			
 			if (sampleKind_3Ch(filename[j])== "M500") h_M500->Add(h);
 			else if (sampleKind_3Ch(filename[j])== "M600") h_M600->Add(h);

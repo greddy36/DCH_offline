@@ -3,7 +3,7 @@
 #include <RooPlot.h>
 #include <RooRealVar.h>
 #include <TCanvas.h>
-#include "include/XSections.C"
+#include "include/Xsections.C"
 
 using namespace RooFit;
 
@@ -100,19 +100,21 @@ void roofit_wz(){
    	std::map<std::string, double> tot_uncert_quadr;
     for (auto& kv : open_files) {
 			for (auto* f : kv.second) {
-			
+				TH1D* h = (TH1D*)f->Get("3lep0tau/h_W_mt");
+				if(!h) continue;
+				h->Sumw2();
+				cout<<kv.first<<"\t"<<applyXSec(f)<<endl;
+		       	h->Scale(applyXSec(f));
 				if (!h_bkg_group[kv.first]){
-					h_bkg_group[kv.first] = dynamic_cast<TH1D*>(f->Get("3lep0tau/h_ST"));
-        			//h_bkg_group[kv.first]->SetFillColor(fill_colors[kv.first]);
-                	tot_uncert_quadr[kv.first] = fake_uncert_squared("3lep", f->GetName())*h_bkg_group[kv.first]->Integral()*h_bkg_group[kv.first]->Integral();
+					h_bkg_group[kv.first]= dynamic_cast<TH1D*>(h);
+					h_bkg_group[kv.first]->Sumw2();
+                	tot_uncert_quadr[kv.first] = fake_uncert_squared("3lep", f->GetName())*h->Integral()*h->Integral();
         		}
 		       	else {
-		       		TH1D* h = (TH1D*)f->Get("3lep0tau/h_ST");
-		       		if (!h) continue; 
 		       		h_bkg_group[kv.first]->Add(h);
 		       		tot_uncert_quadr[kv.first] += fake_uncert_squared("3lep", f->GetName())*h->Integral()*h->Integral();
 		       	}
-		       	cout<<kv.first<<"\t"<<tot_uncert_quadr[kv.first]<<"\t"<<h_bkg_group[kv.first]->Integral()<<endl;
+		       	//cout<<kv.first<<"\t"<<tot_uncert_quadr[kv.first]<<"\t"<<h_bkg_group[kv.first]->Integral()<<endl;
 			}
 	}
 	h_bkg_group["ZZ"]->Scale(1.30291);

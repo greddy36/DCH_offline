@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 #include <map>
-#include "include/XSections.C"
+#include "include/Xsections.C"
 
 void StackHist() {
 	std::string summary_type = "tau_ch", year = "Run2";
@@ -215,12 +215,12 @@ void StackHist() {
     std::map<std::string, std::vector<TFile*>> open_files;
     for (auto& kv : files) {
 		for (const auto& fname : kv.second) {
-		    TFile* file = new TFile(("hist_CR/" + fname).c_str(), "READ");
+		    TFile* file = new TFile(("hist_CR_WZ/" + fname).c_str(), "READ");
 		    if (!file || file->IsZombie()) continue;
 	        open_files[kv.first].push_back(file);
 	    }
 	}
-	TFile *ifile_D1 = new TFile("hist_CR/EGamma_2018.root","READ");
+	TFile *ifile_D1 = new TFile("hist_CR_WZ/EGamma_2018.root","READ");
   
 	for (int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++) {
 		gStyle->SetOptStat(0);
@@ -272,7 +272,7 @@ void StackHist() {
 		        TH1D* h = dynamic_cast<TH1D*>(f->Get(hist_list[i]));
 		        if (!h) continue;
 		        h->Sumw2();
-		        h->Scale(applyXSec(f->GetName(), f->Get("hnevts")->Integral()));
+		        h->Scale(applyXSec(f));
 		        h->Rebin(5);
 				if (kv.first != "data") {
 					for (int ib = 1; ib <= h->GetNbinsX(); ib++) {

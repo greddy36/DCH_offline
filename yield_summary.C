@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 #include <map>
-#include "include/XSections.C"
+#include "include/Xsections.C"
 
 void yield_summary() {
     gStyle->SetOptStat(0);
@@ -29,7 +29,7 @@ void yield_summary() {
     std::vector<std::string> hist_list;
     if (summary_type == "tau_ch") {
     	hist_list = { "0tau/h_cat","1tau/h_cat","2tau/h_cat","3tau/h_cat","3lep0tau/h_cat","3lep1tau/h_cat","3lep2tau/h_cat"};
-    	bkg_stack = new THStack("bkg_stack", "Yield summary in VR;;Events");
+    	bkg_stack = new THStack("bkg_stack", "Yield summary in CR_WZ;;Events");
     }
     else if  (summary_type == "3lep") {
     	hist_list = {"h_met_ee","h_met_eee","h_met_eem","h_met_eet","h_metv_ett","h_met_mm","h_met_emm","h_met_mmm","h_met_mmt","h_metv_mtt"};
@@ -132,7 +132,7 @@ void yield_summary() {
     for (auto& kv : files) {
         for (const auto& fname : kv.second) {
         	TFile* file;
-            if (summary_type == "tau_ch") file = new TFile(("hist_VR/" + fname).c_str(), "READ");
+            if (summary_type == "tau_ch") file = new TFile(("hist_CR_WZ/" + fname).c_str(), "READ");
             else file = new TFile(("hist_test_nopair/" + fname).c_str(), "READ");
             if (!file || file->IsZombie()) continue;
 	        open_files[kv.first].push_back(file);
@@ -154,7 +154,7 @@ void yield_summary() {
                 TH1D* h = (TH1D*)f->Get(hist_name.c_str());
                 if (h) {
                 	h_sum->Sumw2();
-                	h->Scale(applyXSec(f->GetName(), f->Get("hnevts")->Integral()));
+                	h->Scale(applyXSec(f));
                 	h->Rebin(h->GetNbinsX());
                 	double stat_err = h->GetBinError(1);//poisson error
                 	double sys_err = h->GetBinContent(1)*XSec_Uncert(f->GetName())/100;

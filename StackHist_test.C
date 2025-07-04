@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 #include <map>
-#include "include/XSections.C"
+#include "include/Xsections.C"
 
 void StackHist_test() {
 	std::string summary_type = "tau_c", year = "Run2";
@@ -276,7 +276,7 @@ void StackHist_test() {
 		        TH1D* h = dynamic_cast<TH1D*>(f->Get(hist_list[i]));
 		        if (!h) continue;
 		        h->Sumw2();
-		        h->Scale(applyXSec(f->GetName(), f->Get("hnevts")->Integral()));
+		        h->Scale(applyXSec(f);
 		        h->Rebin(5);
 				if (kv.first != "data") {
 					for (int ib = 1; ib <= h->GetNbinsX(); ib++) {

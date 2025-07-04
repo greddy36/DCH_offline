@@ -266,6 +266,7 @@ void HC_template(const char* ext = "2018.root"){
 		for(int j = 0; j < nfiles; j++){
 			TFile *ifile = new TFile(filename[j],"READ");
 			TH1F *h = (TH1F*)ifile->Get(hist_list[i]);
+			h->Scale(applyXSec(filename[j], ifile->Get("hnevts")->Integral()));
 			
 			if (sampleKind(filename[j],hist_list[i])== "M500") h_M500->Add(h);
 			else if (sampleKind(filename[j],hist_list[i])== "M600") h_M600->Add(h);

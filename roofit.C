@@ -100,15 +100,15 @@ void roofit(){
    	std::map<std::string, double> tot_uncert_quadr;
     for (auto& kv : open_files) {
 			for (auto* f : kv.second) {
-			
+				TH1D* h = (TH1D*)f->Get("0tau/h_ST");
+				if(!h) continue;
+				h->Sumw2();
+		       	h->Scale(applyXSec(f));
 				if (!h_bkg_group[kv.first]){
-					h_bkg_group[kv.first] = dynamic_cast<TH1D*>(f->Get("0tau/h_ST"));
-        			//h_bkg_group[kv.first]->SetFillColor(fill_colors[kv.first]);
-                	tot_uncert_quadr[kv.first] = fake_uncert_squared("4lep", f->GetName())*h_bkg_group[kv.first]->Integral()*h_bkg_group[kv.first]->Integral();
+					h_bkg_group[kv.first]= dynamic_cast<TH1D*>(h);
+                	tot_uncert_quadr[kv.first] = fake_uncert_squared("4lep", f->GetName())*h->Integral()*h->Integral();
         		}
 		       	else {
-		       		TH1D* h = (TH1D*)f->Get("0tau/h_ST");
-		       		if (!h) continue; 
 		       		h_bkg_group[kv.first]->Add(h);
 		       		tot_uncert_quadr[kv.first] += fake_uncert_squared("4lep", f->GetName())*h->Integral()*h->Integral();
 		       	}

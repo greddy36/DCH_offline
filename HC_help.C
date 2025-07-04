@@ -2,7 +2,7 @@
 #include <TFile.h>
 #include <TH1.h>
 #include <TList.h>
-#include "include/XSections.C"
+#include "include/Xsections.C"
 
 const char* sampleKind(std::string fname, std::string hist_name){
 	if (hist_name.find("3lep") > hist_name.length()){//4lep
@@ -99,6 +99,9 @@ void HC_help(const char* ext = "2018.root"){
 		for(int j = 0; j < nfiles; j++){
 			TFile *ifile = new TFile(filename[j],"READ");
 			TH1D* h = (TH1D*)ifile->Get(hist_name.c_str());
+			
+			h->Scale(applyXSec(ifile));
+			
 			if (h) {
                 	double sys_err = h->Integral()*XSec_Uncert(ifile->GetName())/100;
 					//if (sampleKind(filename[j],hist_list[i]) == "prompt") cout<<"XSprompt"<<"\t"<<filename[j]<<"\t"<<hist_list[i]<<"\t"<< h->Integral()<<"\t"<<sys_err*sys_err<<endl;

@@ -52,13 +52,13 @@ double XSec(std::string fname){
 	}
 }
 
-double applyXSec(std::string fname, TFile* ifile){
+double applyXSec(TFile* ifile){
 	double lumi_2016 = 35900, lumi_2017 = 41500, lumi_2018 = 58900.0;//in pb^-1
-	TH1D* hnevts;
 	double xs_weight = 1.0;
+	std::string fname = ifile->GetName();
 	if(XSec(fname)!=1){
-			hnevts = (TH1D*)ifile->Get("hNWEvts");
-			if (!hnevts) hnevts = (TH1D*)ifile->Get("hNEvts");
+			TH1D* hnevts = (TH1D*)ifile->Get("hnevts");
+			if(!hnevts) return xs_weight;
 			if (fname.find("2016") < fname.length()) 
 				xs_weight = lumi_2016*XSec(fname)/hnevts->Integral();
 			else if (fname.find("2017") < fname.length()) 
@@ -66,7 +66,6 @@ double applyXSec(std::string fname, TFile* ifile){
 			else if (fname.find("2018") < fname.length()) 
 				xs_weight = lumi_2018*XSec(fname)/hnevts->Integral();
 	}
-	//else hnevts = (TH1D*)ifile->Get("hNEvts");
 	return xs_weight;
 }
 
