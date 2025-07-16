@@ -53,9 +53,9 @@ void cummilative_hist(TH1D* histogram, TH1D* cumm_bkg, TH1D* signi_hist, THStack
 	cummilative_hist(histogram, cumm_bkg, signi_hist, stack, trend, "No");
 }
 	
-void significance() {
+void significance_test() {
 	    // Categories with input files
-	std::string summary_type = "tau_ch", year = "Run2"; const char* trend = "dec";
+	std::string summary_type = "tau_ch", year = "Run2"; const char* trend = "inc";
     std::map<std::string, std::vector<std::string>> files;
     if (year == "Run2") files = {
     	{"signal",    {"HppM1000_2016.root", "HppM1000_2017.root", "HppM1000_2018.root"}},
@@ -156,13 +156,7 @@ void significance() {
 			}
 			bkg_stack->Draw("HIST");
 			cummilative_hist(hist["signal"], cumm_bkg, signi_hist, bkg_stack, trend,"Yes");
-			
-			signi_hist->Scale(bkg_stack->GetMaximum()/signi_hist->GetMaximum());
 			signi_hist->Draw("HIST SAME");
-			
-			hist["signal"]->SetLineColor(2);
-			hist["signal"]->SetLineWidth(2);
-			hist["signal"]->Scale(10);
 			hist["signal"]->Draw("SAME");
 			
 			// Create a TLatex object
@@ -177,7 +171,7 @@ void significance() {
 			for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW", "ttZ", "WJ", "ZZ", "ST", "TTbar", "ttH", "ZH"}) {
 				legend->AddEntry(hist[bkg_group], bkg_group.c_str(), "f");
 			}
-			legend->AddEntry(hist["signal"], "M1000 x 10", "lep");
+			legend->AddEntry(hist["signal"], "Signal", "lep");
 			legend->AddEntry(signi_hist, "Sigificance", "lep");
 			legend->Draw();
 

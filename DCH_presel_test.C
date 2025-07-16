@@ -25,9 +25,42 @@ void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<
 	}
 }
 
-void FillHists(TDirectory* rootDir, std::map< std::string, double > hist_variable_map, double evtwt_nom, std::map<std::string, TH1D*> h_mll1, std::map<std::string, TH1D*> h_mll2, std::map<std::string, TH1D*> h_mDCH1, std::map<std::string, TH1D*> h_mDCH2, std::map<std::string, TH1D*> h_ll1_pt, std::map<std::string, TH1D*> h_ST, std::map<std::string, TH1D*> h_mZ1, std::map<std::string, TH1D*> h_mZ2, std::map<std::string, TH1D*> h_mZ3, std::map<std::string, TH1D*> h_mZ4, std::map<std::string, TH1D*> h_mT1, std::map<std::string, TH1D*> h_mT2, std::map<std::string, TH1D*> h_mTtot1, std::map<std::string, TH1D*> h_mTtot2, std::map<std::string, TH1D*> h_mT1_opp, std::map<std::string, TH1D*> h_mT2_opp, std::map<std::string, TH1D*> h_mT3_opp, std::map<std::string, TH1D*> h_mT4_opp, std::map<std::string, TH1D*> h_mTtot1_opp, std::map<std::string, TH1D*> h_mTtot2_opp, std::map<std::string, TH1D*> h_mTtot3_opp, std::map<std::string, TH1D*> h_mTtot4_opp, std::map<std::string, TH1D*> h_met, std::map<std::string, TH1D*> h_pT1, std::map<std::string, TH1D*> h_pT2, std::map<std::string, TH1D*> h_pT3, std::map<std::string, TH1D*> h_pT4, std::map<std::string, TH1D*> h_dR1, std::map<std::string, TH1D*> h_dR2, std::map<std::string, TH1D*> h_dR3, std::map<std::string, TH1D*> h_dR4, std::map<std::string, TH1D*> h_dRll, std::map<std::string, TH1D*> h_dRll2, std::map<std::string, TH1D*> h_dR1_met, std::map<std::string, TH1D*> h_dR2_met, std::map<std::string, TH1D*> h_dPhiZ_met, std::map<std::string, TH1D*> h_dPhiW_met, std::map<std::string, TH1D*> h_W_mt, std::map<std::string, TH1D*> h_cat, std::map<std::string, TH1D*> h_gencat){
+void n_minus_one_cutflow(const std::string& excludeCut,
+                         std::map<std::string, TH1D*>& cutflowHists,
+                         const std::string& channel,
+                         const std::map<std::string, bool>& cutbools)
+{
+    const std::vector<std::string> cutNames = {"M_ll1","M_ll2","ST", "dRll", "dRlplm", "mZ", "Zveto"};
+
+    // Safety check
+    if (cutflowHists.find(channel) == cutflowHists.end()) {
+        std::cerr << "Warning: Channel '" << channel << "' not found in cutflow map!" << std::endl;
+        return;
+        
+    }
+
+    bool pass = true;
+    for (const auto& cut : cutNames) {
+        if (cut == excludeCut) continue;
+        auto it = cutbools.find(cut);
+        if (it == cutbools.end() || !it->second) {
+            pass = false;
+            break;
+        }
+    }
+
+    if (pass) {
+        int bin = cutflowHists[channel]->GetXaxis()->FindBin(excludeCut.c_str());
+        cutflowHists[channel]->AddBinContent(bin);
+    }
+}
+
+
+
+void FillHists(TDirectory* rootDir, std::map< std::string, double > hist_variable_map, double evtwt_nom, std::map<std::string, TH1D*> cutflow, std::map<std::string, TH1D*> h_mll1, std::map<std::string, TH1D*> h_mll2, std::map<std::string, TH1D*> h_mDCH1, std::map<std::string, TH1D*> h_mDCH2, std::map<std::string, TH1D*> h_ll1_pt, std::map<std::string, TH1D*> h_ST, std::map<std::string, TH1D*> h_mZ1, std::map<std::string, TH1D*> h_mZ2, std::map<std::string, TH1D*> h_mZ3, std::map<std::string, TH1D*> h_mZ4, std::map<std::string, TH1D*> h_mT1, std::map<std::string, TH1D*> h_mT2, std::map<std::string, TH1D*> h_mTtot1, std::map<std::string, TH1D*> h_mTtot2, std::map<std::string, TH1D*> h_mT1_opp, std::map<std::string, TH1D*> h_mT2_opp, std::map<std::string, TH1D*> h_mT3_opp, std::map<std::string, TH1D*> h_mT4_opp, std::map<std::string, TH1D*> h_mTtot1_opp, std::map<std::string, TH1D*> h_mTtot2_opp, std::map<std::string, TH1D*> h_mTtot3_opp, std::map<std::string, TH1D*> h_mTtot4_opp, std::map<std::string, TH1D*> h_met, std::map<std::string, TH1D*> h_pT1, std::map<std::string, TH1D*> h_pT2, std::map<std::string, TH1D*> h_pT3, std::map<std::string, TH1D*> h_pT4, std::map<std::string, TH1D*> h_dR1, std::map<std::string, TH1D*> h_dR2, std::map<std::string, TH1D*> h_dR3, std::map<std::string, TH1D*> h_dR4, std::map<std::string, TH1D*> h_dRll, std::map<std::string, TH1D*> h_dRll2, std::map<std::string, TH1D*> h_dR1_met, std::map<std::string, TH1D*> h_dR2_met, std::map<std::string, TH1D*> h_dPhiZ_met, std::map<std::string, TH1D*> h_dPhiW_met, std::map<std::string, TH1D*> h_W_mt, std::map<std::string, TH1D*> h_cat, std::map<std::string, TH1D*> h_gencat){
 	rootDir->cd();
 	const char* dirName = rootDir->GetName();
+	cutflow[dirName]->Fill(hist_variable_map["cutflow"], evtwt_nom);
 	h_mll1[dirName]->Fill(hist_variable_map["mll1"], evtwt_nom);
 	h_mll2[dirName]->Fill(hist_variable_map["mll2"], evtwt_nom);
 	h_mDCH1[dirName]->Fill(hist_variable_map["mDCH1"], evtwt_nom);
@@ -85,16 +118,16 @@ void DCH_presel_test(const char* ext = ".root"){
 	}
 	gROOT->Reset();
 	
-	std::string selection = "CR";
+	std::string selection = "Pre";
 
 	double mDCH = 500, mZ = 91.2;
 	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
 		std::string fname = filename[j];
-		//if (fname.find("_2016.") > fname.length()) continue;
+		if (fname.find("_2018.") > fname.length()) continue;
 		//if (fname.find("ttZ") > fname.length() and fname.find("ZH") > fname.length()) continue;
-		//if (XSec(filename[j])==1) continue; 
+		if (XSec(filename[j])==1) continue; 
 		cout<<filename[j]<<endl;
 		
 		const char* o_name;
@@ -126,13 +159,13 @@ void DCH_presel_test(const char* ext = ".root"){
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
 						
-		double xmin = 0, xmax = mDCH+1000; int binw = 100; int nbins = (xmax-xmin)/binw;
+		double xmin = 0, xmax = mDCH+1000; int binw = 10; int nbins = (xmax-xmin)/binw;
 		
 		std::map<std::string, TH1D*> cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat;
 		
 		for(auto rootDirName: {"0tau","1tau","2tau","3tau","3lep0tau","3lep1tau","3lep2tau"}){
 			
-			cutflow[rootDirName] = new TH1D("cutflow", "cutflow", 6, 0, 6);
+			cutflow[rootDirName] = new TH1D("cutflow", "cutflow", 7, 0, 7);
 			cutflow[rootDirName]->Sumw2();
 			h_mll1[rootDirName] = new TH1D("h_mll1", "mll_1", nbins, xmin, xmax);
 			h_mll1[rootDirName]->Sumw2();
@@ -434,31 +467,31 @@ void DCH_presel_test(const char* ext = ".root"){
 					};
 				if (cat <=21){//4-lep
 					if (Ntau == 0){ 
-						FillHists(tau0Dir, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau0Dir, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 						//cout<<calculateMTtot(LepV(H_pair[0].first)+LepV(H_pair[0].second),LepV(H_pair[1].first)+LepV(H_pair[1].second))<<endl;
 					
 					}	
 					else if (Ntau == 1){
-						FillHists(tau1Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if (Ntau == 2){
-						FillHists(tau2Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if (Ntau == 3){
-						FillHists(tau3Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau3Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					
 				}//4-lep	
 				else if(cat >= 22 and cat <=39){//3-lep
 					if(Ntau == 0){
 						cout<<calculateMT(LepV(W_lep_idx), MET)<<"\t"<<W_lep_idx<<endl;
-						FillHists(lep3tau0Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(lep3tau0Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if(Ntau == 1){
-						FillHists(lep3tau1Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(lep3tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if(Ntau == 2){
-						FillHists(lep3tau2Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(lep3tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}			
 				}//3-lep
 			}//no selections
@@ -467,7 +500,7 @@ void DCH_presel_test(const char* ext = ".root"){
 				vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
 				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair); 
 				if (SFopp_pair.size() < 1) continue; 
-				if (met <40)continue; if (strlen(cat_name)!=3) continue;
+				//if (met <40)continue; if (strlen(cat_name)!=3) continue;
 				
 				//if (SFopp_pair.size() < 2) continue;//for ZZ CR test 
 				//cout<< SFopp_pair.size()<<endl;
@@ -540,18 +573,18 @@ void DCH_presel_test(const char* ext = ".root"){
 					//if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10 and abs(mZ3-mZ) > 10 and abs(mZ4-mZ) > 10) continue;
 					if (Ntau == 0){ 
 						if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10 and abs(mZ3-mZ) > 10 and abs(mZ4-mZ) > 10) continue;
-						FillHists(tau0Dir, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );			
+						FillHists(tau0Dir, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );			
 					}	
 					else if (Ntau == 1){
 						if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10 and abs(mZ3-mZ) > 10 and abs(mZ4-mZ) > 10) continue;
-						FillHists(tau1Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if (Ntau == 2){
 						if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10 and abs(mZ3-mZ) > 10 and abs(mZ4-mZ) > 10) continue;
-						FillHists(tau2Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if (Ntau == 3){
-						FillHists(tau3Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau3Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					
 				}//4-lep	
@@ -559,14 +592,14 @@ void DCH_presel_test(const char* ext = ".root"){
 					//if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10) continue;
 					if(Ntau == 0){
 						if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10) continue;
-						FillHists(lep3tau0Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(lep3tau0Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if(Ntau == 1){
 						if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10) continue;
-						FillHists(lep3tau1Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(lep3tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if(Ntau == 2){
-						FillHists(lep3tau2Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(lep3tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}			
 				}//3-lep
 			}//CR
@@ -646,22 +679,22 @@ void DCH_presel_test(const char* ext = ".root"){
 					if (Ntau == 0){ 
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
 						if (st > 400){ continue;}
-						FillHists(tau0Dir, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau0Dir, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 						
 					}	
 					else if (Ntau == 1){
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
 						if (st > 400){ continue;}
-						FillHists(tau1Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if (Ntau == 2){
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
 						if (st > 400){ continue;}
-						FillHists(tau2Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if (Ntau == 3){
 						if (st > 100){ continue;}
-						FillHists(tau3Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(tau3Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					
 				}//4-lep	
@@ -670,16 +703,16 @@ void DCH_presel_test(const char* ext = ".root"){
 					if(Ntau == 0){
 						if (st > 300){ continue;}
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10) continue;
-						FillHists(lep3tau0Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(lep3tau0Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if(Ntau == 1){
 						if (st > 200){ continue;}
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10) continue;
-						FillHists(lep3tau1Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(lep3tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if(Ntau == 2){
 						if (st > 100){ continue;}
-						FillHists(lep3tau2Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						FillHists(lep3tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}			
 				}//3-lep
 			}//VR
@@ -755,49 +788,278 @@ void DCH_presel_test(const char* ext = ".root"){
 																{"gencat", gen_cat}
 					};
 				if (cat <=21){//4-lep
-					//if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10 and abs(mZ3-mZ) > 10 and abs(mZ4-mZ) > 10) continue;
 					if (Ntau == 0){ 
-						if (st < 400){ continue;}
-						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
-						FillHists(tau0Dir, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						std::map<std::string, bool> cutbools = {
+							{"ST", (st >= 300)},
+							{"Zveto", (abs(mZ1-mZ) >= 10 and abs(mZ2-mZ) >= 10 and abs(mZ3-mZ) >= 10 and abs(mZ4-mZ) >= 10)},
+							{"dRll", (dRll <= 2.8 and dRll >= 0.4)},
+							{"M_ll1", mll1 >= 400},
+							{"M_ll2", mll2 >= 400},
+							{"mZ", (mZ1 >= 200)},
+							{"dRlplm", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second)) >= 1.5}
+						};
+						bool pass = true;
+						for (const auto& cutName : {"ST", "Zveto", "dRll", "M_ll1", "M_ll2", "mZ", "dRlplm"}) {
+							n_minus_one_cutflow(cutName, cutflow, "0tau", cutbools); 
+							pass = pass and cutbools[cutName];
+						}
+						if (!pass) continue;
+						
+ 						FillHists(tau0Dir, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 						
 					}	
 					else if (Ntau == 1){
-						if (st < 400){ continue;}
-						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
-						FillHists(tau1Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						std::map<std::string, bool> cutbools = {
+							{"ST", (st > 400)},
+							{"Zveto", (abs(mZ1-mZ) >= 10 and abs(mZ2-mZ) >= 10 and abs(mZ3-mZ) >= 10 and abs(mZ4-mZ) >= 10)},
+							{"dRll", (dRll <= 2.8 and dRll >= 0.4)},
+							{"M_ll1", mll1 >= 350},
+							{"M_ll2", mll2 >= 300},
+							{"mZ", (mZ1 >= 150)},
+							{"dRlplm", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second)) >= 1.5}
+						};
+						
+						bool pass = true;
+						for (const auto& cutName : {"ST", "Zveto", "dRll", "M_ll1", "M_ll2", "mZ", "dRlplm"}) {
+							n_minus_one_cutflow(cutName, cutflow, "1tau", cutbools); 
+							pass = pass and cutbools[cutName];
+						}
+						if (!pass) continue;
+						
+						FillHists(tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if (Ntau == 2){
-						if (st < 400){ continue;}
-						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
-						FillHists(tau2Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						std::map<std::string, bool> cutbools = {
+							{"ST", (st > 400)},
+							{"Zveto", (abs(mZ1-mZ) >= 10 and abs(mZ2-mZ) >= 10 and abs(mZ3-mZ) >= 10 and abs(mZ4-mZ) >= 10)},
+							{"dRll", (dRll <= 2.8 and dRll >= 0.4)},
+							{"M_ll1", mll1 >= 200},
+							{"M_ll2", mll2 >= 300},
+							{"mZ", (mZ1 >= 100)},
+							{"dRlplm", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second)) >= 1.25}
+						};
+						
+						bool pass = true;
+						for (const auto& cutName : {"ST", "Zveto", "dRll", "M_ll1", "M_ll2", "mZ", "dRlplm"}) {
+							n_minus_one_cutflow(cutName, cutflow, "2tau", cutbools); 
+							pass = pass and cutbools[cutName];
+						}
+						if (!pass) continue;
+						
+						FillHists(tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if (Ntau == 3){
-						if (st < 100){ continue;}
-						FillHists(tau3Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						std::map<std::string, bool> cutbools = {
+							{"ST", (st > 100)},
+							{"Zveto", true},
+							{"dRll", (dRll <= 2.8 and dRll >= 0.4)},
+							{"M_ll1", mll1 >= 200},
+							{"M_ll2", mll2 >= 200},
+							{"mZ", (mZ1 >= 100)},
+							{"dRlplm", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second)) >= 1.25}
+						};
+						
+						bool pass = true;
+						for (const auto& cutName : {"ST", "Zveto", "dRll", "M_ll1", "M_ll2", "mZ", "dRlplm"}) {
+							n_minus_one_cutflow(cutName, cutflow, "3tau", cutbools); 
+							pass = pass and cutbools[cutName];
+						}
+						if (!pass) continue;
+						
+						FillHists(tau3Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					
 				}//4-lep	
 				else if(cat >= 22 and cat <=39){//3-lep
-					//if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10) continue;
-					if(Ntau == 0){
-						if (st < 300){ continue;}
-						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10) continue;
-						FillHists(lep3tau0Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					if(Ntau == 0){	
+						std::map<std::string, bool> cutbools = {
+							{"ST", (st > 300)},
+							{"Zveto", (abs(mZ1-mZ) >= 10 and abs(mZ2-mZ) >= 10)},
+							{"dRll", (dRll <= 2.8 and dRll >= 1.2)},
+							{"M_ll1", (mll1 >= 400)},
+							{"M_ll2", true},
+							{"mZ", (mZ1 >= 200)},
+							{"dRlplm", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second)) >= 1.5}
+						};
+						
+						bool pass = true;
+						for (const auto& cutName : {"ST", "Zveto", "dRll", "M_ll1", "M_ll2", "mZ", "dRlplm"}) {
+							n_minus_one_cutflow(cutName, cutflow, "3lep0tau", cutbools); 
+							pass = pass and cutbools[cutName];
+						}
+						if (!pass) continue;
+						
+						FillHists(lep3tau0Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if(Ntau == 1){
-						if (st < 200){ continue;}
-						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10) continue;
-						FillHists(lep3tau1Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						std::map<std::string, bool> cutbools = {
+							{"ST", (st > 200)},
+							{"Zveto", (abs(mZ1-mZ) >= 10 and abs(mZ2-mZ) >= 10)},
+							{"dRll", (dRll <= 2.8 and dRll >= 1.2)},
+							{"M_ll1", (mll1 >= 400 )},
+							{"M_ll2", true},
+							{"mZ", (mZ1 >= 150)},
+							{"dRlplm", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second)) >= 1.5}
+						};
+						
+						bool pass = true;
+						for (const auto& cutName : {"ST", "Zveto", "dRll", "M_ll1", "M_ll2", "mZ", "dRlplm"}) {
+							n_minus_one_cutflow(cutName, cutflow, "3lep1tau", cutbools); 
+							pass = pass and cutbools[cutName];
+						}
+						if (!pass) continue;
+
+						FillHists(lep3tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if(Ntau == 2){
-						if (st < 100){ continue;}
-						FillHists(lep3tau2Dir, hist_variable_map, evtwt_nom,h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+						std::map<std::string, bool> cutbools = {
+							{"ST", (st > 100)},
+							{"Zveto", (abs(mZ1-mZ) >= 10 and abs(mZ2-mZ) >= 10)},
+							{"dRll", (dRll <= 2.8 and dRll >= 1.2)},
+							{"M_ll1", (mll1 >= 400)},
+							{"M_ll2", true},
+							{"mZ", (mZ1 >= 100)},
+							{"dRlplm", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second)) >= 1.5}
+						};
+						
+						bool pass = true;
+						for (const auto& cutName : {"ST", "Zveto", "dRll", "M_ll1", "M_ll2", "mZ", "dRlplm"}) {
+							n_minus_one_cutflow(cutName, cutflow, "3lep2tau", cutbools); 
+							pass = pass and cutbools[cutName];
+						}
+						if (!pass) continue;
+						
+						FillHists(lep3tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}			
 				}//3-lep
 			}//MY SLECTIONS
 //===================================================================================
-			
+			if(selection == "test"){//######OLD PRe##########
+			vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
+				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair);
+				if (SFopp_pair.size() < 1) continue;
+				//cout<< SFopp_pair.size()<<endl;
+				double mll1 = (LepV(H_pair[0].first)+LepV(H_pair[0].second)).M();
+				double mZ1 = (LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)).M();
+				double mZ2 = (LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second)).M();
+				double dRll = deltaR(LepV(H_pair[0].first),LepV(H_pair[0].second));
+				double mll2 = (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M();
+				double mZ3 = (LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second)).M();
+				double mZ4 = (LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second)).M();
+				double dRll2 = deltaR(LepV(H_pair[1].first),LepV(H_pair[1].second));
+				double mT1 = calculateMT(LepV(H_pair[0].first)+LepV(H_pair[0].second),MET);
+				double mT2 = calculateMT(LepV(H_pair[1].first)+LepV(H_pair[1].second),MET);
+				double mTtot1 = calculateMTtot(LepV(H_pair[0].first),LepV(H_pair[0].second));
+				double mTtot2 = calculateMTtot(LepV(H_pair[1].first),LepV(H_pair[1].second));
+				double mT1_opp = calculateMT(LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second),MET);
+				double mT2_opp = calculateMT(LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second),MET);
+				double mT3_opp = calculateMT(LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second),MET);
+				double mT4_opp = calculateMT(LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second),MET);
+				double mTtot1_opp = calculateMTtot(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second));
+				double mTtot2_opp = calculateMTtot(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second));
+				double mTtot3_opp = calculateMTtot(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
+				double mTtot4_opp = calculateMTtot(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
+				int W_lep_idx =remaining_idx(SFopp_pair, cat_name);
+
+				std::map< std::string, double > hist_variable_map = {
+																{"cutflow", 0},
+																{"mll1", mll1},
+																{"mll2", mll2},
+																{"mDCH1", mll1},
+																{"mDCH2", mll2},
+																{"ll1_pt", (LepV(H_pair[0].first)+LepV(H_pair[0].second)).Pt()},
+																{"ST", st},
+																{"mZ1", mZ1},
+																{"mZ2", mZ2},
+																{"mZ3", mZ3},
+																{"mZ4", mZ4},
+																{"mT1", mT1},
+																{"mT2", mT2},
+																{"mTtot1", mTtot1},
+																{"mTtot2", mTtot2},
+																{"mT1_opp", mT1_opp},
+																{"mT2_opp", mT2_opp},
+																{"mT3_opp", mT3_opp},
+																{"mT4_opp", mT4_opp},
+																{"mTtot1_opp", mTtot1_opp},
+																{"mTtot2_opp", mTtot2_opp},
+																{"mTtot3_opp", mTtot3_opp},
+																{"mTtot4_opp", mTtot4_opp},
+																{"met", met},
+																{"pT1", leptons[0].pt},
+																{"pT2", leptons[1].pt},
+																{"pT3", leptons[2].pt},
+																{"pT4", leptons[3].pt},
+																{"dR1", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second))},
+																{"dR2", deltaR(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second))},
+																{"dR3", deltaR(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second))},
+																{"dR4", deltaR(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second))},
+																{"dRll", dRll},
+																{"dRll2", dRll2},
+																{"dR1_met", deltaR((LepV(H_pair[0].first)+LepV(H_pair[0].second)), MET)},
+																{"dR2_met", deltaR((LepV(H_pair[1].first)+LepV(H_pair[1].second)), MET)},
+																{"dPhiZ_met", deltaPhi((LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)), MET)},
+																{"dPhiW_met", deltaPhi(LepV(W_lep_idx), MET)},
+																{"W_mt", calculateMT(LepV(W_lep_idx), MET)},
+																{"cat", cat},
+																{"gencat", gen_cat}
+					};
+				if (cat <=21){//4-lep
+					if (Ntau == 0){
+						if (st < 700){ continue;}//ST
+						if (dRll > 4 or dRll2 > 4){ continue;}
+						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10){ continue;}
+						//if (mll1 < 400 and mll2 < 400 ){ continue;}  
+						if ((mll1+mll2)/2 < 200 ){ continue;}  
+						FillHists(tau0Dir, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					}	
+					else if (Ntau == 1){
+						if (st < 600){ continue;}//ST
+						if (dRll > 3.6 or dRll2 > 3.6){ continue;}
+						if (abs(mZ1-mZ) < 25 or abs(mZ2-mZ) < 25 or abs(mZ3-mZ) < 25 or abs(mZ4-mZ) < 25){ continue;}
+						//if (mll1 < 250 and mll2 < 250 ){ continue;}  
+						if ((mll1+mll2)/2 < 250 ){ continue;}  
+						FillHists(tau1Dir, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					}
+					else if (Ntau == 2){
+						if (st < 450){ continue;}//ST
+						if (dRll > 3.9 or dRll2 > 3.9){ continue;}
+						if (abs(mZ1-mZ) < 85 or abs(mZ2-mZ) < 85 or abs(mZ3-mZ) < 85 or abs(mZ4-mZ) < 85){ continue;}
+						//if (mll1 < 150 and mll2 < 150 ){ continue;}  
+						if ((mll1+mll2)/2 < 150 ){ continue;}  
+						FillHists(tau2Dir, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					}
+					if (Ntau > 2){
+						if (st < 450){ continue;}//ST
+						if (dRll > 3.9 or dRll2 > 3.9){ continue;}
+						if (abs(mZ1-mZ) < 5 or abs(mZ2-mZ) < 5 or abs(mZ3-mZ) < 5 or abs(mZ4-mZ) < 5){ continue;}
+						//if (mll1 < 100 and mll2 < 100 ){ continue;}  
+						if ((mll1+mll2)/2 < 100 ){ continue;}  
+						FillHists(tau3Dir, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					}
+				}//4-lep	
+				else if(cat >= 22 and cat <=39 and Ntau !=3 ){//3-lep	
+					//if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10) continue;
+					if(Ntau == 0){
+						if (st < 525){ continue;}
+						if (mll1 < 400) continue;
+						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10) continue;
+						FillHists(lep3tau0Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					}
+					else if(Ntau == 1){
+						if (st < 525){ continue;}
+						if (mll1 < 400) continue;
+						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10) continue;
+						FillHists(lep3tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					}
+					else if(Ntau == 2){
+						if (st < 525){ continue;}
+						if (mll1 < 400) continue;
+						FillHists(lep3tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dPhiZ_met, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					}			
+
+				}//3-lep
+			}//test	
 		}//evt loop
 		/*h_Xmass_0t->Write();
 		h_Xmass_1t->Write();
@@ -809,6 +1071,7 @@ void DCH_presel_test(const char* ext = ".root"){
 		
 		
 		tau0Dir->cd();
+		cutflow["0tau"]->Write();
 		h_mll1["0tau"]->Write();
 		h_mll2["0tau"]->Write();
 		h_mDCH1["0tau"]->Write();
@@ -851,6 +1114,7 @@ void DCH_presel_test(const char* ext = ".root"){
 		h_gencat["0tau"]->Write();
 		
 		tau1Dir->cd();
+		cutflow["1tau"]->Write();
 		h_mll1["1tau"]->Write();
 		h_mll2["1tau"]->Write();
 		h_mDCH1["1tau"]->Write();
@@ -893,6 +1157,7 @@ void DCH_presel_test(const char* ext = ".root"){
 		h_gencat["1tau"]->Write();
 		
 		tau2Dir->cd();
+		cutflow["2tau"]->Write();
 		h_mll1["2tau"]->Write();
 		h_mll2["2tau"]->Write();
 		h_mDCH1["2tau"]->Write();
@@ -935,6 +1200,7 @@ void DCH_presel_test(const char* ext = ".root"){
 		h_gencat["2tau"]->Write();
 		
 		tau3Dir->cd();
+		cutflow["3tau"]->Write();
 		h_mll1["3tau"]->Write();
 		h_mll2["3tau"]->Write();
 		h_mDCH1["3tau"]->Write();
@@ -977,6 +1243,7 @@ void DCH_presel_test(const char* ext = ".root"){
 		h_gencat["3tau"]->Write();
 		
 		lep3tau0Dir->cd();
+		cutflow["3lep0tau"]->Write();
 		h_mll1["3lep0tau"]->Write();
 		h_mll2["3lep0tau"]->Write();
 		h_mDCH1["3lep0tau"]->Write();
@@ -1019,6 +1286,7 @@ void DCH_presel_test(const char* ext = ".root"){
 		h_gencat["3lep0tau"]->Write();
 		
 		lep3tau1Dir->cd();
+		cutflow["3lep1tau"]->Write();
 		h_mll1["3lep1tau"]->Write();
 		h_mll2["3lep1tau"]->Write();
 		h_mDCH1["3lep1tau"]->Write();
@@ -1061,6 +1329,7 @@ void DCH_presel_test(const char* ext = ".root"){
 		h_gencat["3lep1tau"]->Write();
 		
 		lep3tau2Dir->cd();
+		cutflow["3lep2tau"]->Write();
 		h_mll1["3lep2tau"]->Write();
 		h_mll2["3lep2tau"]->Write();
 		h_mDCH1["3lep2tau"]->Write();

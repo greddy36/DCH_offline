@@ -469,7 +469,7 @@ void DCH_presel(const char* ext = ".root"){
 				vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
 				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair); 
 				if (SFopp_pair.size() < 1) continue; 
-				if (met <40)continue; if (strlen(cat_name)!=3) continue;
+				//if (met <40)continue; if (strlen(cat_name)!=3) continue;
 				
 				//if (SFopp_pair.size() < 2) continue;//for ZZ CR test 
 				//cout<< SFopp_pair.size()<<endl;
@@ -757,7 +757,6 @@ void DCH_presel(const char* ext = ".root"){
 																{"gencat", gen_cat}
 					};
 				if (cat <=21){//4-lep
-					//if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10 and abs(mZ3-mZ) > 10 and abs(mZ4-mZ) > 10) continue;
 					if (Ntau == 0){ 
 						if (st < 400){ continue;}
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
@@ -781,7 +780,6 @@ void DCH_presel(const char* ext = ".root"){
 					
 				}//4-lep	
 				else if(cat >= 22 and cat <=39){//3-lep
-					//if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10) continue;
 					if(Ntau == 0){
 						if (st < 300){ continue;}
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10) continue;
