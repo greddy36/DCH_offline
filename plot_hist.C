@@ -38,7 +38,12 @@ void plotAllHistograms(const char* filename) {
             if (name.find("signal") < name.length()) histogram->SetTitle(const_cast<char*>(name.c_str()));
             else if (name.find("prompt") < name.length()) histogram->SetTitle(const_cast<char*>(name.c_str()));
             else if (name.find("fake") < name.length()) histogram->SetTitle(const_cast<char*>(name.c_str()));
+            TLatex latex;
+            latex.SetNDC();
+            string integral = std::to_string(histogram->Integral());
             histogram->Draw("hist");
+            latex.DrawLatex(0.5,0.6,const_cast<char*>(integral.c_str()));
+            
             name.append(".png");
             char* title = const_cast<char*>(name.c_str());//converting string to char
 			canvas->SaveAs(title);
@@ -52,7 +57,7 @@ void plotAllHistograms(const char* filename) {
 
 void plot_hist() {
     // Replace "your_file.root" with the actual path to your ROOT file
-    const char* filename = "hist_MY/nuisance_hist_test.root";
+    const char* filename = "hist_RJM_old/nuisance_hist_test_RJM_old.root";
 
     // Call the function to plot all histograms in the file
     plotAllHistograms(filename);

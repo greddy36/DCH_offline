@@ -63,6 +63,6 @@ void plotAllHistogramsStacked(const char* filename) {
 }
 
 void plot_hist_test() {
-    const char* filename = "hist_MY/nuisance_hist_test.root";
+    const char* filename = "nuisance_hist_2018_OLDallbkginprompt.root";
     plotAllHistogramsStacked(filename);
 }

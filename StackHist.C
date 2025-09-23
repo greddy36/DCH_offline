@@ -215,12 +215,12 @@ void StackHist() {
     std::map<std::string, std::vector<TFile*>> open_files;
     for (auto& kv : files) {
 		for (const auto& fname : kv.second) {
-		    TFile* file = new TFile(("hist_CR_WZ/" + fname).c_str(), "READ");
+		    TFile* file = new TFile(("hist/" + fname).c_str(), "READ");
 		    if (!file || file->IsZombie()) continue;
 	        open_files[kv.first].push_back(file);
 	    }
 	}
-	TFile *ifile_D1 = new TFile("hist_CR_WZ/EGamma_2018.root","READ");
+	TFile *ifile_D1 = new TFile("hist/EGamma_2018.root","READ");
   
 	for (int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++) {
 		gStyle->SetOptStat(0);
@@ -421,7 +421,7 @@ void StackHist() {
 		line1->Draw();line2->Draw();line3->Draw();
 
 		// Output
-		std::string s =  "hist_CR/", s1, s2;
+		std::string s =  "hist/", s1, s2;
 		s1 = s + hist_list[i]+".png";
 		//s2 = s + hist_list[i]+".svg";
 		char* title1 = const_cast<char*>(s1.c_str());//converting string to char

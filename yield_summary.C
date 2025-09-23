@@ -29,7 +29,7 @@ void yield_summary() {
     std::vector<std::string> hist_list;
     if (summary_type == "tau_ch") {
     	hist_list = { "0tau/h_cat","1tau/h_cat","2tau/h_cat","3tau/h_cat","3lep0tau/h_cat","3lep1tau/h_cat","3lep2tau/h_cat"};
-    	bkg_stack = new THStack("bkg_stack", "Yield summary in CR_WZ;;Events");
+    	bkg_stack = new THStack("bkg_stack", "Yield summary in VR;;Events");
     }
     else if  (summary_type == "3lep") {
     	hist_list = {"h_met_ee","h_met_eee","h_met_eem","h_met_eet","h_metv_ett","h_met_mm","h_met_emm","h_met_mmm","h_met_mmt","h_metv_mtt"};
@@ -110,6 +110,7 @@ void yield_summary() {
                    "WJetsToLNu_HT-600To800_2017.root", "WJetsToLNu_HT-800To1200_2017.root", "WJetsToLNu_HT-1200To2500_2017.root", "WJetsToLNu_HT-2500ToInf_2017.root","WJetsToLNu_NLO_2018.root", "WJetsToLNu_HT-70To100_2018.root", "WJetsToLNu_HT-100To200_2018.root", 
                    "WJetsToLNu_HT-200To400_2018.root", "WJetsToLNu_HT-400To600_2018.root", 
                    "WJetsToLNu_HT-600To800_2018.root", "WJetsToLNu_HT-800To1200_2018.root", "WJetsToLNu_HT-1200To2500_2018.root", "WJetsToLNu_HT-2500ToInf_2018.root"}},
+        {"QCD",   {"QCD_HT1000to1500_2016.root", "QCD_HT1000to1500_2017.root", "QCD_HT100to200_2016.root", "QCD_HT100to200_2017.root", "QCD_HT1500to2000_2016.root", "QCD_HT1500to2000_2017.root", "QCD_HT2000toInf_2016.root", "QCD_HT2000toInf_2017.root", "QCD_HT200to300_2016.root", "QCD_HT200to300_2017.root", "QCD_HT300to500_2016.root", "QCD_HT300to500_2017.root", "QCD_HT500to700_2016.root", "QCD_HT500to700_2017.root", "QCD_HT50to100_2016.root", "QCD_HT50to100_2017.root", "QCD_HT700to1000_2016.root", "QCD_HT700to1000_2017.root"}},
         {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo4L_2016.root","ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root","ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
         {"ST",    {"ST_s-channel_2016.root", "ST_t-channel_antitop_2016.root", "ST_t-channel_top_2016.root", 
                    "ST_tW_antitop_2016.root", "ST_tW_top_2016.root","ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", 
@@ -123,7 +124,7 @@ void yield_summary() {
 	   
     std::map<std::string, TH1D*> h_summaries;
     std::map<std::string, int> fill_colors = {
-        {"DY", 7}, {"VV", 8}, {"VVV", 6}, {"ttW", 4}, {"ttZ", 2}, {"WJ", 9}, {"ZZ", 5},
+        {"DY", 7}, {"VV", 8}, {"VVV", 6}, {"ttW", 4}, {"ttZ", 2}, {"WJ", 9}, {"QCD", 11}, {"ZZ", 5},
 		    {"ST", 30}, {"TTbar", 46}, {"other", 28},{"ZH", 29}, {"data", 1}
     };
 
@@ -132,7 +133,7 @@ void yield_summary() {
     for (auto& kv : files) {
         for (const auto& fname : kv.second) {
         	TFile* file;
-            if (summary_type == "tau_ch") file = new TFile(("hist_CR_WZ/" + fname).c_str(), "READ");
+            if (summary_type == "tau_ch") file = new TFile(("hist_VR/" + fname).c_str(), "READ");
             else file = new TFile(("hist_test_nopair/" + fname).c_str(), "READ");
             if (!file || file->IsZombie()) continue;
 	        open_files[kv.first].push_back(file);
@@ -187,7 +188,7 @@ void yield_summary() {
     // Stack backgrounds
     TH1D* h_bkg_total = (TH1D*)h_summaries["DY"]->Clone("h_bkg_total");
     h_bkg_total->Reset(); h_bkg_total->Sumw2();
-    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW","ttZ", "WJ", "ZZ","ZH", "ST", "TTbar", "other"}) {
+    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW","ttZ", "WJ", "QCD", "ZZ","ZH", "ST", "TTbar", "other"}) {
         bkg_stack->Add(h_summaries[bkg_group]);
         bkg_stack->SetMinimum(1); // Show zero bins
         h_bkg_total->Add(h_summaries[bkg_group]);
@@ -221,11 +222,11 @@ void yield_summary() {
 
     //auto legend = new TLegend(0.7, 0.6, 0.88, 0.88);
     auto legend = new TLegend(0.12, 0.6, 0.3, 0.88);
-    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW","ttZ", "WJ", "ZZ","ZH", "ST", "TTbar", "other"}) {
+    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW","ttZ", "WJ","QCD", "ZZ","ZH", "ST", "TTbar", "other"}) {
         legend->AddEntry(h_summaries[bkg_group], bkg_group.c_str(), "f");
     }
     legend->AddEntry(h_summaries["data"], "Data", "lep");
-    //legend->Draw();
+    legend->Draw();
 
     // Ratio histogram: data / MC
     TH1D* h_ratio = (TH1D*)h_summaries["data"]->Clone("h_ratio");

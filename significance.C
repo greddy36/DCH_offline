@@ -4,9 +4,21 @@
 #include "include/Xsections.C"
 
 double getBinSignificance(double s, double b) {
-    if (b <= 0) return 0;
+    if (s <= 0 or b <= 0) return 0;
     return sqrt(2 * ((s + b) * log(1 + s/b) - s));//Asimov/Posisson approximation
 }
+
+double getBinSignificanceWithUncertainty(double s, double b, double sigma_b) {
+    if (s <= 0 or b <= 0) return 0;
+    if (sigma_b == 0) return getBinSignificance(s, b);
+
+    double term1 = (s + b) * log((s + b) * (b + sigma_b * sigma_b) / (b * b + (s + b) * sigma_b * sigma_b));
+    double term2 = (b * b / (sigma_b * sigma_b)) * log(1 + (sigma_b * sigma_b * s) / (b * (b + sigma_b * sigma_b)));
+    double Z = sqrt(2 * (term1 - term2));
+
+    return Z;
+}
+
 
 void cummilative_hist(TH1D* histogram, TH1D* cumm_bkg, TH1D* signi_hist, THStack* stack, const char* trend, const char* isSig){
 	TH1D* h_cumm = new TH1D("h_cumm", histogram->GetTitle(), histogram->GetNbinsX(), histogram->GetXaxis()->GetXmin() , histogram->GetXaxis()->GetXmax());
@@ -16,7 +28,7 @@ void cummilative_hist(TH1D* histogram, TH1D* cumm_bkg, TH1D* signi_hist, THStack
 	h_cumm->SetFillColor(histogram->GetFillColor());
 	h_cumm->SetLineColor(histogram->GetLineColor());
 	if (isSig == "Yes"){
-		for (int i =0; i < histogram->GetNbinsX(); i++){ 
+		for (int i =0; i <= histogram->GetNbinsX(); i++){ 
 			if (trend == "inc"){
 				tmp_val = histogram->Integral(0,i);
 			}
@@ -27,12 +39,15 @@ void cummilative_hist(TH1D* histogram, TH1D* cumm_bkg, TH1D* signi_hist, THStack
 				tmp_val = histogram->GetBinContent(i);
 			}
 			h_cumm->SetBinContent(i, tmp_val);
-			signi_hist->SetBinContent(i, getBinSignificance(tmp_val, cumm_bkg->GetBinContent(i)));
+			signi_hist->SetBinContent(i, getBinSignificanceWithUncertainty(tmp_val, cumm_bkg->GetBinContent(i),0.1*cumm_bkg->GetBinContent(i)));
+			//signi_hist->SetBinContent(i, getBinSignificance(tmp_val, cumm_bkg->GetBinContent(i)));
 		}
-		h_cumm->Draw("hist same");//signal cummilative hist
+		//h_cumm->Scale(cumm_bkg->Integral()/h_cumm->Integral());
+		h_cumm->Draw("hist same");//signal1 cummilative hist
+		cout<<signi_hist->Integral()<<endl;
 	}
 	else{//bkgs
-		for (int i =0; i < histogram->GetNbinsX(); i++){ 
+		for (int i =0; i <= histogram->GetNbinsX(); i++){ 
 			if (trend == "inc"){
 				tmp_val = histogram->Integral(0,i);
 			}
@@ -55,10 +70,11 @@ void cummilative_hist(TH1D* histogram, TH1D* cumm_bkg, TH1D* signi_hist, THStack
 	
 void significance() {
 	    // Categories with input files
-	std::string summary_type = "tau_ch", year = "Run2"; const char* trend = "dec";
+	std::string summary_type = "tau_ch", year = "Run2"; const char* trend = "";
     std::map<std::string, std::vector<std::string>> files;
     if (year == "Run2") files = {
-    	{"signal",    {"HppM1000_2016.root", "HppM1000_2017.root", "HppM1000_2018.root"}},
+    	{"signal1",    {"HppM500_2016.root", "HppM500_2017.root", "HppM500_2018.root"}},
+    	{"signal2",    {"HppM1300_2016.root", "HppM1300_2017.root", "HppM1300_2018.root"}},
         {"DY",    {"DYJetsToLLM10to50_2016.root", "DYJetsToLLM50_2016.root","DYJetsToLLM10to50_2017.root", "DYJetsToLLM50_2017.root","DYJetsToLLM10to50_2018.root", "DYJetsToLLM50_2018.root"}},
         {"VV",    {"WW_2016.root", "WWTo2L2Nu_2016.root", "WZTo2Q2L_2016.root", "WZTo3LNu_2016.root","WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root","WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
         {"VVV",   {"WWW_2016.root", "WZZ_2016.root", "ZZZ_2016.root","WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root","WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
@@ -84,23 +100,59 @@ void significance() {
     std::map<std::string, std::vector<TFile*>> open_files;
     for (auto& kv : files) {
 		for (const auto& fname : kv.second) {
-		    TFile* file = new TFile(("hist/" + fname).c_str(), "READ");
+		    TFile* file = new TFile(("hist_MY_mll/" + fname).c_str(), "READ");
 		    if (!file || file->IsZombie()) continue;
 	        open_files[kv.first].push_back(file);
 	    }
 	}
-	TFile *ifile_D1 = new TFile("hist/HppM500_2016.root","READ");
+	TFile *ifile_D1 = new TFile("hist_MY_mll/HppM500_2018.root","READ");
 	
-	std::string root_dir[] = {"0tau/","1tau/","2tau/","3tau/","3lep0tau/","3lep1tau/","3lep2tau/"};
+	std::string root_dir[] = {"0tau/","1tau/","2tau/","3tau/"/*,"3lep0tau/","3lep1tau/","3lep2tau/"*/};
 	TCanvas* canvas = new TCanvas("canvas", "Stacked Histograms", 800, 700);	
 	gStyle->SetOptStat(0);	//gPad->SetLogy();
 	for(int j = 0; j < sizeof(root_dir)/sizeof(root_dir[0]); j++){
-		std::string hist_list[] = {"h_mll1", "h_mll2", "h_ST", "h_mZ1" ,"h_met","h_pT1","h_pT2","h_pT3","h_pT4","h_dR1","h_dR2","h_dR3","h_dR4","h_dRll","h_dRll2"};
-		const char *hist_names[] = { "M1_{ll} mass", "M2_{ll} mass", "ST", "M1_{l+l-}","MET","Leading pT","Sub-Leading pT","3rd pT","4th pT","dR between 1st(+-) leptons","dR between 2nd(+-) leptons","dR between 3rd(+-) leptons","dR between 4th(+-) leptons","dR between 1st pair", "dR between 2nd pair"};
+		/*std::string hist_list[] = {"h_mll1", "h_mll2", "h_ST", "h_mZ1" ,"h_mZ2" ,"h_mZ3" ,"h_mZ4" ,"h_met","h_mTtot1","h_mTtot1_opp","h_mTtot2","h_mTtot2_opp","h_dR1","h_dR2","h_dR3","h_dR4","h_dRll","h_dRll2","h_max_dR_ll","h_max_dR_lplm"};
+		const char *hist_names[] = { "M1_{ll} mass", "M2_{ll} mass", "ST", "M1_{l+l-}","M2_{l+l-}","M3_{l+l-}","M4_{l+l-}","MET","Leading pT","Sub-Leading pT","3rd pT","4th pT","dR between 1st(+-) leptons","dR between 2nd(+-) leptons","dR between 3rd(+-) leptons","dR between 4th(+-) leptons","dR between 1st pair", "dR between 2nd pair","max dR between ll","max dR between 1st and 2nd 1+l-"};*/
+		/*std::string hist_list[] = {"h_0.0","h_0.1","h_0.2","h_0.3","h_0.4","h_0.5","h_0.6","h_0.7","h_0.8","h_0.9","h_1.0"};
+		std::string hist_names[] = {"h_0.0","h_0.1","h_0.2","h_0.3","h_0.4","h_0.5","h_0.6","h_0.7","h_0.8","h_0.9","h_1.0"};*/ 
+		std::string hist_list[] = {
+		"h_mT2",
+		"h_mTtot1",
+		"h_mTtot2",
+		"h_mT1_opp",
+		"h_mT2_opp",
+		"h_mT3_opp",
+		"h_mT4_opp",
+		"h_mTtot1_opp",
+		"h_mTtot2_opp",
+		"h_mTtot3_opp",
+		"h_mTtot4_opp",
+		"h_mDCH1",
+		"h_mDCH2",
+		"h_mll1",
+		"h_mll2"};
+		std::string hist_names[] = {
+		"w = 0.0",
+		"w = 0.1",
+		"w = 0.2",
+		"w = 0.3",
+		"w = 0.4",
+		"w = 0.5",
+		"w = 0.6",
+		"w = 0.7",
+		"w = 0.8",
+		"w = 0.9",
+		"w = 1.0",
+		"h_mDCH1",
+		"h_mDCH2",
+		"h_mll1",
+		"h_mll2"};
+		
 		for(int i = 0; i < sizeof(hist_names)/sizeof(hist_names[0]); i++){
 			cout<<hist_names[i]<<endl;
 			hist_list[i] = root_dir[j] + hist_list[i];
-			char* hist_name = const_cast<char*>(hist_list[i].c_str());//converting string to char
+			//char* hist_name = const_cast<char*>(hist_list[i].c_str());
+			char* hist_name = const_cast<char*>(hist_names[i].c_str());
 			THStack* bkg_stack = new THStack("bkg_stack", hist_name);
 			std::map<std::string, TH1D*> hist;
 			std::map<std::string, int> fill_colors = {
@@ -108,6 +160,7 @@ void significance() {
 				{"ST", 30}, {"TTbar", 46}, {"ttH", 28},{"ZH", 29}, {"data", 1}
 			};
 			int bins = 0;
+			cout<< hist_list[i]<<endl;
 			for (auto& kv : open_files) {
 				TH1D* tmp = (TH1D*)ifile_D1->Get(hist_list[i].c_str());
 				hist[kv.first]=(TH1D*)tmp->Clone();
@@ -115,10 +168,12 @@ void significance() {
 				hist[kv.first]->Reset();
 				double tot_uncert_quadr[tmp->GetNbinsX()];
 				for (auto* f : kv.second) {
-				    TH1D* h = dynamic_cast<TH1D*>(f->Get(hist_list[i].c_str()));
+				    //TH1D* h = dynamic_cast<TH1D*>(f->Get(hist_list[i].c_str()));
+				    TH1D* h = (TH1D*)f->Get(hist_list[i].c_str());
 				    if (!h) continue;
 				    h->Sumw2();
 				    h->Scale(applyXSec(f));
+				    //cout<<h->Integral()<<endl;
 				    h->Rebin(5);
 					if (kv.first != "data") {
 						for (int ib = 1; ib <= h->GetNbinsX(); ib++) {
@@ -143,27 +198,32 @@ void significance() {
 			hist["ZZ"]->Scale(1.31366);
 			
 			//################## Significance ########################
-			TH1D* signi_hist = new TH1D("signi_hist", "", hist["signal"]->GetNbinsX(), hist["signal"]->GetXaxis()->GetXmin() , hist["signal"]->GetXaxis()->GetXmax());
+			TH1D* signi_hist = new TH1D("signi_hist", "", hist["signal1"]->GetNbinsX(), hist["signal1"]->GetXaxis()->GetXmin() , hist["signal1"]->GetXaxis()->GetXmax());
 			signi_hist->SetLineWidth(3);
 			signi_hist->SetLineStyle(2);
 			signi_hist->SetLineColor(1);
 			//########################################################
 
-			TH1D *cumm_bkg = new TH1D("cumm_bkg", "", hist["signal"]->GetNbinsX(), hist["signal"]->GetXaxis()->GetXmin() , hist["signal"]->GetXaxis()->GetXmax());
+			TH1D *cumm_bkg = new TH1D("cumm_bkg", "", hist["signal1"]->GetNbinsX(), hist["signal1"]->GetXaxis()->GetXmin() , hist["signal1"]->GetXaxis()->GetXmax());
 			
 			for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW", "ttZ", "WJ", "ZZ", "ST", "TTbar", "ttH", "ZH"}) {
-			cummilative_hist(hist[bkg_group], cumm_bkg,  signi_hist, bkg_stack, trend);
+				cummilative_hist(hist[bkg_group], cumm_bkg,  signi_hist, bkg_stack, trend);
 			}
+			double padmax = std::max(bkg_stack->GetMaximum(), hist["signal1"]->GetMaximum());
+			bkg_stack->SetMaximum(padmax*1.1);
 			bkg_stack->Draw("HIST");
-			cummilative_hist(hist["signal"], cumm_bkg, signi_hist, bkg_stack, trend,"Yes");
 			
-			signi_hist->Scale(bkg_stack->GetMaximum()/signi_hist->GetMaximum());
+			hist["signal1"]->SetLineColor(2);
+			hist["signal1"]->SetLineWidth(2);
+			hist["signal2"]->SetLineColor(4);
+			hist["signal2"]->SetLineWidth(2);
+			//hist["signal1"]->Scale(10);
+			//hist["signal1"]->Draw("SAME");
+			cummilative_hist(hist["signal2"], cumm_bkg, signi_hist, bkg_stack, trend,"Yes");
+			cummilative_hist(hist["signal1"], cumm_bkg, signi_hist, bkg_stack, trend,"Yes");
+			
+			//signi_hist->Scale(bkg_stack->GetMaximum()/signi_hist->GetMaximum());
 			signi_hist->Draw("HIST SAME");
-			
-			hist["signal"]->SetLineColor(2);
-			hist["signal"]->SetLineWidth(2);
-			hist["signal"]->Scale(10);
-			hist["signal"]->Draw("SAME");
 			
 			// Create a TLatex object
 			TLatex latex;
@@ -171,21 +231,28 @@ void significance() {
 			latex.SetTextSize(0.04); // Set text size
 			latex.SetTextAlign(31); // Align right (horizontal) and top (vertical)
 			latex.DrawLatex(0.95, 0.95, const_cast<char*>(year.c_str())); // Position (x, y) and text
-
+			
 			auto legend = new TLegend(0.7, 0.6, 0.88, 0.88);
 			//auto legend = new TLegend(0.12, 0.6, 0.3, 0.88);
 			for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW", "ttZ", "WJ", "ZZ", "ST", "TTbar", "ttH", "ZH"}) {
 				legend->AddEntry(hist[bkg_group], bkg_group.c_str(), "f");
 			}
-			legend->AddEntry(hist["signal"], "M1000 x 10", "lep");
+			legend->AddEntry(hist["signal1"], "M500", "lep");
+			legend->AddEntry(hist["signal2"], "M1300", "lep");
 			legend->AddEntry(signi_hist, "Sigificance", "lep");
 			legend->Draw();
-
+			
+			latex.SetTextSize(0.02);
+			//std::string BKG = "Total BKG: " + std::to_string(cumm_bkg->Integral());
+            std::string Sign = "Total significance: " + std::to_string(signi_hist->Integral());
+			latex.DrawLatex(0.5,0.6,const_cast<char*>(Sign.c_str()));
+			//latex.DrawLatex(0.5,0.8,const_cast<char*>(BKG.c_str()));
+			
 			// Show the canvas
 			canvas->Update();
 			canvas->Modified();
 			
-			std::string s =  "hist/";
+			std::string s =  "hist_MY_mll/";
 			s = s + hist_list[i]+ "_"+ trend+".png";
 			char* title = const_cast<char*>(s.c_str());//converting string to char
 			canvas->SaveAs(title);

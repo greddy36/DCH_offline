@@ -2,6 +2,7 @@
 #include <TFile.h>
 #include <TH1.h>
 #include <TList.h>
+#include "include/Xsections.C"
 
 const char* sampleKind(std::string fname, std::string hist_name){
 	if (hist_name.find("3lep") > hist_name.length()){//4lep
@@ -36,7 +37,12 @@ const char* sampleKind(std::string fname, std::string hist_name){
 			fname.find("ZZTo2Q2L") < len ||
 			fname.find("WZTo2Q2L") < len ||
 			fname.find("ttW") < len ||
-			fname.find("ST_") < len)
+			fname.find("ST_") < len ||
+			fname.find("QCD") < len ||
+			fname.find("WJetsToLNu") < len ||
+			fname.find("TTToSemiLep") < len ||
+			fname.find("TTToHadr") < len ||
+			fname.find("TTTo2L2Nu") < len)
 			return "fake";
 		else if (fname.find("EGamma") < len || fname.find("Single") < len)
 			return "data";
@@ -75,7 +81,12 @@ const char* sampleKind(std::string fname, std::string hist_name){
 			fname.find("ZZTo2L2Nu") < len ||
 			fname.find("ZZTo2Q2L") < len ||
 			fname.find("WZTo2Q2L") < len ||
-			fname.find("ST_") < len)
+			fname.find("ST_") < len ||
+			fname.find("QCD") < len ||
+			fname.find("WJetsToLNu") < len ||
+			fname.find("TTToSemiLep") < len ||
+			fname.find("TTToHadr") < len ||
+			fname.find("TTTo2L2Nu") < len)
 			return "fake";
 		else if (fname.find("EGamma") < len || fname.find("Single") < len)
 			return "data";
@@ -83,8 +94,8 @@ const char* sampleKind(std::string fname, std::string hist_name){
 	}
 }
 
-void HC_template(const char* ext = "2018.root"){
-	const char* inDir = "hist_MY";
+void HC_template(const char* ext = "2016.root"){
+	const char* inDir = "hist_test_nopair";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
 	const char* entry;
@@ -99,18 +110,18 @@ void HC_template(const char* ext = "2018.root"){
 	gROOT->Reset();
 
     // Create output file
-    TFile* ofile = new TFile("hist_MY/nuisance_hist_2018.root", "RECREATE");
+    TFile* ofile = new TFile("hist_test_nopair/nuisance_hist_2016.root", "RECREATE");
 	const char* prompt__channel;
 	const char* fake__channel;
 	
-	float xmin = 0, xmax = 1500; int binw = 100; int nbins = (xmax-xmin)/binw; 
-	TH1F* h_data_t0 = new TH1F("data_obs__t0", "mll1", nbins, xmin, xmax);	
-	TH1F* h_data_t1 = new TH1F("data_obs__t1", "mll1", nbins, xmin, xmax);			
-	TH1F* h_data_t2 = new TH1F("data_obs__t2", "mll1", nbins, xmin, xmax);			
-	TH1F* h_data_t3 = new TH1F("data_obs__t3", "mll1", nbins, xmin, xmax);
-	TH1F* h_data_t03l = new TH1F("data_obs__t03l", "mll1", nbins, xmin, xmax);
-	TH1F* h_data_t13l = new TH1F("data_obs__t13l", "mll1", nbins, xmin, xmax);
-	TH1F* h_data_t23l = new TH1F("data_obs__t23l", "mll1", nbins, xmin, xmax);
+	float xmin = 0, xmax = 4500; int binw = 100; int nbins = 150;//(xmax-xmin)/binw; 
+	TH1F* h_data_t0 = new TH1F("data_obs__t0", "mDCH1", nbins, xmin, xmax);	
+	TH1F* h_data_t1 = new TH1F("data_obs__t1", "mDCH1", nbins, xmin, xmax);			
+	TH1F* h_data_t2 = new TH1F("data_obs__t2", "mDCH1", nbins, xmin, xmax);			
+	TH1F* h_data_t3 = new TH1F("data_obs__t3", "mDCH1", nbins, xmin, xmax);
+	TH1F* h_data_t03l = new TH1F("data_obs__t03l", "mDCH1", nbins, xmin, xmax);
+	TH1F* h_data_t13l = new TH1F("data_obs__t13l", "mDCH1", nbins, xmin, xmax);
+	TH1F* h_data_t23l = new TH1F("data_obs__t23l", "mDCH1", nbins, xmin, xmax);
 	ofile->cd();
 	h_data_t0->Write();
 	h_data_t1->Write();
@@ -120,7 +131,7 @@ void HC_template(const char* ext = "2018.root"){
 	h_data_t13l->Write();
 	h_data_t23l->Write();
 
-	const char *hist_list[] = {"0tau/h_mll1","1tau/h_mll1","2tau/h_mll1","3tau/h_mll1","3lep0tau/h_mll1","3lep1tau/h_mll1","3lep2tau/h_mll1"};
+	const char *hist_list[] = {"0tau/h_mDCH1","1tau/h_mDCH1","2tau/h_mDCH1","3tau/h_mDCH1","3lep0tau/h_mDCH1","3lep1tau/h_mDCH1","3lep2tau/h_mDCH1"};
 	for(int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++){
 		const char *signal500__channel;
 		const char *signal600__channel;
@@ -136,7 +147,7 @@ void HC_template(const char* ext = "2018.root"){
 		const char *one_fake__channel;
 		const char *prompt_red__channel;
 		const char *fake__channel;
-		if (hist_list[i] == "0tau/h_mll1"){
+		if (hist_list[i] == "0tau/h_mDCH1"){
 			signal500__channel = "signal500__t0";
 			signal600__channel = "signal600__t0";
 			signal700__channel = "signal700__t0";
@@ -152,7 +163,7 @@ void HC_template(const char* ext = "2018.root"){
 			prompt_red__channel = "prompt_red__t0";
 			fake__channel = "fake__t0";	
 		}
-		else if (hist_list[i] == "1tau/h_mll1"){
+		else if (hist_list[i] == "1tau/h_mDCH1"){
 			signal500__channel = "signal500__t1";
 			signal600__channel = "signal600__t1";
 			signal700__channel = "signal700__t1";
@@ -168,7 +179,7 @@ void HC_template(const char* ext = "2018.root"){
 			prompt_red__channel = "prompt_red__t1";
 			fake__channel = "fake__t1";
 		}
-		else if (hist_list[i] == "2tau/h_mll1"){ 
+		else if (hist_list[i] == "2tau/h_mDCH1"){ 
 			signal500__channel = "signal500__t2";
 			signal600__channel = "signal600__t2";
 			signal700__channel = "signal700__t2";
@@ -184,7 +195,7 @@ void HC_template(const char* ext = "2018.root"){
 			prompt_red__channel = "prompt_red__t2";
 			fake__channel = "fake__t2";
 		}
-		else if (hist_list[i] == "3tau/h_mll1"){
+		else if (hist_list[i] == "3tau/h_mDCH1"){
 			signal500__channel = "signal500__t3";
 			signal600__channel = "signal600__t3";
 			signal700__channel = "signal700__t3";
@@ -200,7 +211,7 @@ void HC_template(const char* ext = "2018.root"){
 			prompt_red__channel = "prompt_red__t3";
 			fake__channel = "fake__t3";
 		}
-		else if (hist_list[i] == "3lep0tau/h_mll1"){
+		else if (hist_list[i] == "3lep0tau/h_mDCH1"){
 			signal500__channel = "signal500__t03l";
 			signal600__channel = "signal600__t03l";
 			signal700__channel = "signal700__t03l";
@@ -216,7 +227,7 @@ void HC_template(const char* ext = "2018.root"){
 			prompt_red__channel = "prompt_red__t03l";
 			fake__channel = "fake__t03l";
 		}
-		else if (hist_list[i] == "3lep1tau/h_mll1"){
+		else if (hist_list[i] == "3lep1tau/h_mDCH1"){
 			signal500__channel = "signal500__t13l";
 			signal600__channel = "signal600__t13l";
 			signal700__channel = "signal700__t13l";
@@ -232,7 +243,7 @@ void HC_template(const char* ext = "2018.root"){
 			prompt_red__channel = "prompt_red__t13l";
 			fake__channel = "fake__t13l";
 		}
-		else if (hist_list[i] == "3lep2tau/h_mll1"){
+		else if (hist_list[i] == "3lep2tau/h_mDCH1"){
 			signal500__channel = "signal500__t23l";
 			signal600__channel = "signal600__t23l";
 			signal700__channel = "signal700__t23l";
@@ -249,24 +260,25 @@ void HC_template(const char* ext = "2018.root"){
 			fake__channel = "fake__t23l";
 		}
 
-		TH1F* h_M500 = new TH1F(signal500__channel, "mll1", nbins, xmin, xmax);
-		TH1F* h_M600 = new TH1F(signal600__channel, "mll1", nbins, xmin, xmax);
-		TH1F* h_M700 = new TH1F(signal700__channel, "mll1", nbins, xmin, xmax);
-		TH1F* h_M800 = new TH1F(signal800__channel, "mll1", nbins, xmin, xmax);
-		TH1F* h_M900 = new TH1F(signal900__channel, "mll1", nbins, xmin, xmax);
-		TH1F* h_M1000 = new TH1F(signal1000__channel, "mll1", nbins, xmin, xmax);
-		TH1F* h_M1100 = new TH1F(signal1100__channel, "mll1", nbins, xmin, xmax);
-		TH1F* h_M1200 = new TH1F(signal1200__channel, "mll1", nbins, xmin, xmax);
-		TH1F* h_M1300 = new TH1F(signal1300__channel, "mll1", nbins, xmin, xmax);
-		TH1F* h_M1400 = new TH1F(signal1400__channel, "mll1", nbins, xmin, xmax);		
-		TH1F* h_prompt = new TH1F(prompt__channel, "mll1", nbins, xmin, xmax);						
-		TH1F* h_fake = new TH1F(fake__channel, "mll1", nbins, xmin, xmax);	
-		//TH1F* h_one_fake = new TH1F(one_fake__channel, "mll1", nbins, xmin, xmax);			
-		//TH1F* h_prompt_red = new TH1F(prompt_red__channel, "mll1", nbins, xmin, xmax);			
+		TH1F* h_M500 = new TH1F(signal500__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_M600 = new TH1F(signal600__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_M700 = new TH1F(signal700__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_M800 = new TH1F(signal800__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_M900 = new TH1F(signal900__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_M1000 = new TH1F(signal1000__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_M1100 = new TH1F(signal1100__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_M1200 = new TH1F(signal1200__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_M1300 = new TH1F(signal1300__channel, "mDCH1", nbins, xmin, xmax);
+		TH1F* h_M1400 = new TH1F(signal1400__channel, "mDCH1", nbins, xmin, xmax);		
+		TH1F* h_prompt = new TH1F(prompt__channel, "mDCH1", nbins, xmin, xmax);						
+		TH1F* h_fake = new TH1F(fake__channel, "mDCH1", nbins, xmin, xmax);	
+		//TH1F* h_one_fake = new TH1F(one_fake__channel, "mDCH1", nbins, xmin, xmax);			
+		//TH1F* h_prompt_red = new TH1F(prompt_red__channel, "mDCH1", nbins, xmin, xmax);			
 		for(int j = 0; j < nfiles; j++){
 			TFile *ifile = new TFile(filename[j],"READ");
 			TH1F *h = (TH1F*)ifile->Get(hist_list[i]);
-			h->Scale(applyXSec(filename[j], ifile->Get("hnevts")->Integral()));
+			if (!h) continue;
+			h->Scale(applyXSec(ifile));
 			
 			if (sampleKind(filename[j],hist_list[i])== "M500") h_M500->Add(h);
 			else if (sampleKind(filename[j],hist_list[i])== "M600") h_M600->Add(h);

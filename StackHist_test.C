@@ -11,15 +11,17 @@
 #include "include/Xsections.C"
 
 void StackHist_test() {
-	std::string summary_type = "tau_c", year = "Run2";
+	std::string summary_type = "tau_c", year = "2018";
     // Define histograms to retrieve
     const char *hist_list[] = 
     {
-"h_met_ee","h_met_em","h_met_mm","h_met_eee","h_met_eem","h_met_eet","h_met_emt","h_met_emm","h_met_mmm","h_met_mmt","h_met_ett","h_met_mtt","h_met_eeee","h_met_eeem","h_met_eemm","h_met_mmem","h_met_mmmm","h_met_eeet","h_met_eemt","h_met_eett","h_met_emtt","h_met_emmt","h_met_ettt","h_met_mmmt","h_met_mmtt","h_met_mttt",
+"h_met_ee","h_met_em","h_met_mm",
 
-"h_metv_ee","h_metv_em","h_metv_mm","h_metv_eee","h_metv_eem","h_metv_eet","h_metv_emt","h_metv_emm","h_metv_mmm","h_metv_mmt","h_metv_ett","h_metv_mtt","h_metv_eeee","h_metv_eeem","h_metv_eemm","h_metv_mmem","h_metv_mmmm","h_metv_eeet","h_metv_eemt","h_metv_eett","h_metv_emtt","h_metv_emmt","h_metv_ettt","h_metv_mmmt","h_metv_mmtt","h_metv_mttt",
+"h_mH_ee","h_mH_em","h_mH_mm",
 
-"h_ST_ee","h_ST_em","h_ST_mm","h_ST_eee","h_ST_eem","h_ST_eet","h_ST_emt","h_ST_emm","h_ST_mmm","h_ST_mmt","h_ST_ett","h_ST_mtt","h_ST_eeee","h_ST_eeem","h_ST_eemm","h_ST_mmem","h_ST_mmmm","h_ST_eeet","h_ST_eemt","h_ST_eett","h_ST_emtt","h_ST_emmt","h_ST_ettt","h_ST_mmmt","h_ST_mmtt","h_ST_mttt",
+"h_pt1_ee","h_pt1_em","h_pt1_mm",
+
+"h_pt2_ee","h_pt2_em","h_pt2_mm",
 
 /*"h_STv_ee","h_STv_em","h_STv_mm","h_STv_eee","h_STv_eem","h_STv_eet","h_STv_emt","h_STv_emm","h_STv_mmm","h_STv_mmt","h_STv_ett","h_STv_mtt","h_STv_eeee","h_STv_eeem","h_STv_eemm","h_STv_mmem","h_STv_mmmm","h_STv_eeet","h_STv_eemt","h_STv_eett","h_STv_emtt","h_STv_emmt","h_STv_ettt","h_STv_mmmt","h_STv_mmtt","h_STv_mttt",
     "h_WMt_ee","h_WMt_em","h_WMt_mm","h_WMt_eee","h_WMt_eem","h_WMt_eet","h_WMt_emt","h_WMt_emm","h_WMt_mmm","h_WMt_mmt","h_WMt_ett","h_WMt_mtt","h_WMt_eeee","h_WMt_eeem","h_WMt_eemm","h_WMt_mmem","h_WMt_mmmm","h_WMt_eeet","h_WMt_eemt","h_WMt_eett","h_WMt_emtt","h_WMt_emmt","h_WMt_ettt","h_WMt_mmmt","h_WMt_mmtt","h_WMt_mttt",
@@ -178,18 +180,21 @@ void StackHist_test() {
         {"data",  {"SingleElectron_2017.root","EGamma_2017.root", "SingleMuon_2017.root"}}
     };
     else if (year == "2018") files = {
+        {"signal", {"HppM1000_2018.root"}},
         {"DY",    {"DYJetsToLLM10to50_2018.root", "DYJetsToLLM50_2018.root"}},
         {"VV",    {"WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
         {"VVV",   {"WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
-        {"ttV",   {"ttWJets_2018.root", "ttZJets_2018.root"}},
+        {"ttW",   {"ttWJets_2018.root"}},
+        {"ttZ",   {"ttZJets_2018.root"}},
         {"WJ",    {"WJetsToLNu_NLO_2018.root", "WJetsToLNu_HT-70To100_2018.root", "WJetsToLNu_HT-100To200_2018.root", 
                    "WJetsToLNu_HT-200To400_2018.root", "WJetsToLNu_HT-400To600_2018.root", 
                    "WJetsToLNu_HT-600To800_2018.root", "WJetsToLNu_HT-800To1200_2018.root", "WJetsToLNu_HT-1200To2500_2018.root", "WJetsToLNu_HT-2500ToInf_2018.root"}},
         {"ZZ",    {"ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
         {"ST",    {"ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", 
                    "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
-        {"TTbar", {"TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
-        {"other", {"ttHToTauTau_2018.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root"}},
+        {"TTbar", {"TTTo2L2Nu_2018.root"/*, "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"*/}},
+        {"ttH", { "ttHToTauTau_2018.root", "ttHToEE_2018.root", "ttHTo2L2Nu_2018.root"}},
+        {"ZH", { "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root"}},
         {"data",  {"EGamma_2018.root", "SingleMuon_2018.root"}}
     };
     else if (year == "Run2") files = {
@@ -276,7 +281,8 @@ void StackHist_test() {
 		        TH1D* h = dynamic_cast<TH1D*>(f->Get(hist_list[i]));
 		        if (!h) continue;
 		        h->Sumw2();
-		        h->Scale(applyXSec(f);
+		        h->Scale(applyXSec(f));
+		        cout<<f->GetName()<<applyXSec(f)<<endl;
 		        h->Rebin(5);
 				if (kv.first != "data") {
 					for (int ib = 1; ib <= h->GetNbinsX(); ib++) {
@@ -311,6 +317,7 @@ void StackHist_test() {
 		for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW", "ttZ", "WJ", "ZZ", "ST", "TTbar", "ttH", "ZH"}) {
 		    bkg_stack->Add(hist[bkg_group]);
 		    h_bkg_total->Add(hist[bkg_group]);
+		    cout<<bkg_group <<"\t"<<hist[bkg_group]->Integral()<<endl;
 		}
 		
 		TH1D* h_mc_uncert_band = (TH1D*) h_bkg_total->Clone("h_mc_uncert_band");
@@ -320,7 +327,7 @@ void StackHist_test() {
 			h_mc_uncert_band->SetBinContent(j, 1.0);  // center at ratio = 1
 			if (h_bkg_total->GetBinContent(j) > 0) h_mc_uncert_band->SetBinError(j, h_bkg_total->GetBinError(j)/h_bkg_total->GetBinContent(j));//scaling error with bin content
 			else h_mc_uncert_band->SetBinError(j,0);
-			cout<<h_bkg_total->GetBinError(j)<<"\t"<<h_bkg_total->GetBinContent(j)<<endl;
+			//cout<<h_bkg_total->GetBinError(j)<<"\t"<<h_bkg_total->GetBinContent(j)<<endl;
 		}
 		
 		// Draw main plot

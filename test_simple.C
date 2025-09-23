@@ -122,7 +122,7 @@ void scaleAndWriteHistograms(std::map<std::string, TH1D*>& histograms, double xs
     }
 }
 
-void DCH_test_nopair(const char* ext = "root"){
+void test_simple(const char* ext = "root"){
 	const char* inDir = ".";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
@@ -137,27 +137,21 @@ void DCH_test_nopair(const char* ext = "root"){
 	}
 	gROOT->Reset();
 	
-	std::string selection = "test";
 
 	double mDCH = 500.0, mZ = 91.2, lumi_2016 = 35900, lumi_2017 = 41500, lumi_2018 = 58900.0; //139000;
 	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
 	for(int j = 0; j < nfiles; j++){
-		cout<<filename[j]<<endl;
 		TFile *ifile = new TFile(filename[j],"READ");
 		std::string fname = filename[j];
 		if (fname.find("_2018.") > fname.length()) continue;
-		//if (fname.find("HZJ") > fname.length()) continue;
+		if (fname.find("Hpp") > fname.length()) continue;
+		cout<<filename[j]<<endl;
 		//if (XSec(filename[j])==1) continue; 
 		
 		//cout<<XSec(filename[j])<<endl;
 		const char* o_name;
-		if (selection =="none") o_name = "hist";
-		else if (selection =="Pre") o_name = "hist_MY";
-		else if (selection =="APre") o_name = "hist_APre";
-		else if (selection =="CR") o_name = "hist_CR";
-		else if (selection =="VR") o_name = "hist_VR";
-		else if (selection =="test") o_name = "hist_test_nopair";
-		else cout<< "SELECTION NOT DEFINED!!!"<<endl;
+		o_name = "hist_test_nopair";
+		
 		char *oname = gSystem->ConcatFileName(o_name, filename[j]);
 		TFile* ofile = new TFile(oname, "RECREATE"); 
 		
@@ -166,7 +160,7 @@ void DCH_test_nopair(const char* ext = "root"){
 			hnevts = (TH1D*)ifile->Get("hNWEvts")->Clone("hnevts");
 			if (!hnevts) hnevts = (TH1D*)ifile->Get("hNEvts")->Clone("hnevts");
 		}
-		//cout<<"NOOOOOOOOOOOOOOOOO "<<hnevts->Integral()<<endl;
+
 		hnevts->Write();
 		double xs_weight = 1.0;
 		
@@ -247,195 +241,90 @@ void DCH_test_nopair(const char* ext = "root"){
         
 		for (int i =0; i < tree->GetEntries(); i++){
 			tree->GetEntry(i);
-			//ERA checking for 2018
-			/*if (XSec(filename[j])==1){
-				//if (run < 315252 or run > 316995) continue; //A
-				//if (run < 316998 or run > 319312) continue; //B
-				//if (run < 319313 or run > 320393) continue; //C
-				if (run < 320394 or run > 325273) continue; //D
-			}*/
+
 			string cat_string = numberToCat(cat);
 			char* cat_name = const_cast<char*>(cat_string.c_str());
 			int Nlep = cat_lepCount(cat_name,'e','m'); 
 			int Ntau = strlen(cat_name)-Nlep; 	
 			if (cat <= 21  and q_1+q_2+q_3+q_4 != 0) continue;  
-			//else if (cat <= 39 and cat > 21 and abs(q_1+q_2+q_3) == 3) continue; 
-			//if (Ntau != 0) continue;
-			//if (Nlep == 0) continue;
-			//if (cat_name != "mmt") continue;
 
-			//cout<<"BEFORE"<<"\t"<<q_1<<"\t"<<q_2<<"\t"<<q_3<<"\t"<<q_4<<"\t"<<cat_name<<endl;			
-			// (strlen(cat_name) == 3 and (abs(q_1+q_2+q_3)!=1 or abs(q_1) !=1 or abs(q_2) != 1 or abs(q_3)!=1))continue;
-			// (strlen(cat_name) == 4 and (abs(q_1+q_2+q_3+q_4)!=0 or abs(q_1) !=1 or abs(q_2) != 1 or abs(q_3)!=1 or abs(q_4)!=1))continue;
-			
 			double evtwt_nom = brWeight*Generator_weight;
-			if (fname.find("_2018.") < fname.length()){//HEM veto
-				if (XSec(filename[j])==1 and run >= 319077 and applyHEMveto(cat_string) == "yes") continue;
-				if (XSec(filename[j])!=1 and applyHEMveto(cat_string) == "yes") evtwt_nom *= 0.35;
-			}
-			applyTauES(cat_string);
-			/*if (XSec(filename[j])!=1){
-				evtwt_nom *= L1PreFiringWeight_Nom*weightPUtruejson;
-				if(strlen(cat_name)<3){
-					evtwt_nom *= IDSF_1*IDSF_2*ISOSF_1*ISOSF_2*TauVsEleIDSF_1*TauVsEleIDSF_2*TauVsMuIDSF_1*TauVsMuIDSF_2*TauVsJetIDSF_1*TauVsJetIDSF_2;
-					if (isTrig_1 >=1)
-						evtwt_nom *= TrigSF_1;
-					else if (isTrig_1 == -1)
-						evtwt_nom *= TrigSF_2;
-					//cout<<evtwt_nom<<endl;
-				}
-				else if (strlen(cat_name)==3)
-					evtwt_nom *= IDSF_1*IDSF_2*IDSF_3*ISOSF_1*ISOSF_2*ISOSF_3*TauVsEleIDSF_1*TauVsEleIDSF_2*TauVsEleIDSF_3*TauVsMuIDSF_1*TauVsMuIDSF_2*TauVsMuIDSF_3*TauVsJetIDSF_1*TauVsJetIDSF_2*TauVsJetIDSF_3;
-				else evtwt_nom *= IDSF_1*IDSF_2*IDSF_3*IDSF_4*ISOSF_1*ISOSF_2*ISOSF_3*ISOSF_4*TauVsEleIDSF_1*TauVsEleIDSF_2*TauVsEleIDSF_3*TauVsEleIDSF_4*TauVsMuIDSF_1*TauVsMuIDSF_2*TauVsMuIDSF_3*TauVsMuIDSF_4*TauVsJetIDSF_1*TauVsJetIDSF_2*TauVsJetIDSF_3*TauVsJetIDSF_4;
-				if(strlen(cat_name)>=3){
-					if (isTrig_1 >=1 and isTrig_2 == 0)
-						evtwt_nom *= TrigSF_1;
-					else if (isTrig_1 == -1 and isTrig_2 == 0)
-						evtwt_nom *= TrigSF_2;
-					//else if (isTrig_1 == 2 and)
-					//	evtwt_nom *= TrigSF_1*TrigSF_2;
-					else if (isTrig_2 >= 1 and isTrig_1 == 0)
-						evtwt_nom *= TrigSF_3;
-					else if (isTrig_2 == -1 and isTrig_1 == 0)
-						evtwt_nom *= TrigSF_4;
-					else if (isTrig_1 == 2 and isTrig_2 == 2)
-						evtwt_nom *= TrigSF_1;
-					//cout<<evtwt_nom<<endl;
-				}
-			}*/
-			if (XSec(filename[j])!=1){
-				evtwt_nom *= L1PreFiringWeight_Nom*weightPUtruejson;
-				
-				if(strlen(cat_name)<3){
-					evtwt_nom *= IDSF_1*IDSF_2*ISOSF_1*ISOSF_2*TauVsEleIDSF_1*TauVsEleIDSF_2*TauVsMuIDSF_1*TauVsMuIDSF_2*TauVsJetIDSF_1*TauVsJetIDSF_2;
-					if (TrigSF_1 !=1)
-						evtwt_nom *= TrigSF_1;
-					else if (TrigSF_2 !=1)
-						evtwt_nom *= TrigSF_2;
-					//cout<<evtwt_nom<<endl;
-				}
-				else if (strlen(cat_name)==3)
-					evtwt_nom *= IDSF_1*IDSF_2*IDSF_3*ISOSF_1*ISOSF_2*ISOSF_3*TauVsEleIDSF_1*TauVsEleIDSF_2*TauVsEleIDSF_3*TauVsMuIDSF_1*TauVsMuIDSF_2*TauVsMuIDSF_3*TauVsJetIDSF_1*TauVsJetIDSF_2*TauVsJetIDSF_3;
-				else evtwt_nom *= IDSF_1*IDSF_2*IDSF_3*IDSF_4*ISOSF_1*ISOSF_2*ISOSF_3*ISOSF_4*TauVsEleIDSF_1*TauVsEleIDSF_2*TauVsEleIDSF_3*TauVsEleIDSF_4*TauVsMuIDSF_1*TauVsMuIDSF_2*TauVsMuIDSF_3*TauVsMuIDSF_4*TauVsJetIDSF_1*TauVsJetIDSF_2*TauVsJetIDSF_3*TauVsJetIDSF_4;
-				if(strlen(cat_name)>=3){
-					if (TrigSF_1 !=1)
-						evtwt_nom *= TrigSF_1;
-					else if (TrigSF_2 !=1)
-						evtwt_nom *= TrigSF_2;
-					else if (TrigSF_3 !=1)
-						evtwt_nom *= TrigSF_3;
-					else if (TrigSF_4 !=1)
-						evtwt_nom *= TrigSF_4;
-				}
-			}
+						
+			bool foundDup = false;
+			std::vector<Lepton> leptons = {
+				Lepton(pt_1, eta_1, phi_1, m_1, q_1, d0_1, dZ_1, iso_1),
+				Lepton(pt_2, eta_2, phi_2, m_2, q_2, d0_2, dZ_2, iso_2),
+				Lepton(pt_3, eta_3, phi_3, m_3, q_3, d0_3, dZ_3, iso_3),
+				Lepton(pt_4, eta_4, phi_4, m_4, q_4, d0_4, dZ_4, iso_4),
+			};
 			
-			 			
-			//cout<<evtwt_nom<<endl;	
-			
-			if(selection == "test"){//My tests
-				bool foundDup = false;
-				std::vector<Lepton> leptons = {
-					Lepton(pt_1, eta_1, phi_1, m_1, q_1, d0_1, dZ_1, iso_1),
-					Lepton(pt_2, eta_2, phi_2, m_2, q_2, d0_2, dZ_2, iso_2),
-					Lepton(pt_3, eta_3, phi_3, m_3, q_3, d0_3, dZ_3, iso_3),
-					Lepton(pt_4, eta_4, phi_4, m_4, q_4, d0_4, dZ_4, iso_4),
-				};
-				
-				for (int w = 0; w < strlen(cat_name) && !foundDup; ++w) {
-					for (int x = w + 1; x < strlen(cat_name); ++x) {
-						if (isDuplicate(leptons[w], leptons[x])){
-						foundDup = true;
-						//cout<<"DUUUUUp"<<endl;
-						break;
-						}
+			for (int w = 0; w < strlen(cat_name) && !foundDup; ++w) {
+				for (int x = w + 1; x < strlen(cat_name); ++x) {
+					if (isDuplicate(leptons[w], leptons[x])){
+					foundDup = true;
+					//cout<<"DUUUUUp"<<endl;
+					break;
 					}
 				}
-				if (foundDup == true ) continue;
-				// Sort the lepton variables in descending order based on pt
-				/*std::sort(leptons.begin(), leptons.end(), [](const Lepton& a, const Lepton& b) {
-					return a.pt > b.pt;
-				});*/
-				/*std::vector<int> Zcands = ZCandMaker(cat_name, 20);	
-				TLorentzVector L1 = LepV(Zcands[0]), L2 = LepV(Zcands[1]), L3 = LepV(Zcands[2]), L4 = LepV(Zcands[3]);
-				int Q[] = {-99, -99, -99, -99};
-				for(int iq = 0; iq <= 3; iq++){
-					if (Zcands[iq] == 1) Q[iq] = q_1;
-					else if (Zcands[iq] == 2) Q[iq] = q_2;
-					else if (Zcands[iq] == 3) Q[iq] = q_3;
-					else if (Zcands[iq] == 4) Q[iq] = q_4;
-				}
-				int q1=Q[0],q2=Q[1],q3=Q[2],q4=Q[3];
-				double mll_1=-99, mll_2=-99, mllt_2=-99;
-				if (q1==q3 and (L1+L3).Pt() >= (L2+L4).Pt()){
-					mll_1 = (L1+L3).M();
-					mllt_2 = (L2+L4).Mt();
-				}
-				else if (q1==q3 and (L2+L4).Pt() >= (L1+L3).Pt()){
-					mll_1 = (L2+L4).M();
-				}
-				else if (q1==q4 and (L1+L4).Pt() >= (L2+L3).Pt()){
-					mll_1 = (L1+L4).M();
-					mllt_2 = (L2+L3).Mt();
-				}
-				else if (q1==q4 and (L2+L3).Pt() >= (L1+L4).Pt()){
-					mll_1 = (L2+L3).M();
-					mllt_2 = (L1+L4).Mt();
-					mllt_2 = (L1+L3).Mt();
-				}*/
+			}
+			if (foundDup == true ) continue;
 				
-				if( cat_string =="emt" ) fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, 0.0, met, 0.0, 0.0, leptons, evtwt_nom);
-				else if( cat_string =="ett" and q_2 == -q_3) fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, 0.0, met, 0.0, 0.0, leptons, evtwt_nom);
-				else if( cat_string =="mtt" and q_2 == -q_3) fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, 0.0, met, 0.0, 0.0, leptons, evtwt_nom);
+			if( cat_string =="emt" ) fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, 0.0, met, 0.0, 0.0, leptons, evtwt_nom);
+			else if( cat_string =="ett" and q_2 == -q_3) fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, 0.0, met, 0.0, 0.0, leptons, evtwt_nom);
+			else if( cat_string =="mtt" and q_2 == -q_3) fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, 0.0, met, 0.0, 0.0, leptons, evtwt_nom);
 				
-				TLorentzVector MET;
-				MET.SetPtEtaPhiM(met, 0, metphi, 0);
-				
-				std::vector<double> mZ, mZv, mH; 
-				std::vector<int> Z_idx; 
-				std::set<int> all_idx;
-				for(int m = 1; m <= strlen(cat_name); ++m){
-					all_idx.insert(m);
-					for(int n = m+1; n <= strlen(cat_name); ++n){
-						string pair_name = pairFunc(m,n,cat_name,20);
-						//the vector elements are inv massses of highest pt pairs because we sotred the lepton vector by pt.
-						if(pair_name=="Zwindow"){
-							mZ.push_back((LepV(m)+LepV(n)).M());
-							Z_idx.push_back(m);
-							Z_idx.push_back(n);
-						}
-						else if(pair_name=="Zv") mZ.push_back((LepV(m)+LepV(n)).M());
-						else if(pair_name=="DCH") mH.push_back((LepV(m)+LepV(n)).M());
-						//else if(pair_name=="found nothing") cout<<"found nothing"<<endl;
-						else continue;
-						//if ((pair_name=="Zv") and mZv[0] <= 10) cout<<cat_name<<"\t"<<leptons[0].eta<<"\t"<<"\t"<<leptons[1].eta<<"\t"<<leptons[2].eta<<"\t"<<leptons[3].eta<< "\t"<<getDR(leptons[m-1].eta,leptons[m-1].phi,leptons[n-1].eta,leptons[n-1].phi)<<endl;
+			TLorentzVector MET;
+			MET.SetPtEtaPhiM(met, 0, metphi, 0);
+			
+			if((Ntau == 1) and (gen_cat == 3 or gen_cat == 5 or gen_cat == 8 or gen_cat == 10 or gen_cat == 13 or gen_cat == 17)){
+				cout<<deltaPhi(LepV(4), MET)*180/3.14<<endl;
+			}
+			
+			std::vector<double> mZ, mZv, mH; 
+			std::vector<int> Z_idx; 
+			std::set<int> all_idx;
+			for(int m = 1; m <= strlen(cat_name); ++m){
+				all_idx.insert(m);
+				for(int n = m+1; n <= strlen(cat_name); ++n){
+					string pair_name = pairFunc(m,n,cat_name,20);
+					//the vector elements are inv massses of highest pt pairs because we sotred the lepton vector by pt.
+					if(pair_name=="Zwindow"){
+						mZ.push_back((LepV(m)+LepV(n)).M());
+						Z_idx.push_back(m);
+						Z_idx.push_back(n);
 					}
+					else if(pair_name=="Zv") mZ.push_back((LepV(m)+LepV(n)).M());
+					else if(pair_name=="DCH") mH.push_back((LepV(m)+LepV(n)).M());
+					//else if(pair_name=="found nothing") cout<<"found nothing"<<endl;
+					else continue;
 				}
-				//std::sort(mH.begin(), mH.end(), [](double a, double b){return a > b;});
-				double Wmt = 0;
-				//if (mZ.size() >0 ) {
-				if (cat > 39 and mH.size()>0) {
-					//std::sort(mZ.begin(), mZ.end(), [](double a, double b){return a > b;});				
-					//for(int idx : Z_idx){ all_idx.erase(idx);}
-					//for(int unZ_idx : all_idx){Wmt = (LepV(unZ_idx)+MET).Mt();}
-					if (cat_string== "ee") fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, 0, mH[0], leptons, evtwt_nom);
-					else if (cat_string== "em") fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, 0, mH[0], leptons, evtwt_nom);
-					else if (cat_string== "mm") fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, 0, mH[0], leptons, evtwt_nom); 
-					else if (cat_string== "ete" or cat_string== "eet" or cat_string == "tee") fillHistograms("eet", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if (cat_string== "mtm" or cat_string== "mmt" or cat_string == "tmm") fillHistograms("mmt", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom); 
-					else if (cat_string== "eee") fillHistograms("eee", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if (cat_string== "eme" or cat_string== "eem" or cat_string == "mee") fillHistograms("eem", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if (cat_string== "emm" or cat_string== "mme" or cat_string == "mem") fillHistograms("emm", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if( cat_string== "mmm" ) fillHistograms("mmm", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+			}
+			//std::sort(mH.begin(), mH.end(), [](double a, double b){return a > b;});
+			double Wmt = 0;
+			//if (mZ.size() >0 ) {
+			if (cat > 39 and mH.size()>0) {
+				//std::sort(mZ.begin(), mZ.end(), [](double a, double b){return a > b;});				
+				//for(int idx : Z_idx){ all_idx.erase(idx);}
+				//for(int unZ_idx : all_idx){Wmt = (LepV(unZ_idx)+MET).Mt();}
+				if (cat_string== "ee") fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, 0, mH[0], leptons, evtwt_nom);
+				else if (cat_string== "em") fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, 0, mH[0], leptons, evtwt_nom);
+				else if (cat_string== "mm") fillHistograms(cat_string, h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, 0, mH[0], leptons, evtwt_nom); 
+				else if (cat_string== "ete" or cat_string== "eet" or cat_string == "tee") fillHistograms("eet", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if (cat_string== "mtm" or cat_string== "mmt" or cat_string == "tmm") fillHistograms("mmt", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom); 
+				else if (cat_string== "eee") fillHistograms("eee", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if (cat_string== "eme" or cat_string== "eem" or cat_string == "mee") fillHistograms("eem", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if (cat_string== "emm" or cat_string== "mme" or cat_string == "mem") fillHistograms("emm", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if( cat_string== "mmm" ) fillHistograms("mmm", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
 					//if(mZ.size()<2) continue;
-					else if( cat_string== "eeee" ) fillHistograms("eeee", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if( cat_lepCount(cat_name,'e','g') == 3 and cat_lepCount(cat_name,'m','g') == 1 ) fillHistograms("eeem", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if( cat_lepCount(cat_name,'e','g') == 2 and cat_lepCount(cat_name,'m','g') == 2 ) fillHistograms("eemm", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom); 
-					else if( cat_lepCount(cat_name,'e','g') == 1 and cat_lepCount(cat_name,'m','g') == 3 ) fillHistograms("mmem", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if( cat_string== "mmmm" ) fillHistograms("mmmm", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if( cat_lepCount(cat_name,'e','g') == 3 and cat_lepCount(cat_name,'t','g') == 1 ) fillHistograms("eeet", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if( cat_lepCount(cat_name,'e','g') == 2 and cat_lepCount(cat_name,'m','g') == 1 and cat_lepCount(cat_name,'t','g') == 1 ) fillHistograms("eemt", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if( cat_lepCount(cat_name,'e','g') == 2 and cat_lepCount(cat_name,'t','g') == 2 ) fillHistograms("eett", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
-					else if( cat_lepCount(cat_name,'e','g') == 1 and cat_lepCount(cat_name,'m','g') == 2 and cat_lepCount(cat_name,'t','g') == 1 ) fillHistograms("emmt", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if( cat_string== "eeee" ) fillHistograms("eeee", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if( cat_lepCount(cat_name,'e','g') == 3 and cat_lepCount(cat_name,'m','g') == 1 ) fillHistograms("eeem", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if( cat_lepCount(cat_name,'e','g') == 2 and cat_lepCount(cat_name,'m','g') == 2 ) fillHistograms("eemm", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom); 
+				else if( cat_lepCount(cat_name,'e','g') == 1 and cat_lepCount(cat_name,'m','g') == 3 ) fillHistograms("mmem", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if( cat_string== "mmmm" ) fillHistograms("mmmm", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if( cat_lepCount(cat_name,'e','g') == 3 and cat_lepCount(cat_name,'t','g') == 1 ) fillHistograms("eeet", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if( cat_lepCount(cat_name,'e','g') == 2 and cat_lepCount(cat_name,'m','g') == 1 and cat_lepCount(cat_name,'t','g') == 1 ) fillHistograms("eemt", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if( cat_lepCount(cat_name,'e','g') == 2 and cat_lepCount(cat_name,'t','g') == 2 ) fillHistograms("eett", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
+				else if( cat_lepCount(cat_name,'e','g') == 1 and cat_lepCount(cat_name,'m','g') == 2 and cat_lepCount(cat_name,'t','g') == 1 ) fillHistograms("emmt", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
 					else if( cat_lepCount(cat_name,'e','g') == 1 and cat_lepCount(cat_name,'m','g') == 1 and cat_lepCount(cat_name,'t','g') == 2 ) fillHistograms("emtt", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
 					else if( cat_lepCount(cat_name,'e','g') == 1 and cat_lepCount(cat_name,'t','g') == 3 ) fillHistograms("ettt", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
 					else if( cat_lepCount(cat_name,'m','g') == 3 and cat_lepCount(cat_name,'t','g') == 1 ) fillHistograms("mmmt", h_mZ, h_mH, h_met,  h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, h_dxy1, h_dxy2, h_dxy3, h_dxy4, h_dZ1, h_dZ2, h_dZ3, h_dZ4, h_iso1, h_iso2, h_iso3, h_iso4, h_12dR, h_13dR, h_14dR, h_23dR, h_24dR, h_34dR, h_WMt, Wmt, met, mZ[0], mH[0], leptons, evtwt_nom);
@@ -496,7 +385,6 @@ void DCH_test_nopair(const char* ext = "root"){
 					else if( cat_lepCount(cat_name,'m','g') == 2 and cat_lepCount(cat_name,'t','g') == 2 ) fillHistograms("mmtt", h_mZv, h_mHv, h_metv,  h_pt1v, h_pt2v, h_pt3v, h_pt4v, h_eta1v, h_eta2v, h_eta3v, h_eta4v, h_phi1v, h_phi2v, h_phi3v, h_phi4v, h_dxy1v, h_dxy2v, h_dxy3v, h_dxy4v, h_dZ1v, h_dZ2v, h_dZ3v, h_dZ4v, h_iso1v, h_iso2v, h_iso3v, h_iso4v, h_12dRv, h_13dRv, h_14dRv, h_23dRv, h_24dRv, h_34dRv, h_WMtv, Wmt, met, mZv[0], mH[0], leptons, evtwt_nom);
 					else if( cat_lepCount(cat_name,'m','g') == 1 and cat_lepCount(cat_name,'t','g') == 3 ) fillHistograms("mttt", h_mZv, h_mHv, h_metv,  h_pt1v, h_pt2v, h_pt3v, h_pt4v, h_eta1v, h_eta2v, h_eta3v, h_eta4v, h_phi1v, h_phi2v, h_phi3v, h_phi4v, h_dxy1v, h_dxy2v, h_dxy3v, h_dxy4v, h_dZ1v, h_dZ2v, h_dZ3v, h_dZ4v, h_iso1v, h_iso2v, h_iso3v, h_iso4v, h_12dRv, h_13dRv, h_14dRv, h_23dRv, h_24dRv, h_34dRv, h_WMtv, Wmt, met, mZv[0], mH[0], leptons, evtwt_nom);
 				}
-			}//selections loop
 		}//evt loop 
 		hnevts->Write();
 		scaleAndWriteHistograms(h_WMt, xs_weight);

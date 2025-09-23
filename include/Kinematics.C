@@ -1,3 +1,7 @@
+#include "TLorentzVector.h"
+#include "TVector3.h"
+#include <TMinuit.h>
+//#include <utility>
 #include "Kinematics.h"
 #include "cat.h" //cat sort funs
 
@@ -118,6 +122,179 @@ double calculateMTtot(const TLorentzVector& l1, const TLorentzVector& l2) {
     double mt_tot = std::sqrt(std::pow(Et_ll + met, 2) - pt_total * pt_total);
 
     return mt_tot;
+}
+
+// Function to compute DCH masses with boost strategy
+std::pair<double, double> ComputeDCHMasses(
+    const TLorentzVector& lep1, 
+    const TLorentzVector& lep2, 
+    const TLorentzVector& lep3, 
+    const TLorentzVector& lep4,
+    const TLorentzVector& MET)
+{
+
+    //Visible 4-vector (sum of leptons)
+    TLorentzVector vis = lep1 + lep2 + lep3 + lep4;
+
+    //Compute boost to pz_visible = 0
+    double beta_z = -vis.Pz() / vis.E();
+    TVector3 boostVec(0, 0, beta_z);
+
+    //Boost leptons to new frame
+    TLorentzVector l1 = lep1;
+    TLorentzVector l2 = lep2;
+    TLorentzVector l3 = lep3;
+    TLorentzVector l4 = lep4;
+
+    l1.Boost(boostVec);
+    l2.Boost(boostVec);
+    l3.Boost(boostVec);
+    l4.Boost(boostVec);
+
+    //MET doesn't change as it's all in azimuthal plane
+    TLorentzVector met4 = MET;
+	met4.Boost(boostVec);
+	
+    /*//Build visible leg vectors
+    TLorentzVector p12 = l1 + l2;
+    TLorentzVector p34 = l3 + l4;
+
+    //Missing for each DCH leg
+    TLorentzVector p12_miss = 0.5 * (p34 + met4 - p12);
+    TLorentzVector p34_miss = 0.5 * (p12 + met4 - p34);
+
+    //Reconstruct DCH candidates
+    TLorentzVector dch1 = p12 + p12_miss;
+    TLorentzVector dch2 = p34 + p34_miss;
+	cout<<dch1.Pt()<<"\t"<<dch2.Pt()<<"\t"<<dch1.E()<<"\t"<<dch2.E()<<endl;
+	cout<<dch1.M()<<"\t"<<dch2.M()<<endl;*/
+	
+	// Step 3: Visible legs
+    TLorentzVector leg1_vis = l1 + l2; // DCH++
+    TLorentzVector leg2_vis = l3 + l4; // DCH−−
+	// Step 4: Assign missing momenta in transverse plane (symmetric)
+    TVector3 pT_leg1_miss = 0.5 * (met4.Vect() + (leg2_vis.Vect() - leg1_vis.Vect()));
+    pT_leg1_miss.SetZ(0); // in this frame, start with pz=0
+
+    TVector3 pT_leg2_miss = met4.Vect() - pT_leg1_miss;
+    pT_leg2_miss.SetZ(0);
+	
+    // Step 5: Solve pz for equal mass constraint
+    // Let pz1 = a, pz2 = -a (equal mass & total pz=0 in this frame)
+    // Solve (E1vis+sqrt(|pT1miss|^2+a^2))^2 - |pT1vis+pT1miss|^2 - a^2
+    //      = (E2vis+sqrt(|pT2miss|^2+a^2))^2 - |pT2vis+pT2miss|^2 - a^2
+
+    double a_guess = 0;
+    auto mass_diff = [&](double a){
+        TLorentzVector miss1(pT_leg1_miss.X(), pT_leg1_miss.Y(), a, sqrt(pT_leg1_miss.Mag2() + a*a));
+        TLorentzVector miss2(pT_leg2_miss.X(), pT_leg2_miss.Y(), -a, sqrt(pT_leg2_miss.Mag2() + a*a));
+        double m1 = (leg1_vis + miss1).M();
+        double m2 = (leg2_vis + miss2).M();
+        return m1 - m2;
+    };
+
+    // Simple bisection to solve mass_diff(a)=0
+    double lo = -2000, hi = 2000;
+    for (int i=0; i<100; i++) {
+        double mid = 0.5*(lo+hi);
+        if (mass_diff(lo)*mass_diff(mid) <= 0) hi = mid;
+        else lo = mid;
+    }
+    double a_sol = 0.5*(lo+hi);
+
+    // Step 6: Build full legs with solved pz
+    TLorentzVector miss1(pT_leg1_miss.X(), pT_leg1_miss.Y(), a_sol, sqrt(pT_leg1_miss.Mag2() + a_sol*a_sol));
+    TLorentzVector miss2(pT_leg2_miss.X(), pT_leg2_miss.Y(), -a_sol, sqrt(pT_leg2_miss.Mag2() + a_sol*a_sol));
+
+    TLorentzVector dch1 = leg1_vis + miss1;
+    TLorentzVector dch2 = leg2_vis + miss2;
+	
+	//cout<<(leg1_vis.Vect()+leg2_vis.Vect()+met4.Vect()).X()<<endl;
+    //Return the two invariant masses
+    return std::make_pair(dch1.M(), dch2.M());
+}
+
+struct InputData {
+    TLorentzVector l1, l2, l3, l4;
+    TVector2 MET;
+};
+
+static TLorentzVector VA, VB;     // visible sides
+static TVector2 METvec;           // MET
+static double minMass = 1e9;      // best mass found
+static double best_pzA = 0, best_pzB = 0;
+
+// Minimization function for TMinuit
+void fcn(int &npar, double *gin, double &f, double *par, int iflag) {
+    // par[0] = pz_invisible_A
+    // par[1] = pz_invisible_B
+    // par[2] = px_invisible_A
+    // par[3] = py_invisible_A
+
+    double pzA = par[0];
+    double pzB = par[1];
+    double pxA = par[2];
+    double pyA = par[3];
+
+    // MET constraint
+    double pxB = METvec.X() - pxA;
+    double pyB = METvec.Y() - pyA;
+
+    // Assume invisible massless neutrinos
+    double pA_E = sqrt(pxA*pxA + pyA*pyA + pzA*pzA);
+    double pB_E = sqrt(pxB*pxB + pyB*pyB + pzB*pzB);
+
+    TLorentzVector IA(pxA, pyA, pzA, pA_E);
+    TLorentzVector IB(pxB, pyB, pzB, pB_E);
+
+    double MA = (VA + IA).M();
+    double MB = (VB + IB).M();
+
+    // Equal mass constraint by minimizing max(MA, MB)
+    //f = fabs(MA - MB) + 0.01 * (MA + MB);
+	f = std::max(MA, MB);
+	
+    // Keep track of best solution
+    if (f < minMass) {
+        minMass = f;
+        best_pzA = pzA;
+        best_pzB = pzB;
+    }
+}
+
+std::pair<double, double>ReconstructMass(const InputData &in) {    // Partition leptons into two sides
+    VA = in.l1 + in.l2;
+    VB = in.l3 + in.l4;
+    METvec = in.MET;
+
+    // Setup Minuit
+    TMinuit minuit(4);
+    minuit.SetPrintLevel(-1);
+    minuit.SetFCN(fcn);
+
+    double step[4] = {1., 1., 1., 1.};
+    double start[4] = {0., 0., 0., METvec.X()/2.};
+    double bound[4] = {0.};
+
+    for (int i = 0; i < 4; i++) {
+        minuit.DefineParameter(i, Form("par%d", i), start[i], step[i], 0, 0);
+    }
+
+    minuit.Migrad();
+
+    // After minimization, reconstruct equal mass
+    double pxA = start[3];
+    double pyA = start[3];
+    double pzA = best_pzA;
+
+    double pxB = METvec.X() - pxA;
+    double pyB = METvec.Y() - pyA;
+    double pzB = best_pzB;
+
+    TLorentzVector IA(pxA, pyA, pzA, sqrt(pxA*pxA + pyA*pyA + pzA*pzA));
+    TLorentzVector IB(pxB, pyB, pzB, sqrt(pxB*pxB + pyB*pyB + pzB*pzB));
+    
+    return std::make_pair((VA + IA).M(), (VB + IB).M());
 }
 
 // Structure to represent a lepton
