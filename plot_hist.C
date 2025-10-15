@@ -57,7 +57,7 @@ void plotAllHistograms(const char* filename) {
 
 void plot_hist() {
     // Replace "your_file.root" with the actual path to your ROOT file
-    const char* filename = "hist_RJM_old/nuisance_hist_test_RJM_old.root";
+    const char* filename = "hist_RJM/nuisance_hist_test_RJM_delelte.root";
 
     // Call the function to plot all histograms in the file
     plotAllHistograms(filename);

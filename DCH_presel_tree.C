@@ -9,8 +9,8 @@
 #include "include/Kinematics.C"//Kine fns
 #include "include/MET_split.C"
 #include "include/Xsections.C"
+#include "rjm_guru.C"
 #include "rjm_final.C"
-
 void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& H_pair, vector<pair<int,int>>& opp_pair) {//global function to process pairs
 	int len = strlen(cat_name);
 	for (int m = 1; m <= len; ++m) {
@@ -231,9 +231,9 @@ void DCH_presel_tree(const char* ext = ".root"){
 			h_mll1[rootDirName]->Sumw2();
 			h_mll2[rootDirName] = new TH1D("h_mll2", "mll_2", nbins, xmin, 2*xmax);
 			h_mll2[rootDirName]->Sumw2();
-			h_mDCH1[rootDirName] = new TH1D("h_mDCH1", "mDCH1", nbins, xmin, 3*xmax);
+			h_mDCH1[rootDirName] = new TH1D("h_mDCH1", "mDCH1", nbins, xmin, 2*xmax);
 			h_mDCH1[rootDirName]->Sumw2();
-			h_mDCH2[rootDirName] = new TH1D("h_mDCH2", "mDCH2", nbins, xmin, 3*xmax);
+			h_mDCH2[rootDirName] = new TH1D("h_mDCH2", "mDCH2", nbins, xmin, 2*xmax);
 			h_mDCH2[rootDirName]->Sumw2();
 			h_ll1_pt[rootDirName] = new TH1D("h_ll1_pt", "Leading pair pT", nbins, xmin, xmax);
 			h_ll1_pt[rootDirName]->Sumw2();
@@ -521,6 +521,10 @@ void DCH_presel_tree(const char* ext = ".root"){
 				L[2] = LepV(H_pair[1].first);
 				L[3] = LepV(H_pair[1].second);
 				TVector2 met_xy(MET.X(), MET.Y());
+				//cout<<"mll "<<mll1 <<"\t"<<mll2<<endl;
+				auto [ileg, Mdch1, Mdch2] = get_legs(L, MET);
+				//if ((int)ileg.size() < 2)continue;
+
 				//auto res = reconstruct(L, met_xy);
 				 // Try collinear
 				/*auto res_col = run_reco_event(L, met_xy, "collinear");
@@ -536,13 +540,19 @@ void DCH_presel_tree(const char* ext = ".root"){
 				std::cout << "\nMH1="<<res_yr.MH1<<"  MH2="<<res_yr.MH2<<"\n";
 				*/
 				// Try fit-based pz adjustment
-				//if (cat_name !="eeee" and cat_name !="mmmm" ) continue;
-				cout<<cat_name<<"\t"<< numberToCat(gen_cat)<<"\t"<<met<<endl;
+				//if (Ntau < 2  ) continue;
 				auto res_fit = run_reco_event(L, met_xy, "fit", true);
+				/*TVector3 met_vec = MET.Vect();
+				auto res_fit = run_reco_event(L, met_vec, "fit", true);*/
 				//std::cout << "\n--- fit policy ---\n";
-				for (int i=0;i<4;++i) std::cout << "alpha["<<i<<"]="<<res_fit.alpha[i] << "  ";
-				std::cout << "\nMH1="<<res_fit.MH1<<"  MH2="<<res_fit.MH2<<"\n";
-			
+				/*if (res_fit.alpha[0]+res_fit.alpha[1]+res_fit.alpha[2]+res_fit.alpha[3] >0.1){
+					cout<<cat_name<<"\t"<< numberToCat(gen_cat)<<"\t"<<met<<endl;
+					for (int i=0;i<4;++i) std::cout << "alpha["<<i<<"]="<<res_fit.alpha[i] << "  ";
+					//std::cout << "\nresidual MET ref = " << res_fit.residual << " GeV";
+					std::cout << "\nMll1="<<mll1<<"  Mll2="<<mll2<<endl;
+					std::cout << "MH1 ="<<res_fit.MH1<<"  MH2 ="<<res_fit.MH2<<endl<<endl;
+				}*/
+				
 				
 				std::map< std::string, double > hist_variable_map = {
 																{"cutflow", 0}, 
@@ -556,8 +566,8 @@ void DCH_presel_tree(const char* ext = ".root"){
 																{"mZ2", mZ2},
 																{"mZ3", mZ3},
 																{"mZ4", mZ4},
-																{"mT1", sqrt(abs(0.1*(mll1-mll2)*(mll1-mll2)+(1-0.1)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
-																{"mT2", sqrt(abs(0*(mll1-mll2)*(mll1-mll2)+(1-0)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
+																{"mT1",Mdch1},
+																{"mT2",Mdch2},
 																{"mTtot1", sqrt(abs(0.1*(mll1-mll2)*(mll1-mll2)+(1-0.1)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
 																{"mTtot2", sqrt(abs(0.2*(mll1-mll2)*(mll1-mll2)+(1-0.2)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
 																{"mT1_opp", sqrt(abs(0.3*(mll1-mll2)*(mll1-mll2)+(1-0.3)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},

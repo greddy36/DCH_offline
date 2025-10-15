@@ -1,5 +1,6 @@
-// met_reco_with_pz_options.cc
-// Compile: g++ -O2 -std=c++17 `root-config --cflags --libs` met_reco_with_pz_options.cc -o met_reco_with_pz_options
+// met_reco_with_dotcheck_fastpath.cc
+// Compile:
+// g++ -O2 -std=c++17 `root-config --cflags --libs` met_reco_with_dotcheck_fastpath.cc -o met_reco_with_dotcheck_fastpath
 
 #include <iostream>
 #include <array>
@@ -19,35 +20,8 @@ static TVector2 gMET_ref;
 static TVector2 g_uT[4];
 static double g_reg_alpha = 1e-3; // tiny regularizer weight
 
-// ---------- Utility: solve 2x2 linear system for pair (i,j) ----------
-static std::tuple<bool,double,double,double>
-solve_pair_analytic(const TVector2 &MET, const TVector2 &ui, const TVector2 &uj) {
-    // Solve for ai, aj in ui*ai + uj*aj = MET (2 equations)
-    // Gram matrix G = [[ui·ui, ui·uj],[uj·ui, uj·uj]], b = [ui·MET, uj·MET]
-    double uiu = ui.Mod2();
-    double uju = uj.Mod2();
-    double uij = ui.X()*uj.X() + ui.Y()*uj.Y();
-    double bi  = ui.X()*MET.X() + ui.Y()*MET.Y();
-    double bj  = uj.X()*MET.X() + uj.Y()*MET.Y();
-
-    double det = uiu*uju - uij*uij;
-    if (std::abs(det) < 1e-12) {
-        // nearly collinear: fallback to projecting MET onto each axis in turn (non-negative)
-        double ai = (uiu>0) ? std::max(0.0, bi/uiu) : 0.0;
-        TVector2 r = MET - ai * ui;
-        double aj = (uju>0) ? std::max(0.0, (uj.X()*r.X()+uj.Y()*r.Y())/uju) : 0.0;
-        TVector2 resid = MET - ai*ui - aj*uj;
-        return { (ai>=0 && aj>=0), ai, aj, resid.Mod() };
-    }
-
-    double ai = (  uju*bi - uij*bj ) / det;
-    double aj = ( -uij*bi + uiu*bj ) / det;
-    TVector2 resid = MET - ai*ui - aj*uj;
-    return { (ai >= -1e-12 && aj >= -1e-12), ai, aj, resid.Mod() };
-}
-
 // alpha_i = x_i^2 to enforce non-negativity; Minuit params are x_i.
-void fcn_alphas_minuit(int &npar, double *, double &f, double *x, int) {
+void fcn_alphas(int &npar, double *, double &f, double *x, int) {
     double a[4];
     for (int i=0;i<4;++i) a[i] = x[i]*x[i];
 
@@ -55,13 +29,17 @@ void fcn_alphas_minuit(int &npar, double *, double &f, double *x, int) {
     TVector2 met_fit(0,0);
     for (int i=0;i<4;++i) met_fit += a[i] * g_uT[i];
     TVector2 r = gMET_ref - met_fit;
-    double term_met = r.Mod2();
-
+    double mismatch = r.Mod2();
+	
+	if (mismatch > 1e-9) {
+        f = 1e12 * mismatch;  // forbid non-closure
+        return;
+    }
     // Regularizer to pick small alphas among continuum
     double term_reg = 0;
     for (int i=0;i<4;++i) term_reg += a[i]*a[i];
 
-    f = term_met + g_reg_alpha * term_reg;
+    f = mismatch + g_reg_alpha *term_reg;
 }
 
 // ---------- Helpers ----------
@@ -72,6 +50,13 @@ TLorentzVector make_collinear_nu_ref(const TLorentzVector &lep_ref, double a) {
     double k = a / ptL;
     TVector3 pnu = k * lep_ref.Vect(); // collinear in 3D
     return TLorentzVector(pnu.X(), pnu.Y(), pnu.Z(), pnu.Mag()); // massless
+}
+
+// rapidity of a TLorentzVector (works for massless or massive)
+double rapidity(const TLorentzVector &v) {
+    double E = v.E(), pz = v.Pz();
+    if (E <= fabs(pz) + 1e-12) return 0.0;
+    return 0.5 * log((E + pz) / (E - pz));
 }
 
 // Signature:
@@ -100,7 +85,7 @@ std::pair<double,double> masses_from_alphas_with_pzpolicy(
             double k = (ptL>1e-12) ? (pt_n / ptL) : 0.0;
             pz = k * pzL;
         } else if (pz_policy == "equal_rapidity") {
-            double yL = gLep_ref[i].Rapidity();
+            double yL = rapidity(gLep_ref[i]);
             pz = pt_n * std::sinh(yL);
         } else if (pz_policy == "fit") {
             if ((int)s_fit.size() == 4) {
@@ -163,6 +148,50 @@ void fcn_pzfit(int &npar, double*, double &f, double *par, int) {
     f = term_massdiff + g_pzfit_reg * term_reg;
 }
 
+// ---------- NEW: analytic solve for up to 2 candidates ----------
+// Solve single candidate: alpha = u·MET (u is unit)
+static double solve_single_alpha(const TVector2 &u, const TVector2 &MET) {
+    return u.X()*MET.X() + u.Y()*MET.Y(); // since u unit, dot = alpha
+}
+
+// Solve two-vector system: a1*u1 + a2*u2 = MET (u1,u2 not necessarily orth)
+// Return (ok, a1, a2, residual)
+// If system nearly singular, returns ok=false.
+static std::tuple<bool,double,double,double>
+solve_two_alphas(const TVector2 &u1, const TVector2 &u2, const TVector2 &MET) {
+    const double u1u1 = u1.Mod2(); // should be 1 if unit, but keep general
+    const double u2u2 = u2.Mod2();
+    const double u1u2 = u1.X()*u2.X() + u1.Y()*u2.Y();
+    const double b1 = u1.X()*MET.X() + u1.Y()*MET.Y();
+    const double b2 = u2.X()*MET.X() + u2.Y()*MET.Y();
+
+    const double det = u1u1*u2u2 - u1u2*u1u2;
+    if (std::abs(det) < 1e-8) return {false, 0.0, 0.0, 1e9};
+
+    double a1 = ( u2u2*b1 - u1u2*b2) / det;
+    double a2 = (-u1u2*b1 + u1u1*b2) / det;
+
+    TVector2 fit = a1*u1 + a2*u2;
+    double residual = (MET - fit).Mod();
+    return {true, a1, a2, residual};
+}
+/*static std::tuple<bool,double,double,double>
+solve_two_alphas(const TVector2 &u1, const TVector2 &u2, const TVector2 &MET) {
+ double denom = u1.X()*u2.Y()-u2.X()*u1.Y();
+    if (fabs(denom) < 1e-6) {
+        std::cerr << "Lepton directions nearly collinear! No unique solution.\n";
+        return {false ,0.0, 0.0, 1e9};
+    }
+
+    double alpha1 = (MET.X()*u2.Y()-u2.X()*MET.Y()) / denom;
+    double alpha2 = (u1.X()*MET.Y()-MET.X()*u1.Y()) / denom;
+	
+	TVector2 fit = alpha1*u1 + alpha2*u2;
+    double residual = (MET - fit).Mod();
+    
+    return {true, alpha1, alpha2, residual};
+}*/
+
 // ---------- Main routine: runs full flow for one event ----------
 struct Result {
     bool ok = false;
@@ -197,153 +226,110 @@ Result run_reco_event(const std::array<TLorentzVector,4> &leps_lab, const TVecto
         else g_uT[i] = TVector2(0,0);
     }
 
-    // -------- Try analytic solutions with <=2 alphas --------
-    double best_resid = std::numeric_limits<double>::infinity();
-    double best_alphas[4] = {0,0,0,0};
-    int best_nonzero_count = 0;
-
-    // 1) Single-lepton projections
+    // 2) quick check: projections of MET along uT
+    std::vector<int> candidates;
+    std::vector<double> proj(4,0.0);
     for (int i=0;i<4;++i) {
-        double ai = std::max(0.0, g_uT[i].X()*gMET_ref.X() + g_uT[i].Y()*gMET_ref.Y());
-        TVector2 fit = ai * g_uT[i];
-        double resid = (gMET_ref - fit).Mod();
-        if (resid < best_resid) {
-            best_resid = resid;
-            std::fill(std::begin(best_alphas), std::end(best_alphas), 0.0);
-            best_alphas[i] = ai;
-            best_nonzero_count = (ai > 1e-9) ? 1 : 0;
-        }
+        if (g_uT[i].Mod2() <= 0) { proj[i]=0.0; continue; }
+        proj[i] = g_uT[i].X()*gMET_ref.X() + g_uT[i].Y()*gMET_ref.Y(); // u·MET
+        if (proj[i] > 1e-3) candidates.push_back(i);
     }
 
-    // 2) Pairs (i,j)
-    for (int i=0;i<4;++i){
-        for (int j=i+1;j<4;++j){
-            auto [ok, ai, aj, resid] = solve_pair_analytic(gMET_ref, g_uT[i], g_uT[j]);
-            if (!ok) continue;
-            if (resid < best_resid) {
-                best_resid = resid;
-                std::fill(std::begin(best_alphas), std::end(best_alphas), 0.0);
-                best_alphas[i] = ai;
-                best_alphas[j] = aj;
-                best_nonzero_count = ((ai>1e-9) + (aj>1e-9));
+    // If up to 2 candidates, solve analytically
+    double alphas[4] = {0,0,0,0};
+    if ((int)candidates.size() <= 2) {
+        if (candidates.empty()) {
+            // all zeros -- trivial
+            for (int i=0;i<4;++i) alphas[i]=0.0;
+        } else if ((int)candidates.size() == 1) {
+            int i = candidates[0];
+            double a = solve_single_alpha(g_uT[i], gMET_ref);
+            alphas[i] = std::max(0.0, a);
+        } else {
+            int i = candidates[0], j = candidates[1];
+            auto [ok, a_i, a_j, res] = solve_two_alphas(g_uT[i], g_uT[j], gMET_ref);
+            if (!ok) {
+                // nearly collinear or numerical issue: fall back to choosing bigger projection
+                double bi = proj[i], bj = proj[j];
+                if (bi >= bj) { alphas[i] = std::max(0.0, bi); alphas[j]=0.0; }
+                else { alphas[j] = std::max(0.0, bj); alphas[i]=0.0; }
+            } else {
+                // enforce non-negativity: if any negative, project to single-vector solution
+                if (a_i >= 0 && a_j >= 0) {
+                    alphas[i] = a_i; alphas[j] = a_j;
+                } else if (a_i < 0 && a_j >= 0) {
+                    alphas[i] = 0.0; alphas[j] = std::max(0.0, solve_single_alpha(g_uT[j], gMET_ref));
+                } else if (a_j < 0 && a_i >= 0) {
+                    alphas[j] = 0.0; alphas[i] = std::max(0.0, solve_single_alpha(g_uT[i], gMET_ref));
+                } else {
+                    // both negative (unlikely) -> pick largest positive projection if any
+                    double bi = proj[i], bj = proj[j];
+                    if (bi >= bj) { alphas[i] = std::max(0.0, bi); alphas[j]=0.0; }
+                    else           { alphas[j] = std::max(0.0, bj); alphas[i]=0.0; }
+                }
             }
         }
-    }
-
-    // Accept analytic solution if residual is small enough.
-    // Threshold can be tuned; we choose something like MET * 1e-3 + 0.5 GeV absolute.
-    double accept_thresh = std::max(1e-3 * gMET_ref.Mod(), 0.5);
-    bool analytic_ok = (best_nonzero_count <= 2 && best_resid <= accept_thresh);
-
-    double alphas[4] = {0,0,0,0};
-    if (analytic_ok) {
-        // Use analytic solution (no Minuit)
-        for (int i=0;i<4;++i) alphas[i] = best_alphas[i];
     } else {
-        // Fallback: full Minuit fit (handles 3 or 4 non-zero alphas)
+        // 3 or 4 candidates -> use Minuit fit (global alpha fit) as before
         TMinuit minuit_a(4);
-        minuit_a.SetFCN(fcn_alphas_minuit);
+        minuit_a.SetFCN(fcn_alphas);
         minuit_a.SetPrintLevel(-1);
 
-        double metmag = gMET_ref.Mod();
         double start[4];
         double step[4] = {0.5,0.5,0.5,0.5};
+        double metmag = gMET_ref.Mod();
         for (int i=0;i<4;++i) start[i] = std::sqrt(std::max(0.0, metmag/4.0));
+
         for (int i=0;i<4;++i) minuit_a.DefineParameter(i, Form("x%d",i), start[i], step[i], 0, 0);
 
         minuit_a.Migrad();
 
         double xi, ex;
-        for (int i=0;i<4;++i) { minuit_a.GetParameter(i, xi, ex); alphas[i] = xi*xi; }
+        for (int i=0;i<4;++i) {
+            minuit_a.GetParameter(i, xi, ex);
+            alphas[i] = xi*xi;
+        }
     }
 
-    // Compute residual before dot-check
+    // compute residual MET in REF (before dot-check)
     TVector2 met_fit_before(0,0);
     for (int i=0;i<4;++i) met_fit_before += alphas[i] * g_uT[i];
     double resid_before = (gMET_ref - met_fit_before).Mod();
 
-    // If requested, run pz-fit (we will prepare sfit_vec if needed)
-    std::vector<double> sfit_vec;
-    if (pz_policy == "fit" || run_pz_fit) {
-        for (int i=0;i<4;++i) g_alphas_for_pzfit[i] = alphas[i];
-        TMinuit minuit_pz(4);
-        minuit_pz.SetFCN(fcn_pzfit);
-        minuit_pz.SetPrintLevel(-1);
-        for (int i=0;i<4;++i) {
-            double ptL = gLep_ref[i].Pt();
-            double sstart = (ptL>1e-12) ? (alphas[i]/ptL) : 0.0;
-            double sstep = std::max(0.1, fabs(sstart)*0.2 + 0.1);
-            minuit_pz.DefineParameter(i, Form("s%d",i), sstart, sstep, -10.0, 10.0);
-        }
-        minuit_pz.Migrad();
-        double sfit[4], err;
-        for (int i=0;i<4;++i) { minuit_pz.GetParameter(i, sfit[i], err); }
-        sfit_vec.assign(sfit, sfit+4);
-    }
+    // 3) If using fit-policy for pz, run small Minuit to find s_i
+    std::vector<double> sfit_vec = {};
+    if ((int)candidates.size() <= 2) {
+		if (pz_policy == "fit" || run_pz_fit) {
+		    for (int i=0;i<4;++i) g_alphas_for_pzfit[i] = alphas[i];
+		    TMinuit minuit_pz(4);
+		    minuit_pz.SetFCN(fcn_pzfit);
+		    minuit_pz.SetPrintLevel(-1);
+		    for (int i=0;i<4;++i) {
+		        double ptL = gLep_ref[i].Pt();
+		        double sstart = (ptL>1e-12) ? (alphas[i]/ptL) : 0.0;
+		        double sstep = std::max(0.1, fabs(sstart)*0.2 + 0.1);
+		        minuit_pz.DefineParameter(i, Form("s%d",i), sstart, sstep, -10.0, 10.0);
+		    }
+		    minuit_pz.Migrad();
+		    double sfit[4], err;
+		    for (int i=0;i<4;++i) { minuit_pz.GetParameter(i, sfit[i], err); }
+		    sfit_vec.assign(sfit, sfit+4);
+		}
+	}
 
-    // Final mass computation with dot-check; zero neutrinos anti-aligned with lepton
+    // 4) Final mass computation with dot-check (zero neutrinos anti-aligned with lepton)
     std::array<bool,4> zeroed = {false,false,false,false};
     std::array<TLorentzVector,4> nu_lab_out;
     auto masses = masses_from_alphas_with_pzpolicy(alphas, pz_policy, sfit_vec, /*zero_opposite=*/true, &zeroed, &nu_lab_out);
     out.MH1 = masses.first; out.MH2 = masses.second;
 
-    // Apply zeroing and build final neutrinos/loss
+    // Now set final alphas and nu_lab: zero alphas where zeroed==true
     for (int i=0;i<4;++i) {
         out.alpha[i] = zeroed[i] ? 0.0 : alphas[i];
         out.nu_lab[i] = nu_lab_out[i];
     }
 
-    // If zeroing removed some alphas and we used analytic solution, it's safe.
-    // If zeroing removed many alphas and analytic had been used, consider re-solving analytically for
-    // the reduced system. We'll implement a simple re-solve for <=2 survivors to improve closure.
-    // Count survivors:
-    std::vector<int> survivors;
-    for (int i=0;i<4;++i) if (out.alpha[i] > 1e-9) survivors.push_back(i);
-
-    if ((int)survivors.size() <= 2) {
-        // Re-solve exactly for survivors (improve closure)
-        if (survivors.size() == 1) {
-            int i = survivors[0];
-            double ai = std::max(0.0, g_uT[i].X()*gMET_ref.X() + g_uT[i].Y()*gMET_ref.Y());
-            out.alpha[i] = ai;
-        } else if (survivors.size() == 2) {
-            int i = survivors[0], j = survivors[1];
-            auto [ok, ai, aj, resid] = solve_pair_analytic(gMET_ref, g_uT[i], g_uT[j]);
-            if (ok) { out.alpha[i] = ai; out.alpha[j] = aj; }
-            // else keep existing values (from previous step)
-        }
-        // rebuild nu_lab with final alphas (and pz policy)
-        std::array<TLorentzVector,4> nu_ref;
-        for (int i=0;i<4;++i) {
-            double pt_n = out.alpha[i];
-            if (pt_n <= 0) { nu_ref[i].SetPxPyPzE(0,0,0,0); continue; }
-            double ux = g_uT[i].X(), uy = g_uT[i].Y();
-            double px = pt_n * ux, py = pt_n * uy;
-            double pz = 0.0;
-            if (pz_policy == "collinear") {
-                double ptL = gLep_ref[i].Pt();
-                double pzL = gLep_ref[i].Pz();
-                double k = (ptL>1e-12) ? (pt_n / ptL) : 0.0;
-                pz = k * pzL;
-            } else if (pz_policy == "equal_rapidity") {
-                double yL = gLep_ref[i].Rapidity();
-                pz = pt_n * std::sinh(yL);
-            } else if (pz_policy == "fit") {
-                if ((int)sfit_vec.size() == 4) pz = sfit_vec[i] * gLep_ref[i].Pz();
-            }
-            double E = std::sqrt(px*px + py*py + pz*pz);
-            nu_ref[i].SetPxPyPzE(px,py,pz,E);
-        }
-        // boost back to lab
-        TLorentzVector Pvis(0,0,0,0); for (int k=0;k<4;++k) Pvis += gLep_lab[k];
-        double betaZ_lab = (std::abs(Pvis.E())>1e-12) ? (-Pvis.Pz()/Pvis.E()) : 0.0;
-        for (int i=0;i<4;++i) { out.nu_lab[i] = nu_ref[i]; out.nu_lab[i].Boost(0,0,-betaZ_lab); }
-        // recompute masses & residual
-        auto masses2 = masses_from_alphas_with_pzpolicy(out.alpha, pz_policy, sfit_vec, /*zero_opposite=*/false, nullptr, nullptr);
-        out.MH1 = masses2.first; out.MH2 = masses2.second;
-    }
-
-    // Recompute final residual MET in REF
+    // Recompute residual MET with zeroed alphas
     TVector2 met_fit_after(0,0);
     for (int i=0;i<4;++i) met_fit_after += out.alpha[i] * g_uT[i];
     out.residual = (gMET_ref - met_fit_after).Mod();
@@ -351,3 +337,30 @@ Result run_reco_event(const std::array<TLorentzVector,4> &leps_lab, const TVecto
     out.ok = true;
     return out;
 }
+/*// --------------------- Demo main ---------------------
+int main(){
+    // Toy event: lepton four-vectors in LAB (pt,eta,phi,m)
+    std::array<TLorentzVector,4> L;
+    L[0].SetPtEtaPhiM(40, 0.2, 0.1, 0.000511);
+    L[1].SetPtEtaPhiM(30,-0.3, 1.0, 0.1057);
+    L[2].SetPtEtaPhiM(45, 0.4,-2.0, 0.000511);
+    L[3].SetPtEtaPhiM(25,-0.5,-1.2, 0.1057);
+
+    TVector2 MET(35, -20);
+
+    // Try collinear with dot-check and fast-path analytic solve
+    auto res_col = run_reco_event(L, MET, "collinear", false);
+    std::cout << "--- collinear + dot-check + fast-path ---\n";
+    for (int i=0;i<4;++i) std::cout << "alpha["<<i<<"]="<<res_col.alpha[i] << "  ";
+    std::cout << "\nresidual MET ref = " << res_col.residual << " GeV\n";
+    std::cout << "MH1="<<res_col.MH1<<"  MH2="<<res_col.MH2<<"\n";
+
+    // Try fit-based pz adjustment with dot-check (still uses analytic path if <=2 candidates)
+    auto res_fit = run_reco_event(L, MET, "fit", true);
+    std::cout << "\n--- fit + dot-check + fast-path ---\n";
+    for (int i=0;i<4;++i) std::cout << "alpha["<<i<<"]="<<res_fit.alpha[i] << "  ";
+    std::cout << "\nresidual MET ref = " << res_fit.residual << " GeV\n";
+    std::cout << "MH1="<<res_fit.MH1<<"  MH2="<<res_fit.MH2<<"\n";
+
+    return 0;
+}*/

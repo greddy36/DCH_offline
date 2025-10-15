@@ -95,7 +95,7 @@ const char* sampleKind(std::string fname, std::string hist_name){
 }
 
 void HC_template(const char* ext = "2016.root"){
-	const char* inDir = "hist_test_nopair";
+	const char* inDir = "hist_RJM";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
 	const char* entry;
@@ -110,7 +110,7 @@ void HC_template(const char* ext = "2016.root"){
 	gROOT->Reset();
 
     // Create output file
-    TFile* ofile = new TFile("hist_test_nopair/nuisance_hist_2016.root", "RECREATE");
+    TFile* ofile = new TFile("hist_RJM/nuisance_hist_2016.root", "RECREATE");
 	const char* prompt__channel;
 	const char* fake__channel;
 	

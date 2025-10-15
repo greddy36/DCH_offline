@@ -366,15 +366,15 @@ string pairFunc(int m, int n, string cat, double Zwindow){//checks if a pair is 
 
 
 TLorentzVector LepV(int n){
-	TLorentzVector lepV;
+	TLorentzVector lepV;// make leptons massless
 	if (n==1)
-		lepV.SetPtEtaPhiM(pt_1, eta_1, phi_1, m_1);
+		lepV.SetPtEtaPhiM(pt_1, eta_1, phi_1, 0);
 	if (n==2)
-		lepV.SetPtEtaPhiM(pt_2, eta_2, phi_2, m_2);
+		lepV.SetPtEtaPhiM(pt_2, eta_2, phi_2, 0);
 	if (n==3)
-		lepV.SetPtEtaPhiM(pt_3, eta_3, phi_3, m_3);
+		lepV.SetPtEtaPhiM(pt_3, eta_3, phi_3, 0);
 	if (n==4)
-		lepV.SetPtEtaPhiM(pt_4, eta_4, phi_4, m_4);
+		lepV.SetPtEtaPhiM(pt_4, eta_4, phi_4, 0);
 	return lepV;
 }	
 
