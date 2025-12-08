@@ -378,6 +378,19 @@ TLorentzVector LepV(int n){
 	return lepV;
 }	
 
+TLorentzVector NuV(int n){
+	TLorentzVector nuV;
+	if (n==1)
+		nuV.SetPtEtaPhiM(nupt_1, nueta_1, nuphi_1, nuM_1);
+	if (n==2)
+		nuV.SetPtEtaPhiM(nupt_2, nueta_2, nuphi_2, nuM_2);
+	if (n==3)
+		nuV.SetPtEtaPhiM(nupt_3, nueta_3, nuphi_3, nuM_3);
+	if (n==4)
+		nuV.SetPtEtaPhiM(nupt_4, nueta_4, nuphi_4, nuM_4);
+	return nuV;
+}
+
 std::vector<int> ZCandMaker(string cat, double Zwindow){
 //make sure the there's no more than 2 lep with same charge before calling this fn.
 //no need to sort cat in order of leptons before calling this fn.

@@ -11,6 +11,7 @@
 #include "include/Xsections.C"
 #include "rjm_guru.C"
 #include "rjm_final.C"
+#include "rjm_test.C"
 void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& H_pair, vector<pair<int,int>>& opp_pair) {//global function to process pairs
 	int len = strlen(cat_name);
 	for (int m = 1; m <= len; ++m) {
@@ -177,8 +178,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
 		std::string fname = filename[j];
-		if (fname.find("_2018.") > fname.length()) continue;
-		if (fname.find("Hpp") > fname.length()) continue;
+		if (fname.find("skim_500_test") > fname.length()) continue;
 		if (XSec(filename[j])==1) continue; 
 		cout<<filename[j]<<endl;
 		
@@ -288,7 +288,8 @@ void DCH_presel_tree(const char* ext = ".root"){
 			h_dR2[rootDirName]->Sumw2();
 			h_dR3[rootDirName] = new TH1D("h_dR3", "dR between 3rd(+-) leptons ", 50, 0, 5);
 			h_dR3[rootDirName]->Sumw2();
-			h_dR4[rootDirName] = new TH1D("h_dR4", "dR between 4th(+-) leptons ", 50, 0, 5);
+			//h_dR4[rootDirName] = new TH1D("h_dR4", "dR between 4th(+-) leptons ", 50, 0, 5);
+			h_dR4[rootDirName] = new TH1D("h_dR4", "d#phi between taus from opp Higgs ", 50, 0, 5);
 			h_dR4[rootDirName]->Sumw2();
 			h_dRll[rootDirName] = new TH1D("h_dRll", "dR between 1st pair", 50, 0, 5);
 			h_dRll[rootDirName]->Sumw2();
@@ -351,7 +352,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 					//brWeight = brWeight*2;
 				//cout<<brWeight<<"\t"<<Gencat_str<<endl;
 			}*/
-			
+	
 			double evtwt_nom = brWeight*Generator_weight;
 			if (fname.find("_2018.") < fname.length()){//HEM veto
 				if (XSec(filename[j])==1 and run >= 319077 and applyHEMveto(cat_string) == "yes") continue;
@@ -461,23 +462,34 @@ void DCH_presel_tree(const char* ext = ".root"){
 				vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
 				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair);
 				if (SFopp_pair.size() < 1) continue; 
+				
 				//cout<< SFopp_pair.size()<<endl;
-				double mll1 = (LepV(H_pair[0].first)+LepV(H_pair[0].second)).M();
+				int H1_idx1 = H_pair[0].first, H1_idx2 = H_pair[0].second, H2_idx1 = H_pair[1].first, H2_idx2 = H_pair[1].second; 
+				if ((LepV(H_pair[0].first)+LepV(H_pair[0].second)).M() <= (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M()){
+					H1_idx1 = H_pair[1].first;
+					H1_idx2 = H_pair[1].second;
+					H2_idx1 = H_pair[0].first;
+					H2_idx2 = H_pair[0].second;
+				}
+				double mll1 = (LepV(H1_idx1)+LepV(H1_idx2)+NuV(H1_idx1)+NuV(H1_idx2)).M();
+				double mll2 = (LepV(H2_idx1)+LepV(H2_idx2)+NuV(H2_idx1)+NuV(H2_idx2)).M();
 				double mZ1 = (LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)).M();
 				double mZ2 = (LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second)).M();
-				double dRll = deltaR(LepV(H_pair[0].first),LepV(H_pair[0].second));
-				double mll2 = (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M();
+				double dRll = deltaR(LepV(H1_idx1),LepV(H1_idx2));
+				//double dRll = deltaPhi(LepV(H1_idx1),LepV(H1_idx2));
 				double mZ3 = (LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second)).M();
 				double mZ4 = (LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second)).M();	
-				double dRll2 = deltaR(LepV(H_pair[1].first),LepV(H_pair[1].second));
+				double dRll2 = deltaR(LepV(H2_idx1),LepV(H2_idx2));
+				//double dRll2 = min(deltaPhi(LepV(H1_idx1),LepV(H1_idx2)),deltaPhi(LepV(H2_idx1),LepV(H2_idx2)));
 				double dR1 = deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second));
 				double dR2 = deltaR(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second));
 				double dR3 = deltaR(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
-				double dR4 = deltaR(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
-				double mT1 = calculateMT(LepV(H_pair[0].first)+LepV(H_pair[0].second),MET);
-				double mT2 = calculateMT(LepV(H_pair[1].first)+LepV(H_pair[1].second),MET);
-				double mTtot1 = calculateMTtot(LepV(H_pair[0].first),LepV(H_pair[0].second));
-				double mTtot2 = calculateMTtot(LepV(H_pair[1].first),LepV(H_pair[1].second));
+				//double dR4 = deltaR(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
+				double dR4 = deltaPhi(LepV(H1_idx2),LepV(H2_idx2));
+				double mT1 = calculateMT(LepV(H1_idx1)+LepV(H1_idx2),MET);
+				double mT2 = calculateMT(LepV(H2_idx1)+LepV(H2_idx2),MET);
+				double mTtot1 = calculateMTtot(LepV(H1_idx1),LepV(H1_idx2));
+				double mTtot2 = calculateMTtot(LepV(H2_idx1),LepV(H2_idx2));
 				double mT1_opp = calculateMT(LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second),MET);
 				double mT2_opp = calculateMT(LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second),MET);
 				double mT3_opp = calculateMT(LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second),MET);
@@ -487,7 +499,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 				double mTtot3_opp = calculateMTtot(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
 				double mTtot4_opp = calculateMTtot(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
 				int W_lep_idx =remaining_idx(SFopp_pair, cat_name);
-				
+				cout<<mll1<<"\t"<<mll2<<endl;
 				double max_dR_ll = 0;
 				if (cat <=21){//4-lep
 					max_dR_ll = max(dRll,dRll2);
@@ -497,34 +509,55 @@ void DCH_presel_tree(const char* ext = ".root"){
 				}
 				
 				/*std::pair<double, double> DCH_mass =  ComputeDCHMasses( 
-																LepV(H_pair[0].first), 
-																LepV(H_pair[0].second),
-																LepV(H_pair[1].first), 
-																LepV(H_pair[1].second),
+																LepV(H1_idx1), 
+																LepV(H1_idx2),
+																LepV(H2_idx1), 
+																LepV(H2_idx2),
 																MET
 																);
 				
 				
 				InputData ev;//for RJM
-				ev.l1 = LepV(H_pair[0].first);
-				ev.l2 = LepV(H_pair[0].second);
-				ev.l3 = LepV(H_pair[1].first);
-				ev.l4 = LepV(H_pair[1].second);
+				ev.l1 = LepV(H1_idx1);
+				ev.l2 = LepV(H1_idx2);
+				ev.l3 = LepV(H2_idx1);
+				ev.l4 = LepV(H2_idx2);
 				ev.MET.Set(met*cos(metphi), met*sin(metphi));
 				std::pair<double, double> mass_DCH = ReconstructMass(ev);*/
 
 				if (cat > 21) continue;
-				//if (Ntau !=1 ) continue;
+				std::string Gencat_str = numberToCat(gen_cat);
+				if (cat_lepCount(Gencat_str,'t','g')!=2) continue;
+				//if (Ntau !=2 ) continue;
+				
 				std::array<TLorentzVector,4> L;
-				L[0] = LepV(H_pair[0].first);
-				L[1] = LepV(H_pair[0].second);
-				L[2] = LepV(H_pair[1].first);
-				L[3] = LepV(H_pair[1].second);
+				L[0] = LepV(H1_idx1);
+				L[1] = LepV(H1_idx2);
+				L[2] = LepV(H2_idx1);
+				L[3] = LepV(H2_idx2);
 				TVector2 met_xy(MET.X(), MET.Y());
 				//cout<<"mll "<<mll1 <<"\t"<<mll2<<endl;
-				auto [ileg, Mdch1, Mdch2] = get_legs(L, MET);
-				//if ((int)ileg.size() < 2)continue;
-
+				
+				mat2 metcov;
+				metcov[0][0] = metcov00; metcov[0][1] = metcov01;
+    			metcov[1][0] = metcov10; metcov[1][1] = metcov11; 
+    			
+				std::string realcat = "";
+				realcat.push_back(cat_string[H1_idx1-1]);
+				realcat.push_back(cat_string[H1_idx2-1]);
+				realcat.push_back(cat_string[H2_idx1-1]);
+				realcat.push_back(cat_string[H2_idx2-1]);
+				//auto [nlegs0, Mdch01, Mdch02] = get_legs(L, MET);
+				
+				auto [nlegs0, Mdch01, Mdch02, isOpp] = get_legs_comb(realcat, L, MET, metcov);
+				//if (isOpp) continue;
+				auto [nlegs, Mdch1, Mdch2] = get_legs_tau(realcat, L, MET);
+				//if (nlegs !=1)continue;
+				cout<<nlegs << "\t isOpp: "<<isOpp<<"\t"<<Gencat_str<<"\t"<<realcat<<endl<<endl;
+				double Mdch001 = Mdch01, Mdch002 = Mdch02;
+				if (abs(Mdch1-Mdch2) < abs(Mdch01-Mdch02)) {
+					Mdch001 = Mdch1; Mdch002 = Mdch2;
+				} 
 				//auto res = reconstruct(L, met_xy);
 				 // Try collinear
 				/*auto res_col = run_reco_event(L, met_xy, "collinear");
@@ -554,24 +587,25 @@ void DCH_presel_tree(const char* ext = ".root"){
 				}*/
 				
 				
+				
 				std::map< std::string, double > hist_variable_map = {
 																{"cutflow", 0}, 
 																{"mll1", mll1},
 																{"mll2", mll2},
 																{"mDCH1", res_fit.MH1},
 																{"mDCH2", res_fit.MH2},
-																{"ll1_pt", (LepV(H_pair[0].first)+LepV(H_pair[0].second)).Pt()},
+																{"ll1_pt", (LepV(H1_idx1)+LepV(H1_idx2)).Pt()},
 																{"ST", st},
 																{"mZ1", mZ1},
 																{"mZ2", mZ2},
 																{"mZ3", mZ3},
 																{"mZ4", mZ4},
-																{"mT1",Mdch1},
-																{"mT2",Mdch2},
-																{"mTtot1", sqrt(abs(0.1*(mll1-mll2)*(mll1-mll2)+(1-0.1)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
-																{"mTtot2", sqrt(abs(0.2*(mll1-mll2)*(mll1-mll2)+(1-0.2)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
-																{"mT1_opp", sqrt(abs(0.3*(mll1-mll2)*(mll1-mll2)+(1-0.3)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
-																{"mT2_opp", sqrt(abs(0.4*(mll1-mll2)*(mll1-mll2)+(1-0.4)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
+																{"mT1",Mdch01},
+																{"mT2",Mdch02},
+																{"mTtot1", Mdch1},
+																{"mTtot2", Mdch2},
+																{"mT1_opp", Mdch001},
+																{"mT2_opp", Mdch002},
 																{"mT3_opp", sqrt(abs(0.5*(mll1-mll2)*(mll1-mll2)+(1-0.5)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
 																{"mT4_opp", sqrt(abs(0.6*(mll1-mll2)*(mll1-mll2)+(1-0.6)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
 																{"mTtot1_opp", sqrt(abs(0.7*(mll1-mll2)*(mll1-mll2)+(1-0.7)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
@@ -589,16 +623,17 @@ void DCH_presel_tree(const char* ext = ".root"){
 																{"dR4", dR4},
 																{"dRll", dRll},
 																{"dRll2", dRll2},
-																{"dR1_met", deltaR((LepV(H_pair[0].first)+LepV(H_pair[0].second)), MET)},
-																{"dR2_met", deltaR((LepV(H_pair[1].first)+LepV(H_pair[1].second)), MET)},
+																{"dR1_met", deltaR((LepV(H1_idx1)+LepV(H1_idx2)), MET)},
+																{"dR2_met", deltaR((LepV(H2_idx1)+LepV(H2_idx2)), MET)},
 																{"max_dR_lplm", max(dR1,dR2)},
 																{"max_dR_ll", max_dR_ll},
 																{"dPhiW_met", deltaPhi(LepV(W_lep_idx), MET)},
 																{"W_mt", calculateMT(LepV(W_lep_idx), MET)},
-																{"cat", cat},
+																{"cat", catToNumber(realcat)},
 																{"gen_cat", gen_cat}
 					};
-					mll_1 = mll1; mll_2 = mll2; dR_1 = dR1; dR_2 = dR2; evtwt = evtwt_nom;
+					//mll_1 = mll1; mll_2 = mll2; dR_1 = dR1; dR_2 = dR2; evtwt = evtwt_nom;
+					mll_1 = Mdch01; mll_2 = Mdch02; dR_1 = deltaPhi(LepV(H1_idx1),LepV(H1_idx2)); dR_2 = deltaPhi(LepV(H1_idx2),LepV(H2_idx2));; evtwt = evtwt_nom;
 				if (cat <=21){//4-lep
 					if (Ntau == 0){ 
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;

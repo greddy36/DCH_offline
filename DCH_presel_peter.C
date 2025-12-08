@@ -9,7 +9,9 @@
 #include "include/Kinematics.C"//Kine fns
 #include "include/MET_split.C"
 #include "include/Xsections.C"
-
+#include "rjm_guru.C"
+#include "rjm_final.C"
+#include "rjm_test.C"
 void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& H_pair, vector<pair<int,int>>& opp_pair) {//global function to process pairs
 	int len = strlen(cat_name);
 	for (int m = 1; m <= len; ++m) {
@@ -55,24 +57,26 @@ void n_minus_one_cutflow(const std::string& excludeCut,
     }
 }
 
-
-
-void FillHists(TDirectory* rootDir, std::map<std::string, TTree*> trim_tree, std::map< std::string, double > hist_variable_map, double evtwt_nom, std::map<std::string, TH1D*> h_mll1, std::map<std::string, TH1D*> h_mll2, std::map<std::string, TH1D*> h_cat, std::map<std::string, TH1D*> h_gencat){
+void FillHists(TDirectory* rootDir, std::map<std::string, TTree*> trim_tree, std::map< std::string, double > hist_variable_map, double evtwt_nom, std::map<std::string, TH1D*> h_mll1, std::map<std::string, TH1D*> h_mll2, std::map<std::string, TH1D*> h_mH1, std::map<std::string, TH1D*> h_mH2, std::map<std::string, TH1D*> h_cat, std::map<std::string, TH1D*> h_gencat){
 	rootDir->cd();
 	const char* dirName = rootDir->GetName();
 	trim_tree[dirName]->Fill();
 	h_mll1[dirName]->Fill(hist_variable_map["mll1"], evtwt_nom);
 	h_mll2[dirName]->Fill(hist_variable_map["mll2"], evtwt_nom);
+	h_mH1[dirName]->Fill(hist_variable_map["mH1"], evtwt_nom);
+	h_mH2[dirName]->Fill(hist_variable_map["mH2"], evtwt_nom);
 	h_cat[dirName]->Fill(hist_variable_map["cat"], evtwt_nom);
 	h_gencat[dirName]->Fill(hist_variable_map["gen_cat"], evtwt_nom);
 }
 
-void WriteHists(TDirectory* rootDir, std::map<std::string, TTree*> trim_tree, std::map<std::string, TH1D*> h_mll1, std::map<std::string, TH1D*> h_mll2, std::map<std::string, TH1D*> h_cat, std::map<std::string, TH1D*> h_gencat){
+void WriteHists(TDirectory* rootDir, std::map<std::string, TTree*> trim_tree, std::map<std::string, TH1D*> h_mll1, std::map<std::string, TH1D*> h_mll2, std::map<std::string, TH1D*> h_mH1, std::map<std::string, TH1D*> h_mH2, std::map<std::string, TH1D*> h_cat, std::map<std::string, TH1D*> h_gencat){
 	rootDir->cd();
 	const char* dirName = rootDir->GetName();
 	trim_tree[dirName]->Write();
 	h_mll1[dirName]->Write();
 	h_mll2[dirName]->Write();
+	h_mH1[dirName]->Write();
+	h_mH2[dirName]->Write();
 	h_cat[dirName]->Write();
 	h_gencat[dirName]->Write();
 }
@@ -99,7 +103,7 @@ void DCH_presel_peter(const char* ext = ".root"){
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
 		std::string fname = filename[j];
-		if (fname.find("_2018.") > fname.length()) continue;
+		//if (fname.find("_2018.") > fname.length()) continue;
 		//if (fname.find("ttZ") > fname.length() and fname.find("ZH") > fname.length()) continue;
 		if (XSec(filename[j])==1) continue; 
 		cout<<filename[j]<<endl;
@@ -137,12 +141,14 @@ void DCH_presel_peter(const char* ext = ".root"){
 						
 		double xmin = 0, xmax = mDCH+1000; int binw = 10; int nbins = (xmax-xmin)/binw;
 		
-		std::map<std::string, TH1D*>h_mll1, h_mll2,h_cat, h_gencat;
-		double mll_1, mll_2, dR_1, dR_2, evtwt;
+		std::map<std::string, TH1D*>h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat;
+		double mll_1, mll_2, mH1, mH2, dR_1, dR_2, evtwt;
 		for(auto rootDirName: {"eeee","eeem","emem","eemm","emmm","mmmm"}){
 			trimmed_tree[rootDirName] = new TTree("Events", "trees");
 			trimmed_tree[rootDirName]->Branch("mll1", &mll_1);
 			trimmed_tree[rootDirName]->Branch("mll2", &mll_2);
+			trimmed_tree[rootDirName]->Branch("mH1", &mH1);
+			trimmed_tree[rootDirName]->Branch("mH2", &mH2);
 			trimmed_tree[rootDirName]->Branch("cat", &cat);
 			trimmed_tree[rootDirName]->Branch("gen_cat", &gen_cat);
 			trimmed_tree[rootDirName]->Branch("evtwt", &evtwt);
@@ -151,6 +157,10 @@ void DCH_presel_peter(const char* ext = ".root"){
 			h_mll1[rootDirName]->Sumw2();
 			h_mll2[rootDirName] = new TH1D("h_mll2", "mll_2", nbins, xmin, xmax);
 			h_mll2[rootDirName]->Sumw2();
+			h_mH1[rootDirName] = new TH1D("h_mH1", "mH1", nbins, xmin, xmax);
+			h_mH1[rootDirName]->Sumw2();
+			h_mH2[rootDirName] = new TH1D("h_mH2", "mH2", nbins, xmin, xmax);
+			h_mH2[rootDirName]->Sumw2();
 			h_cat[rootDirName] = new TH1D("h_cat", "cat", 46,0,46);
 			h_cat[rootDirName]->Sumw2();
 			h_gencat[rootDirName] = new TH1D("h_gencat", "gen cat", 22,0,22);
@@ -303,23 +313,31 @@ void DCH_presel_peter(const char* ext = ".root"){
 				vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
 				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair);
 				if (SFopp_pair.size() < 1) continue; 
+				
 				//cout<< SFopp_pair.size()<<endl;
-				double mll1 = (LepV(H_pair[0].first)+LepV(H_pair[0].second)).M();
+				int H1_idx1 = H_pair[0].first, H1_idx2 = H_pair[0].second, H2_idx1 = H_pair[1].first, H2_idx2 = H_pair[1].second; 
+				if ((LepV(H_pair[0].first)+LepV(H_pair[0].second)).M() <= (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M()){
+					H1_idx1 = H_pair[1].first;
+					H1_idx2 = H_pair[1].second;
+					H2_idx1 = H_pair[0].first;
+					H2_idx2 = H_pair[0].second;
+				}
+				double mll1 = (LepV(H1_idx1)+LepV(H1_idx2)).M();
+				double mll2 = (LepV(H2_idx1)+LepV(H2_idx2)).M();
 				double mZ1 = (LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)).M();
 				double mZ2 = (LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second)).M();
-				double dRll = deltaR(LepV(H_pair[0].first),LepV(H_pair[0].second));
-				double mll2 = (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M();
+				double dRll = deltaR(LepV(H1_idx1),LepV(H1_idx2));
 				double mZ3 = (LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second)).M();
 				double mZ4 = (LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second)).M();	
-				double dRll2 = deltaR(LepV(H_pair[1].first),LepV(H_pair[1].second));
+				double dRll2 = deltaR(LepV(H2_idx1),LepV(H2_idx2));
 				double dR1 = deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second));
 				double dR2 = deltaR(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second));
 				double dR3 = deltaR(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
 				double dR4 = deltaR(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
-				double mT1 = calculateMT(LepV(H_pair[0].first)+LepV(H_pair[0].second),MET);
-				double mT2 = calculateMT(LepV(H_pair[1].first)+LepV(H_pair[1].second),MET);
-				double mTtot1 = calculateMTtot(LepV(H_pair[0].first),LepV(H_pair[0].second));
-				double mTtot2 = calculateMTtot(LepV(H_pair[1].first),LepV(H_pair[1].second));
+				double mT1 = calculateMT(LepV(H1_idx1)+LepV(H1_idx2),MET);
+				double mT2 = calculateMT(LepV(H2_idx1)+LepV(H2_idx2),MET);
+				double mTtot1 = calculateMTtot(LepV(H1_idx1),LepV(H1_idx2));
+				double mTtot2 = calculateMTtot(LepV(H2_idx1),LepV(H2_idx2));
 				double mT1_opp = calculateMT(LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second),MET);
 				double mT2_opp = calculateMT(LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second),MET);
 				double mT3_opp = calculateMT(LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second),MET);
@@ -333,29 +351,60 @@ void DCH_presel_peter(const char* ext = ".root"){
 				if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
 				if (st < 360) continue;
 
+				if (cat > 21) continue;
+				std::string Gencat_str = numberToCat(gen_cat);
+				//if (cat_lepCount(Gencat_str,'t','g')!=2) continue;
+				//if (Ntau !=2 ) continue;
+				
+				std::array<TLorentzVector,4> L;
+				L[0] = LepV(H1_idx1);
+				L[1] = LepV(H1_idx2);
+				L[2] = LepV(H2_idx1);
+				L[3] = LepV(H2_idx2);
+				TVector2 met_xy(MET.X(), MET.Y());
+				//cout<<"mll "<<mll1 <<"\t"<<mll2<<endl;
+				
+				mat2 metcov;
+				metcov[0][0] = metcov00; metcov[0][1] = metcov01;
+    			metcov[1][0] = metcov10; metcov[1][1] = metcov11; 
+    			
+				std::string realcat = "";
+				realcat.push_back(cat_string[H1_idx1-1]);
+				realcat.push_back(cat_string[H1_idx2-1]);
+				realcat.push_back(cat_string[H2_idx1-1]);
+				realcat.push_back(cat_string[H2_idx2-1]);
+				//auto [nlegs0, Mdch01, Mdch02] = get_legs(L, MET);
+				
+				auto [nlegs0, mH1, mH2, isOpp] = get_legs_comb(realcat, L, MET, metcov);
+				//if (!isOpp) continue;
+				
+				//if (nlegs !=1)continue;
+				
 				std::map< std::string, double > hist_variable_map = { 
 																{"mll1", mll1},
 																{"mll2", mll2},
+																{"mH1", mH1},
+																{"mH2", mH2},
 																{"cat", cat},
 																{"gen_cat", gen_cat}
 				};
 				mll_1 = mll1; mll_2 = mll2; evtwt = evtwt_nom;
 				//cout<<gencat_name<<endl;
 				if (fname.find("Hpp") < fname.length() and gencat_string != cat_string) continue;
-				if (cat_string == "eeee") FillHists(eeeeDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_cat, h_gencat);	
-				else if (cat_string == "eeem") FillHists(eeemDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_cat, h_gencat);	
-				else if (cat_string == "emem") FillHists(ememDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_cat, h_gencat);	
-				else if (cat_string == "eemm") FillHists(eemmDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_cat, h_gencat);	
-				else if (cat_string == "emmm") FillHists(emmmDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_cat, h_gencat);	
-				else if (cat_string == "mmmm") FillHists(mmmmDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_cat, h_gencat);	
+				if (cat_string == "eeee") FillHists(eeeeDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat);	
+				else if (cat_string == "eeem") FillHists(eeemDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat);	
+				else if (cat_string == "emem") FillHists(ememDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat);	
+				else if (cat_string == "eemm") FillHists(eemmDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat);	
+				else if (cat_string == "emmm") FillHists(emmmDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat);	
+				else if (cat_string == "mmmm") FillHists(mmmmDir, trimmed_tree, hist_variable_map, evtwt_nom, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat);	
 			}
 		}//evt loop
-		WriteHists(eeeeDir, trimmed_tree, h_mll1, h_mll2,h_cat, h_gencat );
-		WriteHists(eeemDir, trimmed_tree, h_mll1, h_mll2,h_cat, h_gencat );
-		WriteHists(ememDir, trimmed_tree, h_mll1, h_mll2,h_cat, h_gencat );
-		WriteHists(eemmDir, trimmed_tree, h_mll1, h_mll2,h_cat, h_gencat );
-		WriteHists(emmmDir, trimmed_tree, h_mll1, h_mll2,h_cat, h_gencat );
-		WriteHists(mmmmDir, trimmed_tree, h_mll1, h_mll2,h_cat, h_gencat );
+		WriteHists(eeeeDir, trimmed_tree, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat );
+		WriteHists(eeemDir, trimmed_tree, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat );
+		WriteHists(ememDir, trimmed_tree, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat );
+		WriteHists(eemmDir, trimmed_tree, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat );
+		WriteHists(emmmDir, trimmed_tree, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat );
+		WriteHists(mmmmDir, trimmed_tree, h_mll1, h_mll2, h_mH1, h_mH2, h_cat, h_gencat );
 		
 		delete tree;
 	}

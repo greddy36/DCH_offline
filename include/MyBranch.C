@@ -222,6 +222,23 @@
    Double_t        jpt[12];
    Double_t        btagDeep[12];
    
+   Double_t		   nupt_1;
+   Double_t		   nupt_2;
+   Double_t		   nupt_3;
+   Double_t		   nupt_4;
+   Double_t		   nueta_1;
+   Double_t		   nueta_2;
+   Double_t		   nueta_3;
+   Double_t		   nueta_4;
+   Double_t		   nuphi_1;
+   Double_t		   nuphi_2;
+   Double_t		   nuphi_3;
+   Double_t		   nuphi_4;
+   Double_t		   nuM_1;
+   Double_t		   nuM_2;
+   Double_t		   nuM_3;
+   Double_t		   nuM_4;
+   
 void MyBranch(TTree* tree){	
 
 	// Set branch addresses.
@@ -428,6 +445,23 @@ void MyBranch(TTree* tree){
 	tree->SetBranchAddress("jeta",jeta);
 	tree->SetBranchAddress("jpt",jpt);
 	tree->SetBranchAddress("btagDeep",btagDeep);
+	
+	tree->SetBranchAddress("nupt_1",&nupt_1);
+   tree->SetBranchAddress("nupt_2",&nupt_2);
+   tree->SetBranchAddress("nupt_3",&nupt_3);
+   tree->SetBranchAddress("nupt_4",&nupt_4);
+   tree->SetBranchAddress("nueta_1",&nueta_1);
+   tree->SetBranchAddress("nueta_2",&nueta_2);
+   tree->SetBranchAddress("nueta_3",&nueta_3);
+   tree->SetBranchAddress("nueta_4",&nueta_4);
+   tree->SetBranchAddress("nuphi_1",&nuphi_1);
+   tree->SetBranchAddress("nuphi_2",&nuphi_2);
+   tree->SetBranchAddress("nuphi_3",&nuphi_3);
+   tree->SetBranchAddress("nuphi_4",&nuphi_4);
+   tree->SetBranchAddress("nuM_1",&nuM_1);
+   tree->SetBranchAddress("nuM_2",&nuM_2);
+   tree->SetBranchAddress("nuM_3",&nuM_3);
+   tree->SetBranchAddress("nuM_4",&nuM_4);
 
 //  This is the loop skeleton
 // To read only selected branches, Insert statements like:
