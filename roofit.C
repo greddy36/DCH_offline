@@ -78,7 +78,7 @@ void roofit(){
                    "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
         {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root","TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root","TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
         {"other", { "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root",/*"ttHToTauTau_2016.root","ttHToTauTau_2017.root","ttHToTauTau_2018.root","ttHToEE_2016.root","ttHToEE_2017.root", "ttHToEE_2018.root","ttHTo2L2Nu_2016.root","ttHTo2L2Nu_2017.root", "ttHTo2L2Nu_2018.root",*/"ttHJetToNonbb_2016.root","ttHJetToNonbb_2017.root","ttHJetToNonbb_2018.root","TWZToLL_2016.root","TWZToLL_2017.root","TWZToLL_2018.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016.root","HZJ_HToWWTo2L2Nu_ZTo2L_2017.root","HZJ_HToWWTo2L2Nu_ZTo2L_2018.root"}},
-        {"data",  {"SingleElectron_2016.root","EGamma_2016.root", "SingleMuon_2016.root","SingleElectron_2017.root","EGamma_2017.root", "SingleMuon_2017.root","SingleElectron_2018.root","EGamma_2018.root", "SingleMuon_2018.root"}}
+        {"data",  {"SingleElectronB_2016.root","SingleElectronC_2016.root","SingleElectronD_2016.root","SingleElectronE_2016.root","SingleElectronF_2016.root","SingleElectronG_2016.root","SingleElectronH_2016.root", "SingleMuonB_2016.root","SingleMuonC_2016.root","SingleMuonD_2016.root","SingleMuonE_2016.root","SingleMuonF_2016.root","SingleMuonG_2016.root","SingleMuonH_2016.root","SingleElectronB_2017.root","SingleElectronC_2017.root","SingleElectronD_2017.root","SingleElectronE_2017.root","SingleElectronF_2017.root", "SingleMuonB_2017.root","SingleMuonC_2017.root","SingleMuonD_2017.root","SingleMuonE_2017.root","SingleMuonF_2017.root","EGammaA_2018.root","EGammaB_2018.root","EGammaC_2018.root","EGammaD_2018.root", "SingleMuonA_2018.root","SingleMuonB_2018.root","SingleMuonC_2018.root","SingleMuonD_2018.root"}}
     };
     
     std::map<std::string, TH1D*> h_bkg_group;
@@ -128,7 +128,7 @@ void roofit(){
 	double other_uncert = sqrt(tot_uncert_quadr["other"]+tot_uncert_quadr["DY"]+tot_uncert_quadr["VV"]+tot_uncert_quadr["VVV"]+tot_uncert_quadr["ttV"]+tot_uncert_quadr["WJ"]+tot_uncert_quadr["ST"]+tot_uncert_quadr["TTbar"])/h_other_bkg->Integral();
 	//cout<<other_uncert<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
 	
-	RooRealVar x("x", "S_{T} variable", 0, 1000);//Discriminating Variable
+	RooRealVar x("x", "L_{T} variable", 0, 1000);//Discriminating Variable
 
 	RooDataHist other_hist("other_hist", "Other", x, Import(*h_other_bkg));
 	RooHistPdf other_pdf("other_pdf", "Other PDF", x, other_hist);

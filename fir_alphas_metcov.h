@@ -59,6 +59,75 @@ inline mat2 add_diag(const mat2 &A, double eps) {
     return B;
 }
 
+inline double quad(TVector3 &a, const mat2 &M, TVector3 &b) {
+    return a.X()*(M[0][0]*b.X() + M[0][1]*b.Y()) +
+           a.Y()*(M[1][0]*b.X() + M[1][1]*b.Y());
+}
+
+/*
+ Solve for alpha in MET = alpha * L using MET covariance.
+
+ Inputs:
+   L         : lepton transverse vector (px, py)
+   MET       : measured MET vector
+   Sigma_met : 2x2 MET covariance
+
+ Outputs:
+   alpha     : best-fit alpha
+   sigma2    : variance of alpha
+   chi2min   : minimum chi^2
+
+ Returns:
+   true on success, false if covariance is singular or L too small
+*/
+bool SolveOneNeutrinoAlpha(
+    TVector3 &L,
+    TVector3 &MET,
+    const mat2 &Sigma_met,
+    double &alpha,
+    double &sigma2,
+    double &chi2min
+) {
+    // Check lepton magnitude
+    /*double L2 = L.X()+L.X() + L.Y()+L.Y();
+    if (L2 < 1e-12) return false;
+
+    // Invert MET covariance
+    bool ok;
+    mat2 W = inv2(Sigma_met, ok);
+    if (!ok) return false;
+
+    // Compute numerator and denominator
+    double num = quad(L, W, MET); // L^T W MET
+    double den = quad(L, W, L);   // L^T W L
+
+    if (den < 1e-14) return false;
+
+    // Best-fit alpha
+    alpha = num / den;
+
+    // Variance
+    sigma2 = 1.0 / den;
+
+    // Minimum chi2
+    double METW_MET = quad(MET, W, MET);
+    chi2min = METW_MET - (num*num)/den;*/
+
+    // Invert MET covariance
+    bool ok;
+    mat2 W = inv2(Sigma_met, ok);
+
+    // Best-fit alpha
+    alpha = MET.Mag();//L.Mag();
+
+    // Variance
+    sigma2 = 1.0;
+    // Minimum chi2
+    chi2min = 0;
+    
+    return true;
+}
+
 /*
  Returns:
    - alpha_star (size 2)
@@ -82,6 +151,8 @@ bool FitAlphasWithMETCov(
 	double &chi2min, 
 	double &M2star
 ) {
+	double Delta = 0000.0; // GeV^2 (tune this!)
+
     // Build U = [k1 k2] as 2x2 (columns are k1,k2)
     mat2 U;
     U[0][0] = Lxy1.X(); U[0][1] = Lxy2.X();
@@ -138,7 +209,7 @@ bool FitAlphasWithMETCov(
         return false;
     }
 
-    // Step 3: alpha* = alpha_hat - (lambda * Sigma_alpha * c * s) / denom
+   /* // Step 3: alpha* = alpha_hat - (lambda * Sigma_alpha * c * s) / denom
     vec2 term = scalar_vec(lambda * s / denom, Sigma_alpha_c); // Sigma_alpha*c scaled
     
     alpha_star = vec2{ alpha_hat[0] - term[0], alpha_hat[1] - term[1] };
@@ -155,7 +226,32 @@ bool FitAlphasWithMETCov(
         cov_alpha_star[i][j] = Sigma_alpha[i][j] - correction[i][j];
 
     // Step 4: minimized chi2: chi2min = lambda * s^2 / denom
-    chi2min = 0.00001*lambda * s * s / denom;
+    chi2min = 0.00001*lambda * s * s / denom;*/
+	
+	double s_raw = dot(c, alpha_hat) + d;
+	double s_eff = 0.0;
+	if (std::abs(s_raw) > Delta)
+    	s_eff = (s_raw > 0 ? 1.0 : -1.0) * (std::abs(s_raw) - Delta);
+	// Step 3: alpha* = alpha_hat - (lambda * Sigma_alpha * c * s) / denom
+    vec2 term = scalar_vec(lambda * s_eff / denom, Sigma_alpha_c);
+    
+    alpha_star = vec2{ alpha_hat[0] - term[0], alpha_hat[1] - term[1] };
+
+    // Sigma_alpha,* = Sigma_alpha - (lambda * Sigma_alpha * c c^T Sigma_alpha) / denom
+    // Implement numerator matrix N = lambda * (Sigma_alpha * c) (Sigma_alpha * c)^T
+    mat2 numerator = outer(Sigma_alpha_c, Sigma_alpha_c);
+    mat2 correction;
+    double scale = lambda / denom;
+    for (int i=0;i<2;++i) for (int j=0;j<2;++j)
+        correction[i][j] = scale * numerator[i][j];
+        
+    for (int i=0;i<2;++i) for (int j=0;j<2;++j)
+        cov_alpha_star[i][j] = Sigma_alpha[i][j] - correction[i][j];
+
+    // Step 4: minimized chi2: chi2min = lambda * s^2 / denom
+   chi2min = 0.00001*lambda * s_eff * s_eff / denom;
+
+
 
     // Optional: profiled common mass squared M2* per eq (6)
     // XA = m2_ll_A * (1 + alpha1*)

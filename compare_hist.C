@@ -6,7 +6,7 @@
 #include <TString.h>
 #include <iostream>
 
-void compare_hist(const char* filename = "hist_MY/skim_500_2018.root") {
+void compare_hist(const char* filename = "hist_MY/skim_500_test.root") {
     // Open file
     TFile* f = TFile::Open(filename, "READ");
     if (!f || f->IsZombie()) {
@@ -26,13 +26,13 @@ void compare_hist(const char* filename = "hist_MY/skim_500_2018.root") {
         }
 
         // Get histograms
-        TH1* h_mll1  = (TH1*)d->Get("h_mll2");
-        TH1* h_mH1 = (TH1*)d->Get("h_mTtot2");
-        TH1* h_mH01 = (TH1*)d->Get("h_mT2");
+        TH1* h_mll1  = (TH1*)d->Get("h_mll1");
+        TH1* h_mH1 = (TH1*)d->Get("h_mT1_opp");
+        TH1* h_mH01 = (TH1*)d->Get("h_mT1");
         
-  		/*h_mll1->Add((TH1*)d->Get("h_mll2"));
-  		h_mH1->Add((TH1*)d->Get("h_mTtot2"));
-  		h_mH01->Add((TH1*)d->Get("h_mT2"));*/
+  		TH1* h_mll2  = (TH1*)d->Get("h_mll2");
+        TH1* h_mH2 = (TH1*)d->Get("h_mT2_opp");
+        TH1* h_mH02 = (TH1*)d->Get("h_mT2");
   		
         if (!h_mll1 || !h_mH1 || !h_mH01) {
             std::cerr << "Warning: missing histograms in " << dir << std::endl;
@@ -47,24 +47,49 @@ void compare_hist(const char* filename = "hist_MY/skim_500_2018.root") {
         h_mH01->SetLineColor(kBlue);
         h_mH01->SetLineWidth(2);
         
+        h_mll2->SetLineColor(kRed);
+        h_mll2->SetLineWidth(2);
+        h_mH2->SetLineColor(kGreen);
+        h_mH2->SetLineWidth(2);
+        h_mH02->SetLineColor(kBlue);
+        h_mH02->SetLineWidth(2);
+        
 		h_mll1->SetTitle("M500");
 		h_mll1->GetXaxis()->SetRangeUser(0, 1500);
-		float pad_max = max({h_mll1->GetMaximum(), h_mH1->GetMaximum(), h_mH01->GetMaximum()});
-        h_mll1->SetMaximum(1.1*pad_max);
+		float pad_max1 = max({h_mll1->GetMaximum(), h_mH1->GetMaximum(), h_mH01->GetMaximum()});
+        h_mll1->SetMaximum(1.1*pad_max1);
+        
+        h_mll2->SetTitle("M500");
+		h_mll2->GetXaxis()->SetRangeUser(0, 1500);
+		float pad_max2 = max({h_mll2->GetMaximum(), h_mH2->GetMaximum(), h_mH02->GetMaximum()});
+        h_mll2->SetMaximum(1.1*pad_max2);
         
         // Create canvas
-        TCanvas* c = new TCanvas(Form("c_%s", dir), dir, 800, 600);
+        TCanvas *c = new TCanvas(Form("c_%s", dir), dir, 1600, 600);
+        c->Divide(2,1);
 		gStyle->SetOptStat(0);
+		c->cd(1);
         // Draw
         h_mll1->Draw("HIST"); 
-        h_mH1->Draw("HIST SAME");
+        //h_mH1->Draw("HIST SAME");
         h_mH01->Draw("HIST SAME");
-        // Legend
-        TLegend* leg = new TLegend(0.55, 0.7, 0.88, 0.88);
-        leg->AddEntry(h_mll1, "m_{ll_{2}}", "l");
-        leg->AddEntry(h_mH1, "m_{H_{b}} with #nu for #tau_{h} only", "l");
-        leg->AddEntry(h_mH01, "m_{H_{b}} with MET_{cov}", "l");
-        leg->Draw();
+       
+        TLegend* leg1 = new TLegend(0.55, 0.7, 0.88, 0.88);
+        leg1->AddEntry(h_mll1, "m_{ll_{1}}", "l");
+        //leg1->AddEntry(h_mH1, "m_{H_{a}} with true #nu", "l");
+        leg1->AddEntry(h_mH01, "m_{H_{a}} with MET_{cov}", "l");
+        leg1->Draw();
+        c->cd(2);
+        // Draw
+        h_mll2->Draw("HIST"); 
+        //h_mH2->Draw("HIST SAME");
+        h_mH02->Draw("HIST SAME");
+        
+        TLegend* leg2 = new TLegend(0.55, 0.7, 0.88, 0.88);
+        leg2->AddEntry(h_mll2, "m_{ll_{2}}", "l");
+        //leg2->AddEntry(h_mH2, "m_{H_{b}} with true #nu", "l");
+        leg2->AddEntry(h_mH02, "m_{H_{b}} with MET_{cov}", "l");
+        leg2->Draw();
 
         // Save as png
         TString outname = Form("%s.png", dir);

@@ -41,7 +41,7 @@ double XSec(std::string fname){
 	else if(fname.find("ttHJetToNonbb") < fname.length()) return 0.24111;
 	else if(fname.find("TWZToLL") < fname.length()) return 0.001669;
 	else if(fname.find("HZJ") < fname.length()) return 0.00177;
-	else if(fname.find("HppM") < fname.length()) return 0.001;//Signal
+	else if(fname.find("HppM") < fname.length()) return 0.0000494;//0.001;//Signal
 	else if(fname.find("EGamma") < fname.length()) return 1;//Data
 	else if(fname.find("Muon") < fname.length()) return 1;//Data
 	else if(fname.find("Tau") < fname.length()) return 1;//Data
@@ -53,18 +53,21 @@ double XSec(std::string fname){
 }
 
 double applyXSec(TFile* ifile){
-	double lumi_2016 = 35900, lumi_2017 = 41500, lumi_2018 = 58900.0;//in pb^-1
+	double lumi_2016 = 36310, lumi_2017 = 42070, lumi_2018 = 59560, lumi_run2 = 138000;//in pb^-1
 	double xs_weight = 1.0;
 	std::string fname = ifile->GetName();
 	if(XSec(fname)!=1){
-			TH1D* hnevts = (TH1D*)ifile->Get("hnevts");
-			if(!hnevts) return xs_weight;
+			TH1D* hNWEvts = (TH1D*)ifile->Get("hNWEvts");
+			if(!hNWEvts)  hNWEvts = (TH1D*)ifile->Get("hnevts");//old naming
+			if(!hNWEvts) return xs_weight;
 			if (fname.find("2016") < fname.length()) 
-				xs_weight = lumi_2016*XSec(fname)/hnevts->Integral();
+				xs_weight = lumi_2016*XSec(fname)/hNWEvts->Integral();
 			else if (fname.find("2017") < fname.length()) 
-				xs_weight = lumi_2017*XSec(fname)/hnevts->Integral();
+				xs_weight = lumi_2017*XSec(fname)/hNWEvts->Integral();
 			else if (fname.find("2018") < fname.length()) 
-				xs_weight = lumi_2018*XSec(fname)/hnevts->Integral();
+				xs_weight = lumi_2018*XSec(fname)/hNWEvts->Integral();
+			else if (fname.find("run2") < fname.length()) 
+				xs_weight = lumi_run2*XSec(fname)/hNWEvts->Integral();
 	}
 	return xs_weight;
 }

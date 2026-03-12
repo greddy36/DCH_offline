@@ -12,7 +12,7 @@
 #include "rjm_guru.C"
 #include "rjm_final.C"
 #include "rjm_test.C"
-void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& H_pair, vector<pair<int,int>>& opp_pair) {//global function to process pairs
+void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& SS_pair, vector<pair<int,int>>& OSOF_pair) {//global function to process pairs
 	int len = strlen(cat_name);
 	for (int m = 1; m <= len; ++m) {
 		for (int n = m + 1; n <= len; ++n) {
@@ -20,8 +20,8 @@ void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<
 			if (pair_name == "Zwindow") Z_pair.push_back({m,n});
 			else if (pair_name == "Zv") Zv_pair.push_back({m,n});
 			else if (pair_name == "ZttPair") Zv_pair.push_back({m,n});
-			else if (pair_name == "oppPair") opp_pair.push_back({m,n});
-			else if (pair_name == "DCH") H_pair.push_back({m,n});
+			else if (pair_name == "OSOFpair") OSOF_pair.push_back({m,n});
+			else if (pair_name == "SSpair") SS_pair.push_back({m,n});
 			else continue;
 		}
 	}
@@ -201,18 +201,18 @@ void DCH_presel_tree(const char* ext = ".root"){
 		TDirectory* lep3tau2Dir = ofile->mkdir("3lep2tau");
 
 
-		TH1D* hnevts;
+		TH1D* hNWEvts;
 		if(XSec(fname)!=1){
-			hnevts = (TH1D*)ifile->Get("hNWEvts")->Clone("hnevts");
-			if (!hnevts) hnevts = (TH1D*)ifile->Get("hNEvts")->Clone("hnevts");
+			hNWEvts = (TH1D*)ifile->Get("hNWEvts")->Clone("hNWEvts");
+			if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts")->Clone("hNWEvts");
 		}
-		hnevts->Write();
+		hNWEvts->Write();
 		
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
 		
 		std::map<std::string, TTree*> trimmed_tree;
-						
+    
 		double xmin = 0, xmax = mDCH+1000; int binw = 10; int nbins = (xmax-xmin)/binw;
 		
 		std::map<std::string, TH1D*> cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat;
@@ -247,17 +247,17 @@ void DCH_presel_tree(const char* ext = ".root"){
 			h_mZ3[rootDirName]->Sumw2();
 			h_mZ4[rootDirName] = new TH1D("h_mZ4", "|M4_{l+l-}-mZ|", nbins, xmin, 2*xmax);
 			h_mZ4[rootDirName]->Sumw2();
-			h_mT1[rootDirName] = new TH1D("h_mT1", "M_T of first ll pair and MET", nbins, xmin, 2*xmax);
+			h_mT1[rootDirName] = new TH1D("h_mT1", "mDCH1 with cov MET", nbins, xmin, 2*xmax);
 			h_mT1[rootDirName]->Sumw2();
-			h_mT2[rootDirName] = new TH1D("h_mT2", "M_T of second ll pair and MET", nbins, xmin, 2*xmax);
+			h_mT2[rootDirName] = new TH1D("h_mT2", "mDCH2 with cov MET", nbins, xmin, 2*xmax);
 			h_mT2[rootDirName]->Sumw2();
-			h_mTtot1[rootDirName] = new TH1D("h_mTtot1", "M_Ttot of first ll pair and MET", nbins, xmin, 2*xmax);
+			h_mTtot1[rootDirName] = new TH1D("h_mTtot1", "mDCH1 with simple MET split", nbins, xmin, 2*xmax);
 			h_mTtot1[rootDirName]->Sumw2();
-			h_mTtot2[rootDirName] = new TH1D("h_mTtot2", "M_Ttot of second ll pair and MET", nbins, xmin, 2*xmax);
+			h_mTtot2[rootDirName] = new TH1D("h_mTtot2", "mDCH2 with simple MET split", nbins, xmin, 2*xmax);
 			h_mTtot2[rootDirName]->Sumw2();
-			h_mT1_opp[rootDirName] = new TH1D("h_mT1_opp", "M_T of first l+l- pair and MET", nbins, xmin, 2*xmax);
+			h_mT1_opp[rootDirName] = new TH1D("h_mT1_opp", "mll1 with Gen #nu", nbins, xmin, 2*xmax);
 			h_mT1_opp[rootDirName]->Sumw2();
-			h_mT2_opp[rootDirName] = new TH1D("h_mT2_opp", "M_T of second l+l- pair and MET", nbins, xmin, 2*xmax);
+			h_mT2_opp[rootDirName] = new TH1D("h_mT2_opp", "mll2 with Gen #nu", nbins, xmin, 2*xmax);
 			h_mT2_opp[rootDirName]->Sumw2();
 			h_mT3_opp[rootDirName] = new TH1D("h_mT3_opp", "M_T of third l+l- pair and MET", nbins, xmin, 2*xmax);
 			h_mT3_opp[rootDirName]->Sumw2();
@@ -289,7 +289,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 			h_dR3[rootDirName] = new TH1D("h_dR3", "dR between 3rd(+-) leptons ", 50, 0, 5);
 			h_dR3[rootDirName]->Sumw2();
 			//h_dR4[rootDirName] = new TH1D("h_dR4", "dR between 4th(+-) leptons ", 50, 0, 5);
-			h_dR4[rootDirName] = new TH1D("h_dR4", "d#phi between taus from opp Higgs ", 50, 0, 5);
+			h_dR4[rootDirName] = new TH1D("h_dR4", "d#phi between two #nu in Higgs ", 50, 0, 5);
 			h_dR4[rootDirName]->Sumw2();
 			h_dRll[rootDirName] = new TH1D("h_dRll", "dR between 1st pair", 50, 0, 5);
 			h_dRll[rootDirName]->Sumw2();
@@ -313,6 +313,14 @@ void DCH_presel_tree(const char* ext = ".root"){
 			h_gencat[rootDirName]->Sumw2();
 		}
 		
+		TCanvas *c1 = new TCanvas("c1","",900,800);
+    	c1->Divide(1,2);
+		TH1D* h_dR_Lnu = new TH1D("h_dR_Lnu", "dR(l,#nu)", 50, 0, 0.5);
+		TH1D* h_nudphi = new TH1D("h_nudphi", "#nu dPhi", 50, 0, 4);
+		TH1D* h_nuMETdphi = new TH1D("h_nuMETdphi", "d#Phi_{#nu,MET}", 50, 0, 4);
+		TH1D* h_chi2 = new TH1D("h_chi2", "best Chi2", 50, 0, 0.005);
+		TH1D* h_visPz = new TH1D("h_visPz", "Sum of pT", 100, 0, 1500);
+		TH1D* h_nuPz = new TH1D("h_nuPz", "Sum of pT", 100, 0, 1500);
 		TH1D* h_Xmass_0t = new TH1D("h_Xmass_0t", "mDCH1", nbins, xmin, xmax);
 		TH1D* h_Xmass_1t = new TH1D("h_Xmass_1t", "mDCH1", nbins, xmin, xmax);
 		TH1D* h_Xmass_2t = new TH1D("h_Xmass_2t", "mDCH1", nbins, xmin, xmax);
@@ -320,8 +328,8 @@ void DCH_presel_tree(const char* ext = ".root"){
 		TH1D* h_Xmass_0t3l = new TH1D("h_Xmass_0t3l", "mDCH1", nbins, xmin, xmax);
 		TH1D* h_Xmass_1t3l = new TH1D("h_Xmass_1t3l", "mDCH1", nbins, xmin, xmax);
 		TH1D* h_Xmass_2t3l = new TH1D("h_Xmass_2t3l", "mDCH1", nbins, xmin, xmax);
-		for (int i =0; i < tree->GetEntries(); i++){
-			tree->GetEntry(i);
+		for (int ievt=0; ievt< tree->GetEntries(); ievt++){
+			tree->GetEntry(ievt);
 			//ERA checking for 2018
 			/*if (XSec(filename[j])==1){
 				//if (run < 315252 or run > 316995) continue; //A
@@ -444,14 +452,14 @@ void DCH_presel_tree(const char* ext = ".root"){
 			if (strlen(cat_name)==4) st = pt_1+pt_2+pt_3+pt_4;
 			else if (strlen(cat_name)==3) st = pt_1+pt_2+pt_3;
 			
-			/*void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& H_pair) {//global function to process pairs
+			/*void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& SS_pair) {//global function to process pairs
 				int len = strlen(cat_name);
 				for (int m = 1; m <= len; ++m) {
 					for (int n = m + 1; n <= len; ++n) {
 						string pair_name = pairFunc(m, n, cat_name, 20);
 						if (pair_name == "Zwindow") Z_pair.push_back({m,n});
 						else if (pair_name == "Zv") Zv_pair.push_back({m,n});
-						else if (pair_name == "DCH") H_pair.push_back({m,n});
+						else if (pair_name == "DCH") SS_pair.push_back({m,n});
 						else continue;
 					}
 				}
@@ -459,47 +467,49 @@ void DCH_presel_tree(const char* ext = ".root"){
 			TLorentzVector MET; MET.SetPtEtaPhiM(met, 0, metphi, 0);
 //==============================================================================
 			if (selection == "Pre"){	
-				vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
-				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair);
-				if (SFopp_pair.size() < 1) continue; 
+				vector<pair<int, int>> OSSF_pair, OSOF_pair, SS_pair;
+				processPairs(cat_name, OSSF_pair, OSSF_pair, SS_pair, OSOF_pair);
+				if (OSSF_pair.size() < 1) continue; 
 				
-				//cout<< SFopp_pair.size()<<endl;
-				int H1_idx1 = H_pair[0].first, H1_idx2 = H_pair[0].second, H2_idx1 = H_pair[1].first, H2_idx2 = H_pair[1].second; 
-				if ((LepV(H_pair[0].first)+LepV(H_pair[0].second)).M() <= (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M()){
-					H1_idx1 = H_pair[1].first;
-					H1_idx2 = H_pair[1].second;
-					H2_idx1 = H_pair[0].first;
-					H2_idx2 = H_pair[0].second;
+				//cout<< OSSF_pair.size()<<endl;
+				int H1_idx1 = SS_pair[0].first, H1_idx2 = SS_pair[0].second, H2_idx1 = SS_pair[1].first, H2_idx2 = SS_pair[1].second; 
+				if ((LepV(SS_pair[0].first)+LepV(SS_pair[0].second)).M() <= (LepV(SS_pair[1].first)+LepV(SS_pair[1].second)).M()){
+					H1_idx1 = SS_pair[1].first;
+					H1_idx2 = SS_pair[1].second;
+					H2_idx1 = SS_pair[0].first;
+					H2_idx2 = SS_pair[0].second;
 				}
-				double mll1 = (LepV(H1_idx1)+LepV(H1_idx2)+NuV(H1_idx1)+NuV(H1_idx2)).M();
-				double mll2 = (LepV(H2_idx1)+LepV(H2_idx2)+NuV(H2_idx1)+NuV(H2_idx2)).M();
-				double mZ1 = (LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)).M();
-				double mZ2 = (LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second)).M();
+				double mll1 = (LepV(H1_idx1)+LepV(H1_idx2)).M();
+				double mll2 = (LepV(H2_idx1)+LepV(H2_idx2)).M();
+				double mll1_nu = (LepV(H1_idx1)+LepV(H1_idx2)+NuV(H1_idx1)+NuV(H1_idx2)).M();
+				double mll2_nu = (LepV(H2_idx1)+LepV(H2_idx2)+NuV(H2_idx1)+NuV(H2_idx2)).M();
+				double mZ1 = (LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second)).M();
+				double mZ2 = (LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second)).M();
 				double dRll = deltaR(LepV(H1_idx1),LepV(H1_idx2));
 				//double dRll = deltaPhi(LepV(H1_idx1),LepV(H1_idx2));
-				double mZ3 = (LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second)).M();
-				double mZ4 = (LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second)).M();	
+				double mZ3 = (LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second)).M();
+				double mZ4 = (LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second)).M();	
 				double dRll2 = deltaR(LepV(H2_idx1),LepV(H2_idx2));
 				//double dRll2 = min(deltaPhi(LepV(H1_idx1),LepV(H1_idx2)),deltaPhi(LepV(H2_idx1),LepV(H2_idx2)));
-				double dR1 = deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second));
-				double dR2 = deltaR(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second));
-				double dR3 = deltaR(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
-				//double dR4 = deltaR(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
+				double dR1 = deltaR(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second));
+				double dR2 = deltaR(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second));
+				double dR3 = deltaR(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second));
+				//double dR4 = deltaR(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second));
 				double dR4 = deltaPhi(LepV(H1_idx2),LepV(H2_idx2));
 				double mT1 = calculateMT(LepV(H1_idx1)+LepV(H1_idx2),MET);
 				double mT2 = calculateMT(LepV(H2_idx1)+LepV(H2_idx2),MET);
 				double mTtot1 = calculateMTtot(LepV(H1_idx1),LepV(H1_idx2));
 				double mTtot2 = calculateMTtot(LepV(H2_idx1),LepV(H2_idx2));
-				double mT1_opp = calculateMT(LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second),MET);
-				double mT2_opp = calculateMT(LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second),MET);
-				double mT3_opp = calculateMT(LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second),MET);
-				double mT4_opp = calculateMT(LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second),MET);
-				double mTtot1_opp = calculateMTtot(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second));
-				double mTtot2_opp = calculateMTtot(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second));
-				double mTtot3_opp = calculateMTtot(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
-				double mTtot4_opp = calculateMTtot(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
-				int W_lep_idx =remaining_idx(SFopp_pair, cat_name);
-				cout<<mll1<<"\t"<<mll2<<endl;
+				//double mT1_opp = calculateMT(LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second),MET);
+				//double mT2_opp = calculateMT(LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second),MET);
+				double mT3_opp = calculateMT(LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second),MET);
+				double mT4_opp = calculateMT(LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second),MET);
+				double mTtot1_opp = calculateMTtot(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second));
+				double mTtot2_opp = calculateMTtot(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second));
+				double mTtot3_opp = calculateMTtot(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second));
+				double mTtot4_opp = calculateMTtot(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second));
+				int W_lep_idx =remaining_idx(OSSF_pair, cat_name);
+
 				double max_dR_ll = 0;
 				if (cat <=21){//4-lep
 					max_dR_ll = max(dRll,dRll2);
@@ -527,7 +537,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 
 				if (cat > 21) continue;
 				std::string Gencat_str = numberToCat(gen_cat);
-				if (cat_lepCount(Gencat_str,'t','g')!=2) continue;
+				if (cat_lepCount(Gencat_str,'t','g')!=3) continue;
 				//if (Ntau !=2 ) continue;
 				
 				std::array<TLorentzVector,4> L;
@@ -549,11 +559,40 @@ void DCH_presel_tree(const char* ext = ".root"){
 				realcat.push_back(cat_string[H2_idx2-1]);
 				//auto [nlegs0, Mdch01, Mdch02] = get_legs(L, MET);
 				
-				auto [nlegs0, Mdch01, Mdch02, isOpp] = get_legs_comb(realcat, L, MET, metcov);
-				//if (isOpp) continue;
+				auto [nlegs0, Mdch01, Mdch02, bestdPhi, bestChi2, isOpp] = get_legs_comb(realcat, L, MET, metcov,true);
+				
+				//if (!isOpp) continue; 
+				/*if (!(Mdch01 < 400 or Mdch01 > 550)) continue;
+				if (!(Mdch02 < 400 or Mdch02 > 550)) continue;*/
+				
+				//get_legs_comb(realcat, L, MET, metcov,true);//this is running again to print out alphas etc
+				h_nudphi->Fill(bestdPhi);
+				h_chi2->Fill(bestChi2);
+				h_visPz->Fill((LepV(H1_idx1)+LepV(H1_idx2)+LepV(H2_idx1)+LepV(H2_idx2)).Pz());
+				//double boost = (LepV(1)+LepV(2)+LepV(3)+LepV(4)).Pz()/(LepV(1)+LepV(2)+LepV(3)+LepV(4)).E();
+				double min_dPhi_nuMET = 999;
+				TLorentzVector numer;
+				for(int i : {H1_idx1, H1_idx2, H2_idx1, H2_idx2}){numer += LepV(i);
+					if(NuV(i).Pt()){
+						h_dR_Lnu->Fill(deltaR(LepV(i), NuV(i)));
+						//cout<<"Lep: ";print4Vec(LepV(i));
+						cout<<"Nu: ";print4Vec(NuV(i));
+						if (min_dPhi_nuMET > deltaPhi(NuV(i),MET)) min_dPhi_nuMET = deltaPhi(NuV(i),MET);
+					}
+				}
+				h_nuMETdphi->Fill(min_dPhi_nuMET);
+				double boost = numer.Pz()/numer.E();
+				TLorentzVector totNu = (LepV(1)+LepV(2)+LepV(3)+LepV(4));
+				totNu.Boost(0.0,0.0,-boost);
+				//h_nuPz->Fill((LepV(H1_idx1)+LepV(H1_idx2)+NuV(H1_idx1)+NuV(H1_idx2)).DeltaPhi((LepV(H2_idx1)+LepV(H2_idx2)+NuV(H2_idx1)+NuV(H2_idx2))));
+				h_nuPz->Fill(totNu.Pz());
+				cout<<"Total Nu pT: "<<(NuV(1)+NuV(2)+NuV(3)+NuV(4)).Pt()<<endl;
+				cout<<"Total Nu pz/E: "<<(NuV(1)+NuV(2)+NuV(3)+NuV(4)).Pz()/(NuV(1)+NuV(2)+NuV(3)+NuV(4)).E()<<endl;
+				print4Vec(MET);
+				cout<<"Event#: "<<evt<< "\t isOpp: "<<isOpp<<"\t"<<Gencat_str<<"\t"<<realcat<<"\t mll1_nu: "<<mll1_nu<<"\t mll2_nu: "<<mll2_nu<<endl<<endl;
 				auto [nlegs, Mdch1, Mdch2] = get_legs_tau(realcat, L, MET);
 				//if (nlegs !=1)continue;
-				cout<<nlegs << "\t isOpp: "<<isOpp<<"\t"<<Gencat_str<<"\t"<<realcat<<endl<<endl;
+				
 				double Mdch001 = Mdch01, Mdch002 = Mdch02;
 				if (abs(Mdch1-Mdch2) < abs(Mdch01-Mdch02)) {
 					Mdch001 = Mdch1; Mdch002 = Mdch2;
@@ -604,8 +643,8 @@ void DCH_presel_tree(const char* ext = ".root"){
 																{"mT2",Mdch02},
 																{"mTtot1", Mdch1},
 																{"mTtot2", Mdch2},
-																{"mT1_opp", Mdch001},
-																{"mT2_opp", Mdch002},
+																{"mT1_opp", mll1_nu},
+																{"mT2_opp", mll2_nu},
 																{"mT3_opp", sqrt(abs(0.5*(mll1-mll2)*(mll1-mll2)+(1-0.5)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
 																{"mT4_opp", sqrt(abs(0.6*(mll1-mll2)*(mll1-mll2)+(1-0.6)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
 																{"mTtot1_opp", sqrt(abs(0.7*(mll1-mll2)*(mll1-mll2)+(1-0.7)*(mll1+mll2)*(mll1+mll2)-50000))*0.707},
@@ -777,8 +816,8 @@ void DCH_presel_tree(const char* ext = ".root"){
 					}			
 				}//3-lep
 			}//MY SLECTIONS
-		}//evt loop
-		
+		}//ievtloop
+		h_dR_Lnu->Write();
 		WriteHists(tau0Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 		WriteHists(tau1Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 		WriteHists(tau2Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
@@ -787,7 +826,15 @@ void DCH_presel_tree(const char* ext = ".root"){
 		WriteHists(lep3tau1Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 		WriteHists(lep3tau2Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 		
-		
+		h_nudphi->Draw();
+		h_nuMETdphi->Draw();
+		gStyle->SetOptStat(0);
+		c1->cd(1);  h_nuPz->SetLineColor(kRed);h_nuPz->Draw();
+    	c1->cd(2); h_visPz->SetLineColor(kBlue);h_visPz->Draw("same");
+    	 TLegend* leg1 = new TLegend(0.55, 0.7, 0.88, 0.88);
+    	 leg1->AddEntry(h_nuPz, "Pz vis in boosted frame", "l");
+    	 leg1->AddEntry(h_visPz, "Pz", "l");
+    	 leg1->Draw();
 		//trimmed_tree->Write();
 		//cout<< j <<"\t"<< oname <<endl;
 		//printf("%s %f\t %f\n ", oname,  h_Xmass_0t->Integral(), h_Xmass_3lep->Integral());

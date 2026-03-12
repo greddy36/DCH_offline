@@ -87,9 +87,9 @@ void DCH_cutflow(const char* ext = ".root"){
 	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
-		TH1D* hnevts = (TH1D*)ifile->Get("hNEvts");
+		TH1D* hNWEvts = (TH1D*)ifile->Get("hNEvts");
 		float xs_weight = 1;
-		//if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
+		//if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hNWEvts->Integral();
 		
 		std::string fname = filename[j];
 		//if (fname.find("WZ") > fname.length()) continue;

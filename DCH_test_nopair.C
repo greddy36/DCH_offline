@@ -161,13 +161,13 @@ void DCH_test_nopair(const char* ext = "root"){
 		char *oname = gSystem->ConcatFileName(o_name, filename[j]);
 		TFile* ofile = new TFile(oname, "RECREATE"); 
 		
-		TH1D* hnevts;
+		TH1D* hNWEvts;
 		if(XSec(fname)!=1){
-			hnevts = (TH1D*)ifile->Get("hNWEvts")->Clone("hnevts");
-			if (!hnevts) hnevts = (TH1D*)ifile->Get("hNEvts")->Clone("hnevts");
+			hNWEvts = (TH1D*)ifile->Get("hNWEvts")->Clone("hNWEvts");
+			if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts")->Clone("hNWEvts");
 		}
-		//cout<<"NOOOOOOOOOOOOOOOOO "<<hnevts->Integral()<<endl;
-		hnevts->Write();
+		//cout<<"NOOOOOOOOOOOOOOOOO "<<hNWEvts->Integral()<<endl;
+		hNWEvts->Write();
 		double xs_weight = 1.0;
 		
 		TTree *tree = (TTree*)ifile->Get("Events");
@@ -498,7 +498,7 @@ void DCH_test_nopair(const char* ext = "root"){
 				}
 			}//selections loop
 		}//evt loop 
-		hnevts->Write();
+		hNWEvts->Write();
 		scaleAndWriteHistograms(h_WMt, xs_weight);
 		scaleAndWriteHistograms(h_WMtv, xs_weight);
 		scaleAndWriteHistograms(h_mZ, xs_weight);

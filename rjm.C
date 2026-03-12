@@ -1,4 +1,3 @@
-// g++ -O2 -std=c++17 `root-config --cflags --libs` met_projection_reco.cc -o met_projection_reco
 
 #include <iostream>
 #include <vector>

@@ -11,22 +11,32 @@
 #include "TMath.h"
 #include "fir_alphas_metcov.h"
 #include "fir_alphas_metcovGN.h"
+#include "3nu_new.h"
+#include "3nu_good.h"
+#include "3nu_good1.h"
+//#include "3nu_best.h"
 
-std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::array<TLorentzVector,4> &Lep_lab, TLorentzVector &MET_lab, const mat2 &metcov){//this gives valid lepton legs with neutrinos
+std::tuple<int, double, double, double, double, bool> get_legs_comb(std::string cat, const std::array<TLorentzVector,4> &Lep_lab, TLorentzVector &MET_lab, const mat2 &metcov, bool doPrint=false){//this gives valid lepton legs with neutrinos
 	std::cout << std::fixed;
-    std::cout << std::setprecision(4);
+    std::cout << std::setprecision(6);
     
 	//Boosting to have Pz_tot(vis) = 0
-	double betaZ = 0; 
+	double betaZ = 0, sumE = 0; 
 	std::array<TLorentzVector,4> Lep_ref; 
 	TVector3 MET_ref; TVector3 Lxy[4];
 	double alpha[4] = {0,0,0,0}; 
-	for (int i=0;i<4;++i) betaZ += Lep_lab[i].Pz();
+	for (int i=0;i<4;++i) {
+		sumE += Lep_lab[i].E(); 
+		betaZ += Lep_lab[i].Pz();
+	}
+	betaZ = betaZ/sumE;
 	for (int i=0;i<4;++i) {
 		Lep_ref[i] = Lep_lab[i]; 
 		//Lep_ref[i].Boost(0,0,-betaZ);
+		//print4Vec(Lep_ref[i]);
 		MET_ref = MET_lab.Vect(); //no need to boost met
 		TVector3 v(Lep_ref[i].Vect().X(), Lep_ref[i].Vect().Y(), 0);
+		
 		Lxy[i] = v;
 	}
 	std::vector<int> ileg;
@@ -36,12 +46,14 @@ std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::
     double mll_1 = (Lep_ref[0]+Lep_ref[1]).M();
     double mll_2 = (Lep_ref[2]+Lep_ref[3]).M();
     
-    double bestChi2 = 1e15; double best_Chi2 = 1e15;
+    double bestChi2 = 1e15; double best_Chi2 = 1e15; double bestchi2 = 1e15; double chee2 = 999999999;
 	double chi2min; double chi2_mass;
 	double M2star;
+	double bestdPhi = 999;
 	//for 2 alphas
 	float dmH = 99999;//abs(mll_1 - mll_2) ;
 	bool isOpp = true;
+	AlphaSolution sol; FitOut out;
     for (int i=0;i<4;i++){
     	for (int j=i+1;j<4;j++){
     		//if (int(ileg.size())==1){if (ileg[0] != i and ileg[0] != j) continue;}
@@ -49,8 +61,8 @@ std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::
     		
     		bool i_in = std::find(ileg.begin(), ileg.end(), i) != ileg.end();
             bool j_in = std::find(ileg.begin(), ileg.end(), j) != ileg.end();
-            if (ileg.size()==1 and !(i_in or j_in)) continue;
-			//if (ileg.size()>1 and !(i_in and j_in)) continue;
+            //if (ileg.size()==1 and !(i_in or j_in)) continue;
+			//else if (ileg.size()>1 and !(i_in and j_in)) continue;
     		
     		
 			double alpha1 = MET_ref.Cross(Lxy[j].Unit())*Lxy[i].Unit().Cross(Lxy[j].Unit())/Lxy[i].Unit().Cross(Lxy[j].Unit()).Mag2();
@@ -58,11 +70,12 @@ std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::
 			//auto [alpha1, alpha2] = solve_two_alphas(Lxy[i].Unit(),Lxy[j].Unit(),MET_ref);
 			alpha1 = alpha1/Lxy[i].Mag(); alpha2 = alpha2/Lxy[j].Mag();
 			
-			//cout<<"alpha1: "<<alpha1<<"\t alpha2: "<<alpha2<<endl;
+			//if (doPrint)cout<<"alpha1: "<<sqrt(1+alpha1)*mll_1<<"\t alpha2: "<<sqrt(1+alpha2)*mll_2<<endl;
 			//if (alpha1 <= 0 or alpha2 <= 0) continue;
 			
 			double mHa =  -99, mHb = -999; 
-			/*if ((i==0 and j==2) or (i==0 and j==3) or (i==1 and j==2) or (i==1 and j==3)){ 
+			/*if ((i==0 and j==2) or (i==0 and j==3) or (i==1 and j==2) or (i==1 and j==3)){ 231ALPHAS  -1876470.6993	161999.3888	457010.5042
+
 				mHa = sqrt(1+alpha1)*mll_1;
 				mHb = sqrt(1+alpha2)*mll_2;
 			}
@@ -81,7 +94,8 @@ std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::
 			for(int l=0; l<4; l++) alpha[l]=0;
 			alpha[i] = alpha1;
 			alpha[j] = alpha2;*/
-			vec2 alpha_star = {{0,0}};
+			
+			/*vec2 alpha_star = {{0,0}};
 			mat2 cov_alpha_star = {{{0, 0},{0, 0}}};
 			vec2 alpha_init = {{alpha1,alpha2}};	
 			if ((i==0 and j==2) or (i==0 and j==3) or (i==1 and j==2) or (i==1 and j==3)){ 
@@ -97,17 +111,18 @@ std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::
 				chi2min,
 				M2star
 				);if(!ok1) continue;
-				cout<<i<<j<<"\t chi2: "<<chi2min<<" alpha1: "<<alpha_star[0]<<"\t alpha2: "<<alpha_star[1]<<"\t mH(cov): "<<sqrt(M2star)<<" dPhi: "<<deltaPhi(Lep_ref[i], Lep_ref[j])<<endl;
+				//if (doPrint) cout<<i<<j<<"\t chi2: "<<chi2min<<" alpha1: "<<alpha_star[0]<<"\t alpha2: "<<alpha_star[1]<<"\t mH(cov): "<<sqrt(M2star)<<" dPhi: "<<deltaPhi(Lep_ref[i], Lep_ref[j])<<endl;
 				if (alpha_star[0] <= 0 or alpha_star[1] <= 0) continue;
 				
 				if (chi2min > bestChi2) continue;
-				bestChi2 = chi2min;
+				bestChi2 = chi2min; bestdPhi = deltaPhi(Lep_ref[i], Lep_ref[j]);
 				for(int l=0; l<4; l++) alpha[l]=0;
 				alpha[i] = alpha_star[0];
 				alpha[j] = alpha_star[1];
-
+				
 				mHa = sqrt(1+alpha_star[0])*mll_1;
 				mHb = sqrt(1+alpha_star[1])*mll_2;
+				//cout<<mHa<<"\t"<<mHb<<endl;
 				isOpp = true;
 			}
 			else if (i==0 and j==1){ //continue;
@@ -123,11 +138,11 @@ std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::
 				20,
 				1e-6
 				);if(!ok2) continue;
-				cout<<i<<j<<"\t chi2: "<<chi2min<<" alpha1: "<<alpha_star[0]<<"\t alpha2: "<<alpha_star[1]<<"\t dPhi: "<<deltaPhi(Lep_ref[i], Lep_ref[j])<<endl;
+				//if (doPrint) cout<<i<<j<<"\t chi2: "<<chi2min<<" alpha1: "<<alpha_star[0]<<"\t alpha2: "<<alpha_star[1]<<"\t dPhi: "<<deltaPhi(Lep_ref[i], Lep_ref[j])<<endl;
 				if (alpha_star[0] <= 0 or alpha_star[1] <= 0) continue;
 				
 				if (chi2min > bestChi2) continue;
-				bestChi2 = chi2min;
+				bestChi2 = chi2min;bestdPhi = deltaPhi(Lep_ref[i], Lep_ref[j]);
 				for(int l=0; l<4; l++) alpha[l]=0;
 				alpha[i] = alpha_star[0];
 				alpha[j] = alpha_star[1];
@@ -135,6 +150,7 @@ std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::
 				
 				mHa = sqrt((1+alpha_star[0])*(1+alpha_star[1]))*mll_1;
 			 	mHb = mll_2;
+			 	//cout<<mHa<<"\t"<<mHb<<endl;
 			 	isOpp = false;
 			}
 			else if (i==2 and j==3){//continue;
@@ -150,11 +166,11 @@ std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::
 				20,
 				1e-6
 				);if(!ok2) continue;
-				cout<<i<<j<<"\t chi2: "<<chi2min<<" alpha1: "<<alpha_star[0]<<"\t alpha2: "<<alpha_star[1]<<"\t dPhi: "<<deltaPhi(Lep_ref[i], Lep_ref[j])<<endl;
+				//if (doPrint) cout<<i<<j<<"\t chi2: "<<chi2min<<" alpha1: "<<alpha_star[0]<<"\t alpha2: "<<alpha_star[1]<<"\t dPhi: "<<deltaPhi(Lep_ref[i], Lep_ref[j])<<endl;
 				if (alpha_star[0] <= 0 or alpha_star[1] <= 0) continue;
 				
 				if (chi2min > bestChi2) continue;
-				bestChi2 = chi2min;
+				bestChi2 = chi2min;bestdPhi = deltaPhi(Lep_ref[i], Lep_ref[j]);
 				for(int l=0; l<4; l++) alpha[l]=0;
 				alpha[i] = alpha_star[0];
 				alpha[j] = alpha_star[1];
@@ -162,14 +178,150 @@ std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::
 				
 				mHa = mll_1;
 				mHb = sqrt((1+alpha_star[0])*(1+alpha_star[1]))*mll_2;
+				//cout<<mHa<<"\t"<<mHb<<endl;
 				isOpp = false;
+			}*/
+
+			//TESTING 3nu.h
+			/*TMatrixD SigmaMET(2,2);
+			SigmaMET(0,0)=metcov[0][0];
+			SigmaMET(0,1)=metcov[0][1];
+			SigmaMET(1,0)=metcov[1][0];
+			SigmaMET(1,1)=metcov[1][1];
+			for(int k=j+1;k<4;k++){cout<<"INDEX: "<<i<<j<<k<<endl;
+				if (i==0 and j==1) sol = SolveThreeNuMETCov(
+					Lep_ref[i],Lep_ref[j],Lep_ref[k],
+					MET_ref,
+					SigmaMET,
+					mll_1*mll_1,
+					mll_2*mll_2
+				); 
+				else if (j==2 and k==3) sol = SolveThreeNuMETCov(
+					Lep_ref[j],Lep_ref[k],Lep_ref[i],
+					MET_ref,
+					SigmaMET,
+					mll_2*mll_2,
+					mll_1*mll_1
+				);
+				
+				if(!sol.ok) continue;
+				if (sol.alpha1 <= 0 or sol.alpha2 <= 0 or sol.alpha3 <=0) continue;
+				if (sol.chi2 > bestchi2) continue;
+				bestchi2 = sol.chi2;
+				for(int l=0; l<4; l++) alpha[l]=0;
+				alpha[i] = sol.alpha1;
+				alpha[j] = sol.alpha2;
+				alpha[k] = sol.alpha3;
+			}*/
+			// Testing 3nu_new.h
+			/*for(int k=j+1;k<4;k++){cout<<"INDEX: "<<i<<j<<k<<endl;
+				bool k_in = std::find(ileg.begin(), ileg.end(), k) != ileg.end();
+				//if(!k_in) continue;
+				vec3 alp;
+				bool okay;
+				if (i==0 and j==1)  std::tie(mHa, mHb, betaZ) = FitAlphasNuPzZero(
+					Lep_ref, // size = 4
+					MET_ref,
+					metcov,
+					mll_1*mll_1, mll_2*mll_2,
+					alp,
+					chee2,
+					i,j,k
+				);
+				else if (j==2 and k==3) std::tie(mHb, mHa, betaZ) = FitAlphasNuPzZero(
+					Lep_ref, // size = 4
+					MET_ref,
+					metcov,
+					mll_2*mll_2, mll_1*mll_1,
+					alp,
+					chee2,
+					j,k,i
+				);
+				
+				cout<<"cheee2 "<<chee2<<" betaZ: "<<betaZ<<endl;
+
+				cout<<"alphas: "<<alp[0]<<"\t"<<alp[1]<<"\t"<<alp[2]<<endl;
+				//if (alp[0] < 0 or alp[1] < 0 or alp[2] < 0) continue;
+				if (chee2 >= bestchi2) continue;
+				//if (abs(mHb-mHa) > dmH) continue;
+				bestchi2 = chee2;
+				dmH = abs(mHb-mHa);
+				for(int l=0; l<4; l++) alpha[l]=0;
+				alpha[i] = alp[0];
+				alpha[j] = alp[1];
+				alpha[k] = alp[2];
+				cout<<"BEST CHI2: "<<bestchi2<<" "<<chee2<<endl;
+				//cout<<"alphas: "<<alpha[0]<<"\t"<<alpha[1]<<"\t"<<alpha[2]<<"\t"<<alpha[3]<<endl;
+				cout<<"mH1: "<<mHa<<"\t mH2: "<<mHb<<endl;
+			}*/
+			//testing 3nu_good.h
+			for(int k=j+1;k<4;k++){cout<<"INDEX: "<<i<<j<<k<<endl;
+				bool k_in = std::find(ileg.begin(), ileg.end(), k) != ileg.end();
+				//if(!k_in) continue;
+				vec3 alp;
+				bool okay;
+				
+				out = Fit3Nu_Option2_FullMass_YBarrier(
+					Lep_ref, // size = 4
+					MET_ref,
+					metcov,
+					i,j,k,
+					i,j,k
+				);
+				
+				cout<<"cheee2 "<<out.chi2 <<"\t"<<out.x[0]<<"\t"<<out.x[1]<<"\t"<<out.x[2]<<endl;
+				if (out.x[0]*out.x[1]*out.x[2] ==0)continue;
+				if (out.chi2 >= bestchi2) continue;
+				bestchi2 = out.chi2;
+				for(int l=0; l<4; l++) alpha[l]=0;
+				alpha[i]=out.x[0]/Lep_ref[i].Pt();
+				alpha[j]=out.x[1]/Lep_ref[j].Pt();
+				alpha[k]=out.x[2]/Lep_ref[k].Pt();
+
+				cout<<"mH1: "<<out.mA<<"\t mH2: "<<out.mB<<endl;
 			}
-			/*cout<<"chi2min: "<<chi2min<<endl;
-			cout<<"alpha_stars: "<<alpha_star[0]<<"\t"<<alpha_star[1]<<endl;
-			cout<<"mH1: "<<mHa<<"\t mH2: "<<mHb<<"\t M2star: "<<M2star<<endl;*/
+			//testing 3nu_best.h
+			/*for(int k=j+1;k<4;k++){cout<<"INDEX: "<<i<<j<<k<<endl;
+				bool k_in = std::find(ileg.begin(), ileg.end(), k) != ileg.end();
+				//if(!k_in) continue;
+				
+				std::array<int,3> idxNu = {0,1,2}; // leptons 0,1,2 have neutrinos
+				std::array<int,2> pairA = {0,1};  // Higgs A from leptons 0+1
+				std::array<int,2> pairB = {2,3};  // Higgs B from leptons 2+3
+
+				if (i==0 and j==1)  out = Fit3Neutrinos_GlobalLocal(
+					Lep_ref, // size = 4
+					MET_ref,
+					metcov,
+					i,j,k,
+					i,j,k
+				);
+				else if (j==2 and k==3) 
+				
+				out = Fit3Neutrinos_GlobalLocal(
+					Lep_ref, // size = 4
+					MET_ref,
+					metcov,
+					i,j,k,
+					i,j,k
+				);
+				
+				cout<<"cheee2 "<<out.chi2 <<"\t"<<out.x[0]<<"\t"<<out.x[1]<<"\t"<<out.x[2]<<endl;
+				if (out.x[0]*out.x[1]*out.x[2] ==0)continue;
+				if (out.chi2 >= bestchi2) continue;
+				bestchi2 = out.chi2;
+				for(int l=0; l<4; l++) alpha[l]=0;
+				alpha[i]=out.x[0]/Lep_ref[i].Pt();
+				alpha[j]=out.x[1]/Lep_ref[j].Pt();
+				alpha[k]=out.x[2]/Lep_ref[k].Pt();
+
+				cout<<"mH1: "<<out.mA<<"\t mH2: "<<out.mB<<endl;
+			}*/
+			
+			//cout<<"mH1: "<<mHa<<"\t mH2: "<<mHb<<"\t M2star: "<<M2star<<endl;
     	}
     }
-    
+
 	/*//3 neutrinos
 	float dmH = 99999;//abs(mll_1 - mll_2) ;
     for (int i=0;i<4;i++){
@@ -228,26 +380,28 @@ std::tuple<int, double, double, bool> get_legs_comb(std::string cat, const std::
     	}
     }*/
     
+    //BoostLeptonsZ(Lep_ref, betaZ);
     TLorentzVector nu[4]; int nlegs =0;
     for (int i=0;i<4;++i) {//making neutrinos
-    	TLorentzVector tmp;
-    	//tmp.SetVectM(Lep_ref[i].Vect(),0);0
-    	tmp = Lep_ref[i];
-    	//tmp.SetVectM(Lxy[i],0.0);0
-    	nu[i] = (alpha[i])*tmp;
+    	//nu[i].SetPxPyPzE(alpha[i]*Lep_ref[i].Px(), alpha[i]*Lep_ref[i].Py(), alpha[i]*Lep_ref[i].Pz(), alpha[i]*Lep_ref[i].E());
+    	nu[i] = alpha[i]*Lep_ref[i]; 
     	if (nu[i].E()>0) nlegs +=1;
     }
-
-	for (int i=0;i<4;++i) {cout<<"nu"<<i<<": "; print4Vec(nu[i]);}
-	for (int i=0;i<4;++i) {cout<<"Lep"<<i<<": "; print4Vec(Lep_ref[i]);}
+    
     double MDCH1 = (nu[0]+nu[1]+Lep_ref[0]+Lep_ref[1]).M();
 	double MDCH2 = (nu[2]+nu[3]+Lep_ref[2]+Lep_ref[3]).M();
 
-    cout<<"MET "<<MET_ref.Mag()<<"\t"<<"Sum (nu pT) "<<(nu[0]+nu[1]+nu[2]+nu[3]).Pt()<<endl;
-    cout<<"Mll "<< mll_1 <<"\t"<< mll_2 <<endl;
-    cout<<"DCH masses "<< (nu[0]+nu[1]+Lep_ref[0]+Lep_ref[1]).M() <<"\t"<< (nu[2]+nu[3]+Lep_ref[2]+Lep_ref[3]).M()<<endl;
+	//if(nlegs!=3) return {nlegs, MDCH1, MDCH2, bestdPhi, bestChi2, isOpp};
+	if (doPrint){
+		for (int i=0;i<4;++i) {cout<<"nu"<<i<<": "; print4Vec(nu[i]);}
+		for (int i=0;i<4;++i) {cout<<"Lep"<<i<<": "; print4Vec(Lep_ref[i]);}
+		cout<<"MET "<<MET_ref.Mag()<<"\t"<<"Sum (nu pT) "<<(nu[0]+nu[1]+nu[2]+nu[3]).Pt()<<endl;
+		cout<<"Mll "<< mll_1 <<"\t"<< mll_2 <<endl;
+		cout<<"DCH masses "<< MDCH1 <<"\t"<< MDCH2<<endl;
+		cout<<"SOL masses "<< sol.mHA <<"\t"<< sol.mHB<<endl;
+	}
     //cout<<nlegs<<endl;
-    return {nlegs, MDCH1, MDCH2, isOpp};
+    return {nlegs, MDCH1, MDCH2, bestdPhi, bestChi2, isOpp};
 }
 
 	

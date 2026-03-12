@@ -75,14 +75,14 @@ void DCH_presel_ATLAS_test(const char* ext = "2018.root"){
 		//if (fname.find("DY") > fname.length()) continue;
 		//if (XSec(filename[j])!=1) continue; 
 	
-		TH1D* hnevts;
+		TH1D* hNWEvts;
 		double xs_weight = 1.0;
 		if(XSec(filename[j])!=1){
-			hnevts = (TH1D*)ifile->Get("hNWEvts");
-			if (!hnevts) hnevts = (TH1D*)ifile->Get("hNEvts");
-			xs_weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
+			hNWEvts = (TH1D*)ifile->Get("hNWEvts");
+			if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts");
+			xs_weight = lumi_2018*XSec(filename[j])/hNWEvts->Integral();
 		}
-		else hnevts = (TH1D*)ifile->Get("hNEvts");
+		else hNWEvts = (TH1D*)ifile->Get("hNEvts");
 			
 		const char* o_name;
 		if (selection =="none") o_name = "hist";
@@ -254,7 +254,7 @@ void DCH_presel_ATLAS_test(const char* ext = "2018.root"){
 		h_Xmass_34t->Scale(xs_weight);
 		h_Xmass_3lep->Scale(xs_weight);
 		
-		hnevts->Write();		
+		hNWEvts->Write();		
 		h_Xmass_0t->Write();
 		h_Xmass_1t->Write();
 		h_Xmass_2t->Write();

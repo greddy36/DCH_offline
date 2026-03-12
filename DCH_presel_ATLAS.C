@@ -69,9 +69,9 @@ void DCH_presel_ATLAS(const char* ext = "2018.root"){
 	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
-		TH1D* hnevts = (TH1D*)ifile->Get("hNEvts");
+		TH1D* hNWEvts = (TH1D*)ifile->Get("hNEvts");
 		float xs_weight = 1;
-		if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
+		if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hNWEvts->Integral();
 
 		std::string fname = filename[j];
 		//if (fname.find("HppM100") > fname.length()) continue;
@@ -486,7 +486,7 @@ void DCH_presel_ATLAS(const char* ext = "2018.root"){
 		h_Xmass_34t->Scale(xs_weight);
 		h_Xmass_3lep->Scale(xs_weight);
 		
-		hnevts->Write();		
+		hNWEvts->Write();		
 		/*cutflow->Write();
 		h_mll_1->Write();
 		h_mll_2->Write();

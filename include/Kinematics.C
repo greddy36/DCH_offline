@@ -5,6 +5,10 @@
 #include "Kinematics.h"
 #include "cat.h" //cat sort funs
 
+void print4Vec(TLorentzVector Vec){
+	cout<< Vec.Pt()<<"\t"<<Vec.Eta()<<"\t"<<Vec.Phi()<<"\t"<<Vec.M()<<endl;
+}
+
 std::vector<double> SortPt(){
 	double pt[] = {pt_1,pt_2,pt_3,pt_4};
 	std::vector<double> sorted_pt;
@@ -353,13 +357,15 @@ string pairFunc(int m, int n, string cat, double Zwindow){//checks if a pair is 
 		lep2 = LepV(4);
 		c2 = q_4;
 	}
-	if (c1 == c2 ) return "DCH";
-	else if (c1 == -c2){//doing Z window only for light leptons for now
-		if ( (cat[m-1] == 'e' or cat[m-1] == 'm' ) and cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) < Zwindow) return "Zwindow";
-		else if ( (cat[m-1] == 'e' or cat[m-1] == 'm' ) and cat[m-1] == cat[n-1] and abs((lep1+lep2).M()-91.2) >= Zwindow) return "Zv";
-		else if (cat[m-1] == 't' and cat[m-1] == cat[n-1]) return "ZttPair" ;
-		else if (cat[m-1] != cat[n-1]) return "oppPair";
-		else return "found nothing";
+	if (c1 == c2 ) return "SSpair";//SS
+	else if (c1 == -c2){//OS
+		if (cat[m-1] == cat[n-1]){//+SF
+			if (cat[m-1] == 'e' or cat[m-1] == 'm' ){
+				return (abs((lep1+lep2).M()-91.2) < Zwindow) ? "Zwindow" : "Zv";
+			}
+			else if (cat[m-1] == 't') return "ZttPair" ;
+		}
+		else return "OSOFpair";
 	}
 	else "messed up";
 }
@@ -369,330 +375,170 @@ TLorentzVector LepV(int n){
 	TLorentzVector lepV;// make leptons massless
 	if (n==1)
 		lepV.SetPtEtaPhiM(pt_1, eta_1, phi_1, 0);
-	if (n==2)
+	else if (n==2)
 		lepV.SetPtEtaPhiM(pt_2, eta_2, phi_2, 0);
-	if (n==3)
+	else if (n==3)
 		lepV.SetPtEtaPhiM(pt_3, eta_3, phi_3, 0);
-	if (n==4)
+	else if (n==4)
 		lepV.SetPtEtaPhiM(pt_4, eta_4, phi_4, 0);
+	else lepV.SetPtEtaPhiM(0,0,0,0);
 	return lepV;
 }	
 
-TLorentzVector NuV(int n){
+/*TLorentzVector NuV(int n){
 	TLorentzVector nuV;
 	if (n==1)
 		nuV.SetPtEtaPhiM(nupt_1, nueta_1, nuphi_1, nuM_1);
-	if (n==2)
+	else if (n==2)
 		nuV.SetPtEtaPhiM(nupt_2, nueta_2, nuphi_2, nuM_2);
-	if (n==3)
+	else if (n==3)
 		nuV.SetPtEtaPhiM(nupt_3, nueta_3, nuphi_3, nuM_3);
-	if (n==4)
+	else if (n==4)
 		nuV.SetPtEtaPhiM(nupt_4, nueta_4, nuphi_4, nuM_4);
+	else nuV.SetPtEtaPhiM(0,0,0,0);
 	return nuV;
 }
+*/
 
-std::vector<int> ZCandMaker(string cat, double Zwindow){
-//make sure the there's no more than 2 lep with same charge before calling this fn.
-//no need to sort cat in order of leptons before calling this fn.
-//returns opposite-sign same-flav pairs
-//First 2 leptons form the best Z pair and are pt sorted.
-	double mZ = 91.2;
-	TLorentzVector l1 = LepV(1), l2 = LepV(2), l3 = LepV(3), l4 = LepV(4);
-	std::vector<int> arr = {1,2,3,4};
-	auto swap_lep_array = [](std::vector<int>& arr, int m, int n){
-		int temp = arr[m-1];
-		arr[m-1] = arr[n-1];
-		arr[n-1] = temp; 
-	};
-	auto swap_pair = [](std::vector<int>& arr){
-		int tmp1 = arr[0];
-		int tmp2 = arr[1];
-		arr[0] = arr[2];
-		arr[1] = arr[3];
-		arr[2] = tmp1;
-		arr[3] = tmp2;
-	};
-	if(cat.length() == 3){
-		if( cat[0]==cat[1] and q_1 == -q_2 and abs((l1+l2).M()-mZ) < Zwindow){
-			if (l1.Pt() < l2.Pt()) swap_lep_array(arr, 1, 2);
-		}
-		else if( cat[1]==cat[2] and q_2 == -q_3 and abs((l2+l3).M()-mZ) < Zwindow){
-			if (l2.Pt() < l3.Pt()) arr = {3,2,1,4};
-			else arr = {2,3,1,4};
-		}
-		else if( cat[0]==cat[2] and q_1 == -q_3 and abs((l1+l3).M()-mZ) < Zwindow ){
-			if (l1.Pt() < l3.Pt()) arr = {3,1,2,4};
-			else arr = {1,3,2,4};
-		}
-		return arr;
-	}
-	/*else if(cat.length() == 4){//needs fixing!!
-		if( q_1 == -q_2 and q_3 == -q_4){
-			if(cat[0] == cat[1]){
-				if (l1.Pt() < l2.Pt()) swap_lep_array(arr, 1, 2);
-			}	
-			if(cat[2] == cat[3]){
-				if (l3.Pt() < l4.Pt()) swap_lep_array(arr, 3, 4);
-				if (abs((l3+l4).M()-mZ) < Zwindow) swap_pair(arr);
-			}
-			else if(cat[0] == cat[1] and cat[2] == cat[3] and abs((l1+l2).M()-mZ) < Zwindow and abs((l3+l4).M()-mZ) < Zwindow and  (l1+l2).Pt() < (l3+l4).Pt()) swap_pair(arr);
-		}
-		else if( q_1 == -q_3 and q_2 == -q_4){
-			if(cat[0] == cat[2]){
-				if (l1.Pt() < l3.Pt()) swap_lep_array(arr, 1, 3);
-			}	
-			if(cat[1] == cat[3]){
-				if (l2.Pt() < l4.Pt()) swap_lep_array(arr, 2, 4);
-			} 
-			if(cat[0] == cat[2] and cat[1] == cat[3] and abs((l1+l3).M()-mZ) < Zwindow and abs((l2+l4).M()-mZ) < Zwindow and (l1+l3).Pt() < (l2+l4).Pt()) swap_pair(arr);
-		}
-		else if( q_1 == -q_4 and q_2 == -q_3){
-			if(cat[0] == cat[3] and abs((l1+l4).M()-mZ) < Zwindow){
-				if (l1.Pt() < l4.Pt()) swap_lep_array(arr, 1, 4);
-			}	
-			if(cat[1] == cat[2] and abs((l2+l3).M()-mZ) < Zwindow){
-				if (l2.Pt() < l3.Pt()) swap_lep_array(arr, 2, 3);
-			} 
-			if(cat[0] == cat[3] and cat[1] == cat[2] and abs((l1+l4).M()-mZ) < Zwindow and abs((l2+l3).M()-mZ) < Zwindow and (l1+l4).Pt() < (l2+l3).Pt()) swap_pair(arr);			
-		}
-		return arr;*/
-	else if(cat.length() == 4){//needs fixing!!
-		if(cat[0] == cat[1] and q_1 == -q_2){
-			if (l1.Pt() < l2.Pt()) swap_lep_array(arr, 1, 2);
-		}	
-		if(cat[2] == cat[3] and q_3 == -q_4){
-			if (l3.Pt() < l4.Pt()) swap_lep_array(arr, 3, 4);
-		}
-		if(cat[0] == cat[1] and cat[2] == cat[3] and q_1 == -q_2 and q_3 == -q_4){
-			if((l1+l2).Pt() < (l3+l4).Pt()) swap_pair(arr);
-		}
-		if(cat[0] == cat[2] and q_1 == -q_3){
-			if (l1.Pt() < l3.Pt()) swap_lep_array(arr, 1, 3);
-		}
-		if(cat[0] == cat[3]){
-			if (l1.Pt() < l4.Pt()) swap_lep_array(arr, 1, 4);
-		}
-		if(cat[1] == cat[2]){
-			if (l2.Pt() < l3.Pt()) swap_lep_array(arr, 2, 3);
-		}
-		if(cat[1] == cat[3]){
-			if (l2.Pt() < l4.Pt()) swap_lep_array(arr, 2, 4);
-		}	
-		return arr;
-	}
-}		
+void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& Ztt_pair, vector<pair<int, int>>& SS_pair, vector<pair<int,int>>& OSOF_pair) {//global function to process pairs
+	int len = strlen(cat_name);
 
+    vector<bool> used(len+1,false);
 
-std::vector<int> ZVetoMaker(string cat, double Zwindow){
-	double mZ = 91.2;
-	//static int Zveto_arr[4] ;
-	TLorentzVector l1 = LepV(1), l2 = LepV(2), l3 = LepV(3), l4 = LepV(4);
-	std::vector<int> arr = {1,2,3,4};
-	auto swap_lep_array = [](std::vector<int>& arr, int m, int n){
-		int temp = arr[m-1];
-		arr[m-1] = arr[n-1];
-		arr[n-1] = temp; 
-	};
-	auto swap_pair = [](std::vector<int>& arr){
-		int tmp1 = arr[0];
-		int tmp2 = arr[1];
-		arr[0] = arr[2];
-		arr[1] = arr[3];
-		arr[2] = tmp1;
-		arr[3] = tmp2;
-	};
-		
-	if(cat.length() == 3){
-		if( cat[0]==cat[1] and q_1 == -q_2 and abs((l1+l2).M()-mZ) >= Zwindow){
-			if (l1.Pt() < l2.Pt()) swap_lep_array(arr, 1, 2);
-		}
-		else if( cat[1]==cat[2] and q_2 == -q_3 and abs((l2+l3).M()-mZ) >= Zwindow){
-			if (l2.Pt() < l3.Pt()) arr = {3,2,1,4};
-			else arr = {2,3,1,4};
-		}
-		else if( cat[0]==cat[2] and q_1 == -q_3 and abs((l1+l3).M()-mZ) >= Zwindow){
-			if (l1.Pt() < l3.Pt()) arr = {3,1,2,4};
-			else arr = {1,3,2,4};
-		}
-		return arr;
-	}
-	else if(cat.length() == 4){//needs fixing!!
-		if( q_1 == -q_2 and q_3 == -q_4){
-			if(cat[0] == cat[1]){
-				if (l1.Pt() < l2.Pt()) swap_lep_array(arr, 1, 2);
-			}	
-			if(cat[2] == cat[3]){
-				if (l3.Pt() < l4.Pt()) swap_lep_array(arr, 3, 4); 
-			}
-			if(cat[0] == cat[1] and cat[2] == cat[3] and (l1+l2).Pt() < (l3+l4).Pt()) swap_pair(arr);
-		}
-		else if( q_1 == -q_3 and q_2 == -q_4){
-			if(cat[0] == cat[2]){
-				if (l1.Pt() < l3.Pt()) swap_lep_array(arr, 1, 3);
-			}	
-			if(cat[1] == cat[3]){
-				if (l2.Pt() < l4.Pt()) swap_lep_array(arr, 2, 4);
-			} 
-			if(cat[0] == cat[2] and cat[1] == cat[3] and (l1+l3).Pt() < (l2+l4).Pt()) swap_pair(arr);
-		}
-		else if( q_1 == -q_4 and q_2 == -q_3){
-			if(cat[0] == cat[3]){
-				if (l1.Pt() < l4.Pt()) swap_lep_array(arr, 1, 4);
-			}	
-			if(cat[1] == cat[2]){
-				if (l2.Pt() < l3.Pt()) swap_lep_array(arr, 2, 3);
-			} 
-			if(cat[0] == cat[3] and cat[1] == cat[2] and (l1+l4).Pt() < (l2+l3).Pt()) swap_pair(arr);			
-		}
-		return arr;
-	}
+    struct Zcand {
+        int i,j; 
+        double diff;
+    };
+    vector<Zcand> Zcands;
+
+    //First pass: collect candidates
+    for (int m=1; m<=len; ++m){
+        for (int n=m+1; n<=len; ++n){
+
+            string pair_name = pairFunc(m,n,cat_name,10);
+
+            if(pair_name=="Zwindow"){
+                double mass = (LepV(m)+LepV(n)).M(); 
+                double diff = fabs(mass - 91.1876);
+                Zcands.push_back({m,n,diff});
+            }
+            else if(pair_name=="ZttPair") Ztt_pair.push_back({m,n});//might have overlapping idxs
+            else if(pair_name=="OSOFpair") OSOF_pair.push_back({m,n});//might have overlapping idxs
+            else if(pair_name=="SSpair") SS_pair.push_back({m,n});
+        }
+    }
+
+    //Sort Z candidates by closeness to Z mass
+    sort(Zcands.begin(), Zcands.end(),
+         [](const Zcand& a,const Zcand& b){ return a.diff < b.diff; });
+
+    //Select non-overlapping Z pairs
+    for(auto &zcand : Zcands){
+        if(!used[zcand.i] && !used[zcand.j]){
+            Z_pair.push_back({zcand.i,zcand.j});
+            used[zcand.i] = true;
+            used[zcand.j] = true;
+        }
+    }
+    //Second pass: Zv pairs only from leptons not in Zwindow
+    //but still might have overlapping idxs within the Zv
+    for (int m=1; m<=len; ++m){
+    	if(used[m]) continue;
+        for (int n=m+1; n<=len; ++n){
+            if(used[n]) continue;
+            string pair_name = pairFunc(m,n,cat_name,10);
+            if(pair_name=="Zv"){
+                Zv_pair.push_back({m,n});
+                used[m] = true;
+                used[n] = true;
+            }
+        }
+    }
+    
 }
 
-TLorentzVector *ZCandMaker_pair(string cat, TLorentzVector l1, TLorentzVector l2, TLorentzVector l3, TLorentzVector l4, double Zwindow){
-	double mZ = 91.2;
-	TLorentzVector *Zpaired_lep = new TLorentzVector[4] ;
-	TLorentzVector L1, L2, L3, L4;
-	
-	if(cat.length() == 3){
-		if( cat[0]==cat[2] and abs((l1+l3).M()-mZ) < Zwindow){
-			if(l1.Pt() >= l3.Pt()){
-				L1 = l1; L2 = l3;
-				L3 = l2; L4 = l4;
-			}
-			else{
-				L1 = l3; L2 = l1;
-				L3 = l2; L4 = l4;
-			}
-		}
-		else if( cat[1]==cat[2] and abs((l2+l3).M()-mZ) < Zwindow){
-			if(l2.Pt() >= l3.Pt()){
-				L1 = l2; L2 = l3;
-				L3 = l1; L4 = l4;
-			}
-			else{
-				L1 = l3; L2 = l2;
-				L3 = l1; L4 = l4;	
-			}
-		}
-		if( cat[0]==cat[2] and cat[1]==cat[2] and abs((l1+l3).M()-mZ) < Zwindow and abs((l2+l3).M()-mZ) < Zwindow){
-			if( l1.Pt() >= l3.Pt() and l3.Pt() >= l2.Pt()){
-				L1 = l1; L2 = l3;
-				L3 = l2; L4 = l4;
-			}
-			else if( l2.Pt() >= l3.Pt() and l3.Pt() >= l1.Pt()){
-				L1 = l2; L2 = l3;
-				L3 = l1; L4 = l4;	
-			}
-			else if( l3.Pt() >= l1.Pt() and l1.Pt() >= l1.Pt()){
-				L1 = l3; L2 = l1;
-				L3 = l2; L4 = l4;	
-			}
-			else if( l3.Pt() >= l2.Pt() and l2.Pt() >= l1.Pt()){
-				L1 = l3; L2 = l2;
-				L3 = l1; L4 = l4;	
-			}
-		}
-	}
-	else if(cat.length() == 4){//needs fixing!!
-		if( cat[0]==cat[2] /*and abs((l1+l3).M()-mZ) < Zwindow*/){
-			if(l1.Pt() >= l3.Pt()){
-				L1 = l1; L2 = l3;
-				L3 = l2; L4 = l4;
-			}
-			else{
-				L1 = l3; L2 = l1;
-				L3 = l2; L4 = l4;
-			}
-		}
-		else if( cat[0]==cat[3] /*and abs((l1+l4).M()-mZ) < Zwindow*/){
-			if(l1.Pt() >= l4.Pt()){
-				L1 = l1; L2 = l4;
-				L3 = l2; L4 = l3;
-			}
-			else{
-				L1 = l4; L2 = l1;
-				L3 = l2; L4 = l3;
-			}
-		}
-		else if( cat[1]==cat[2] /*and abs((l2+l3).M()-mZ) < Zwindow*/){
-			if(l2.Pt() >= l3.Pt()){
-				L1 = l2; L2 = l3;
-				L3 = l1; L4 = l4;
-			}
-			else{
-				L1 = l3; L2 = l2;
-				L3 = l1; L4 = l4;	
-			}
-		}
-		else if( cat[1]==cat[3] /*and abs((l2+l4).M()-mZ) < Zwindow*/){
-			if(l2.Pt() >= l4.Pt()){
-				L1 = l2; L2 = l4;
-				L3 = l1; L4 = l3;
-			}
-			else{
-				L1 = l4; L2 = l2;
-				L3 = l1; L4 = l3;	
-			}
-		}
-	}
-	Zpaired_lep[0] = L1;
-	Zpaired_lep[1] = L2;
-	Zpaired_lep[2] = L3;
-	Zpaired_lep[3] = L4;
-	return Zpaired_lep;
-}		
+vector<pair<int,int>> removeOverlap(const vector<pair<int,int>>& pairs, int nLep)
+{//removes overlapping indices. Not good for Z window pairs, so we implimented best Z-pair method within the pairFunc()
+    vector<pair<int,int>> clean;
+    vector<bool> used(nLep,false);
 
+    for(const auto& p : pairs){
+        if(!used[p.first] && !used[p.second]){
+            clean.push_back(p);
+            used[p.first]  = true;
+            used[p.second] = true;
+        }
+    }
+    return clean;
+}
 
-TLorentzVector *ZVetoMaker_pair(string cat, TLorentzVector l1, TLorentzVector l2, TLorentzVector l3, TLorentzVector l4, double Zwindow){
-	double mZ = 91.2;
-	TLorentzVector *Zveto_lep = new TLorentzVector[4] ;
-	TLorentzVector L1, L2, L3, L4;
-	
-	if(cat.length() == 3){
-		if( cat[0]==cat[2] and abs((l1+l3).M()-mZ) > Zwindow){
-			if(l1.Pt() >= l3.Pt()){
-				L1 = l1; L2 = l3;
-				L3 = l2; L4 = l4;
-			}
-			else{
-				L1 = l3; L2 = l1;
-				L3 = l2; L4 = l4;
-			}
-		}
-		else if( cat[1]==cat[2] and abs((l2+l3).M()-mZ) > Zwindow){
-			if(l2.Pt() >= l3.Pt()){
-				L1 = l2; L2 = l3;
-				L3 = l1; L4 = l4;
-			}
-			else{
-				L1 = l3; L2 = l2;
-				L3 = l1; L4 = l4;	
-			}
-		}
-		if( cat[0]==cat[2] and cat[1]==cat[2] and abs((l1+l3).M()-mZ) > Zwindow and abs((l2+l3).M()-mZ) > Zwindow){
-			if( l1.Pt() >= l3.Pt() and l3.Pt() >= l2.Pt()){
-				L1 = l1; L2 = l3;
-				L3 = l2; L4 = l4;
-			}
-			else if( l2.Pt() >= l3.Pt() and l3.Pt() >= l1.Pt()){
-				L1 = l2; L2 = l3;
-				L3 = l1; L4 = l4;	
-			}
-			else if( l3.Pt() >= l1.Pt() and l1.Pt() >= l1.Pt()){
-				L1 = l3; L2 = l1;
-				L3 = l2; L4 = l4;	
-			}
-			else if( l3.Pt() >= l2.Pt() and l2.Pt() >= l1.Pt()){
-				L1 = l3; L2 = l2;
-				L3 = l1; L4 = l4;	
-			}
-		}
+std::string classifyTauRegion(std::string cat_name, double LT, vector<pair<int, int>> OSSF_pair){
+	int Ntau = cat_name.size()-cat_lepCount(cat_name,'e','m'); 
+	double Zwindow = 10, Zmass = 91.2;
+	double mZ[4] = {-99, -99, -99, -99};
+	int numZ =0;
+	for (int i = 0; i<OSSF_pair.size(); i++){
+		mZ[i] = (LepV(OSSF_pair[i].first)+LepV(OSSF_pair[i].second)).M();
+		if (abs(mZ[i]- Zmass) <= Zwindow) numZ += 1;
+		
 	}
-	//else if(cat.length() == 4){
+	if (cat_name.size()==2){
+		if (Ntau==0) return (numZ==1) ? "DYCR_0tau" : "DYveto_0tau";
+		else if (Ntau==1) return (numZ==1) ? "DYCR_1tau" : "DYveto_1tau";
+	}
+	if (numZ==0 and cat_name.size()==4){
+		if (Ntau==0) return (LT < 400) ? "VR_0tau" : "SR_0tau";
+		else if (Ntau==1) return (LT < 400) ? "VR_1tau" : "SR_1tau";
+		else if (Ntau==2) return (LT < 400) ? "VR_2tau" : "SR_2tau";
+		else if (Ntau==3) return (LT < 100) ? "VR_3tau" : "SR_3tau";
+	}
+	else if (numZ==0 and cat_name.size()==3){
+		if (Ntau==0) return (LT < 300) ? "VR_3lep0tau" : "SR_3lep0tau";
+		else if (Ntau==1) return (LT < 200) ? "VR_3lep1tau" : "SR_3lep1tau";
+		else if (Ntau==2) return (LT < 100) ? "VR_3lep2tau" : "SR_3lep2tau";
+	}
+	else if (numZ > 0 and cat_name.size()==3){//WZ CR if you do MET >= 40
+		if (Ntau==0) return "CR_3lep0tau";
+		else if (Ntau==1) return "CR_3lep1tau";
+		else if (Ntau==2) return "CR_3lep2tau";//will be empty as we don't make Z with taus
+	}
+	else if (numZ > 0 and cat_name.size()==4){//ZZ CR if you do numZ ==2
+		if (Ntau==0) return "CR_0tau";
+		else if (Ntau==1) return "CR_1tau";//will be empty as we don't make Z with taus
+		else if (Ntau==2) return "CR_2tau";//will be empty as we don't make Z with taus
+		else if (Ntau==3) return "CR_3tau";//will be empty as we don't make Z with taus
+	}
+	else {cout<<"CRAAAPPP "<<cat_name<<"\t"<<numZ<<endl; return "crap";}
+}
+
+std::string classifyLepRegion(std::string cat_name, vector<pair<int, int>> pairVec){//classifies channels based on OSSF (CR/VR) or SS (Signal) pairing 
+	std::string lepRegion = "";
+	int cat_size = cat_name.size();
 	
-	Zveto_lep[0] = L1;
-	Zveto_lep[1] = L2;
-	Zveto_lep[2] = L3;
-	Zveto_lep[3] = L4;
-	return Zveto_lep;
+	int nPairs = pairVec.size(); 
+	if(nPairs == 0) return cat_name;
+	if(cat_size == 2) return cat_name;
+	
+	vector<bool> used(cat_name.size(), false);
+	std::sort(pairVec.begin(), pairVec.end());
+    //add paired leptons first
+    for (auto &p : pairVec) {
+    	//lepRegion += cat_name[p.first]+cat_name[p.second];//this is WRONG as they are strings. so C++ adds their ASCII values before appending.
+        lepRegion += cat_name[p.first-1];
+		lepRegion += cat_name[p.second-1];
+        used[p.first-1] = true;
+        used[p.second-1] = true;
+    }
+    //add remaining leptons in order
+    string extra = "";
+    for (int i = 0; i < cat_name.size(); i++) {
+        if (used[i]) continue;
+        extra += cat_name[i];
+    }
+    if (extra == "me") extra = "em";
+    else if (extra == "te") extra = "et";
+    else if (extra == "tm") extra = "mt";
+    lepRegion += extra; 
+    	
+    return lepRegion;
 }

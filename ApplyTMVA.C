@@ -43,8 +43,8 @@ void ApplyTMVA(const char* ext = ".root"){
     for (auto [inname, outname] : samples) {
         TFile* fin = TFile::Open(inname);
         TFile* fout = new TFile(outname, "RECREATE");
-        TH1D* hnevts = (TH1D*)fin->Get("hnevts");
-        hnevts->Write();
+        TH1D* hNWEvts = (TH1D*)fin->Get("hNWEvts");
+        hNWEvts->Write();
 	    TDirectory* tau0Dir = fout->mkdir("0tau");
 		TDirectory* tau1Dir = fout->mkdir("1tau");
 		TDirectory* tau2Dir = fout->mkdir("2tau");

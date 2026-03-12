@@ -100,7 +100,7 @@ void roofit_wz(){
    	std::map<std::string, double> tot_uncert_quadr;
     for (auto& kv : open_files) {
 			for (auto* f : kv.second) {
-				TH1D* h = (TH1D*)f->Get("3lep0tau/h_W_mt");
+				TH1D* h = (TH1D*)f->Get("3lep0tau/h_ST");
 				if(!h) continue;
 				h->Sumw2();
 				cout<<kv.first<<"\t"<<applyXSec(f)<<endl;
@@ -133,7 +133,7 @@ void roofit_wz(){
 	double other_uncert = sqrt(tot_uncert_quadr["other"]+tot_uncert_quadr["DY"]+tot_uncert_quadr["ttW"]+tot_uncert_quadr["ttZ"]+tot_uncert_quadr["ZH"]+tot_uncert_quadr["ZZ"]+tot_uncert_quadr["VVV"]+tot_uncert_quadr["WJ"]+tot_uncert_quadr["ST"]+tot_uncert_quadr["TTbar"])/h_other_bkg->Integral();
 	//cout<<other_uncert<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
 	
-	RooRealVar x("x", "W_{mT} variable", 0, 1000);//Discriminating Variable
+	RooRealVar x("x", "L_{T} variable", 0, 1000);//Discriminating Variable
 
 	RooDataHist other_hist("other_hist", "Other", x, Import(*h_other_bkg));
 	RooHistPdf other_pdf("other_pdf", "Other PDF", x, other_hist);

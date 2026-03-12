@@ -87,9 +87,9 @@ void DCH(const char* ext = ".root"){
 	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
-		TH1D* hnevts = (TH1D*)ifile->Get("hNEvts");
+		TH1D* hNWEvts = (TH1D*)ifile->Get("hNEvts");
 		float xs_weight = 1;
-		if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
+		if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hNWEvts->Integral();
 		
 		std::string fname = filename[j];
 		//if (fname.find("WZ") > fname.length()) continue;
@@ -241,11 +241,11 @@ void DCH(const char* ext = ".root"){
 				if(Ntau >= 2) h_mH[3]->Fill(mll_1, brWeight*evtwt_nom);
 			}
 		}//evt loop 
-		hnevts->Write();	
+		hNWEvts->Write();	
 		
 		scaleAndWriteHistograms(h_mH, xs_weight);
 		
-		printf("%s %f\n", oname, XSec(filename[j])*lumi_2018/hnevts->Integral() );
+		printf("%s %f\n", oname, XSec(filename[j])*lumi_2018/hNWEvts->Integral() );
 		delete tree;
 	}
 	gSystem->FreeDirectory(dirp);

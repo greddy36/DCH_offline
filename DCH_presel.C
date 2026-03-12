@@ -144,14 +144,14 @@ void DCH_presel(const char* ext = ".root"){
 		//if (XSec(filename[j])==1) continue; 
 		cout<<filename[j]<<endl;
 		
-		TH1D* hnevts;
+		TH1D* hNWEvts;
 		double xs_weight = 1.0;
 		if(XSec(filename[j])!=1){
-			hnevts = (TH1D*)ifile->Get("hNWEvts");
-			if (!hnevts) hnevts = (TH1D*)ifile->Get("hNEvts");
-			xs_weight = lumi_2016*XSec(filename[j])/hnevts->Integral();
+			hNWEvts = (TH1D*)ifile->Get("hNWEvts");
+			if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts");
+			xs_weight = lumi_2016*XSec(filename[j])/hNWEvts->Integral();
 		}
-		else hnevts = (TH1D*)ifile->Get("hNEvts");
+		else hNWEvts = (TH1D*)ifile->Get("hNEvts");
 		cout<<xs_weight<<endl;
 		const char* o_name;
 		if (selection =="none") o_name = "hist";

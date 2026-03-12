@@ -113,9 +113,9 @@ void DCH_test_nopair_4l(const char* ext = "root"){
 	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
-		TH1D* hnevts = (TH1D*)ifile->Get("hNEvts");
+		TH1D* hNWEvts = (TH1D*)ifile->Get("hNEvts");
 		double xs_weight = 1;
-		if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hnevts->Integral();
+		if(XSec(filename[j])!=1) xs_weight = lumi_2018*XSec(filename[j])/hNWEvts->Integral();
 		
 		std::string fname = filename[j];
 		//if (fname.find("DY") > fname.length()) continue;
@@ -1097,7 +1097,7 @@ void DCH_test_nopair_4l(const char* ext = "root"){
 				}
 			}//selections loop
 		}//evt loop 
-		hnevts->Write();	
+		hNWEvts->Write();	
 		scaleAndWriteHistograms(h_mZ, xs_weight);
 		scaleAndWriteHistograms(h_mZv, xs_weight);
 		scaleAndWriteHistograms(h_mH, xs_weight);
@@ -1153,7 +1153,7 @@ void DCH_test_nopair_4l(const char* ext = "root"){
 		scaleAndWriteHistograms(h_iso3v, xs_weight);
 		scaleAndWriteHistograms(h_iso4v, xs_weight);
 		//cout<< j <<"\t"<< oname <<endl;
-		printf("%s %f\n", oname, XSec(filename[j])*lumi_2018/hnevts->Integral() );
+		printf("%s %f\n", oname, XSec(filename[j])*lumi_2018/hNWEvts->Integral() );
 		delete tree;
 	}
 	gSystem->FreeDirectory(dirp);

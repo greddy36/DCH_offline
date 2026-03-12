@@ -155,13 +155,13 @@ void test_simple(const char* ext = "root"){
 		char *oname = gSystem->ConcatFileName(o_name, filename[j]);
 		TFile* ofile = new TFile(oname, "RECREATE"); 
 		
-		TH1D* hnevts;
+		TH1D* hNWEvts;
 		if(XSec(fname)!=1){
-			hnevts = (TH1D*)ifile->Get("hNWEvts")->Clone("hnevts");
-			if (!hnevts) hnevts = (TH1D*)ifile->Get("hNEvts")->Clone("hnevts");
+			hNWEvts = (TH1D*)ifile->Get("hNWEvts")->Clone("hNWEvts");
+			if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts")->Clone("hNWEvts");
 		}
 
-		hnevts->Write();
+		hNWEvts->Write();
 		double xs_weight = 1.0;
 		
 		TTree *tree = (TTree*)ifile->Get("Events");
@@ -386,7 +386,7 @@ void test_simple(const char* ext = "root"){
 					else if( cat_lepCount(cat_name,'m','g') == 1 and cat_lepCount(cat_name,'t','g') == 3 ) fillHistograms("mttt", h_mZv, h_mHv, h_metv,  h_pt1v, h_pt2v, h_pt3v, h_pt4v, h_eta1v, h_eta2v, h_eta3v, h_eta4v, h_phi1v, h_phi2v, h_phi3v, h_phi4v, h_dxy1v, h_dxy2v, h_dxy3v, h_dxy4v, h_dZ1v, h_dZ2v, h_dZ3v, h_dZ4v, h_iso1v, h_iso2v, h_iso3v, h_iso4v, h_12dRv, h_13dRv, h_14dRv, h_23dRv, h_24dRv, h_34dRv, h_WMtv, Wmt, met, mZv[0], mH[0], leptons, evtwt_nom);
 				}
 		}//evt loop 
-		hnevts->Write();
+		hNWEvts->Write();
 		scaleAndWriteHistograms(h_WMt, xs_weight);
 		scaleAndWriteHistograms(h_WMtv, xs_weight);
 		scaleAndWriteHistograms(h_mZ, xs_weight);

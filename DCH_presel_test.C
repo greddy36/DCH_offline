@@ -10,21 +10,6 @@
 #include "include/MET_split.C"
 #include "include/Xsections.C"
 
-void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& H_pair, vector<pair<int,int>>& opp_pair) {//global function to process pairs
-	int len = strlen(cat_name);
-	for (int m = 1; m <= len; ++m) {
-		for (int n = m + 1; n <= len; ++n) {
-			string pair_name = pairFunc(m, n, cat_name, 20);
-			if (pair_name == "Zwindow") Z_pair.push_back({m,n});
-			else if (pair_name == "Zv") Zv_pair.push_back({m,n});
-			else if (pair_name == "ZttPair") Zv_pair.push_back({m,n});
-			else if (pair_name == "oppPair") opp_pair.push_back({m,n});
-			else if (pair_name == "DCH") H_pair.push_back({m,n});
-			else continue;
-		}
-	}
-}
-
 void n_minus_one_cutflow(const std::string& excludeCut,
                          std::map<std::string, TH1D*>& cutflowHists,
                          const std::string& channel,
@@ -196,12 +181,12 @@ void DCH_presel_test(const char* ext = ".root"){
 		TDirectory* lep3tau2Dir = ofile->mkdir("3lep2tau");
 
 
-		TH1D* hnevts;
+		TH1D* hNWEvts;
 		if(XSec(fname)!=1){
-			hnevts = (TH1D*)ifile->Get("hNWEvts")->Clone("hnevts");
-			if (!hnevts) hnevts = (TH1D*)ifile->Get("hNEvts")->Clone("hnevts");
+			hNWEvts = (TH1D*)ifile->Get("hNWEvts")->Clone("hNWEvts");
+			if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts")->Clone("hNWEvts");
 		}
-		hnevts->Write();
+		hNWEvts->Write();
 		
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
@@ -443,31 +428,31 @@ void DCH_presel_test(const char* ext = ".root"){
 			TLorentzVector MET; MET.SetPtEtaPhiM(met, 0, metphi, 0);
 //=======================Histograms without any cuts=============================
 			if (selection == "none"){
-				vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
-				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair); 
-				if (SFopp_pair.size() < 1) continue; 
-				//cout<< SFopp_pair.size()<<endl;
+				vector<pair<int, int>> OSSF_pair, Ztt_pair, OSDF_pair, H_pair;
+				processPairs(cat_name, OSSF_pair, OSSF_pair, Ztt_pair, H_pair, OSDF_pair); 
+				if (OSSF_pair.size() < 1) continue; 
+				//cout<< OSSF_pair.size()<<endl;
 				double mll1 = (LepV(H_pair[0].first)+LepV(H_pair[0].second)).M();
-				double mZ1 = (LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)).M();
-				double mZ2 = (LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second)).M();
+				double mZ1 = (LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second)).M();
+				double mZ2 = (LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second)).M();
 				double dRll = deltaR(LepV(H_pair[0].first),LepV(H_pair[0].second));
 				double mll2 = (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M();
-				double mZ3 = (LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second)).M();
-				double mZ4 = (LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second)).M();	
+				double mZ3 = (LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second)).M();
+				double mZ4 = (LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second)).M();	
 				double dRll2 = deltaR(LepV(H_pair[1].first),LepV(H_pair[1].second));
 				double mT1 = calculateMT(LepV(H_pair[0].first)+LepV(H_pair[0].second),MET);
 				double mT2 = calculateMT(LepV(H_pair[1].first)+LepV(H_pair[1].second),MET);
 				double mTtot1 = calculateMTtot(LepV(H_pair[0].first),LepV(H_pair[0].second));
 				double mTtot2 = calculateMTtot(LepV(H_pair[1].first),LepV(H_pair[1].second));
-				double mT1_opp = calculateMT(LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second),MET);
-				double mT2_opp = calculateMT(LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second),MET);
-				double mT3_opp = calculateMT(LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second),MET);
-				double mT4_opp = calculateMT(LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second),MET);
-				double mTtot1_opp = calculateMTtot(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second));
-				double mTtot2_opp = calculateMTtot(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second));
-				double mTtot3_opp = calculateMTtot(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
-				double mTtot4_opp = calculateMTtot(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
-				int W_lep_idx =remaining_idx(SFopp_pair, cat_name);
+				double mT1_opp = calculateMT(LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second),MET);
+				double mT2_opp = calculateMT(LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second),MET);
+				double mT3_opp = calculateMT(LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second),MET);
+				double mT4_opp = calculateMT(LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second),MET);
+				double mTtot1_opp = calculateMTtot(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second));
+				double mTtot2_opp = calculateMTtot(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second));
+				double mTtot3_opp = calculateMTtot(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second));
+				double mTtot4_opp = calculateMTtot(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second));
+				int W_lep_idx =remaining_idx(OSSF_pair, cat_name);
 				
 				std::map< std::string, double > hist_variable_map = {
 																{"cutflow", 0}, 
@@ -498,10 +483,10 @@ void DCH_presel_test(const char* ext = ".root"){
 																{"pT2", leptons[1].pt},
 																{"pT3", leptons[2].pt},
 																{"pT4", leptons[3].pt},
-																{"dR1", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second))},
-																{"dR2", deltaR(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second))}, 
-																{"dR3", deltaR(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second))},
-																{"dR4", deltaR(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second))},
+																{"dR1", deltaR(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second))},
+																{"dR2", deltaR(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second))}, 
+																{"dR3", deltaR(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second))},
+																{"dR4", deltaR(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second))},
 																{"dRll", dRll},
 																{"dRll2", dRll2},
 																{"dR1_met", deltaR((LepV(H_pair[0].first)+LepV(H_pair[0].second)), MET)},
@@ -544,34 +529,34 @@ void DCH_presel_test(const char* ext = ".root"){
 			}//no selections
 //===========================Histograms with CR cuts=============================
 			if (selection == "CR"){				
-				vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
-				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair); 
-				if (SFopp_pair.size() < 1) continue; 
+				vector<pair<int, int>> OSSF_pair, OSDF_pair, H_pair;
+				processPairs(cat_name, OSSF_pair, OSSF_pair, H_pair, OSDF_pair); 
+				if (OSSF_pair.size() < 1) continue; 
 				//if (met <40)continue; if (strlen(cat_name)!=3) continue;
 				
-				//if (SFopp_pair.size() < 2) continue;//for ZZ CR test 
-				//cout<< SFopp_pair.size()<<endl;
+				//if (OSSF_pair.size() < 2) continue;//for ZZ CR test 
+				//cout<< OSSF_pair.size()<<endl;
 				double mll1 = (LepV(H_pair[0].first)+LepV(H_pair[0].second)).M();
-				double mZ1 = (LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)).M();
-				double mZ2 = (LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second)).M();
+				double mZ1 = (LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second)).M();
+				double mZ2 = (LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second)).M();
 				double dRll = deltaR(LepV(H_pair[0].first),LepV(H_pair[0].second));
 				double mll2 = (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M();
-				double mZ3 = (LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second)).M();
-				double mZ4 = (LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second)).M();	
+				double mZ3 = (LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second)).M();
+				double mZ4 = (LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second)).M();	
 				double dRll2 = deltaR(LepV(H_pair[1].first),LepV(H_pair[1].second));
 				double mT1 = calculateMT(LepV(H_pair[0].first)+LepV(H_pair[0].second),MET);
 				double mT2 = calculateMT(LepV(H_pair[1].first)+LepV(H_pair[1].second),MET);
 				double mTtot1 = calculateMTtot(LepV(H_pair[0].first),LepV(H_pair[0].second));
 				double mTtot2 = calculateMTtot(LepV(H_pair[1].first),LepV(H_pair[1].second));
-				double mT1_opp = calculateMT(LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second),MET);
-				double mT2_opp = calculateMT(LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second),MET);
-				double mT3_opp = calculateMT(LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second),MET);
-				double mT4_opp = calculateMT(LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second),MET);
-				double mTtot1_opp = calculateMTtot(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second));
-				double mTtot2_opp = calculateMTtot(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second));
-				double mTtot3_opp = calculateMTtot(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
-				double mTtot4_opp = calculateMTtot(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
-				int W_lep_idx =remaining_idx(SFopp_pair, cat_name);
+				double mT1_opp = calculateMT(LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second),MET);
+				double mT2_opp = calculateMT(LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second),MET);
+				double mT3_opp = calculateMT(LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second),MET);
+				double mT4_opp = calculateMT(LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second),MET);
+				double mTtot1_opp = calculateMTtot(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second));
+				double mTtot2_opp = calculateMTtot(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second));
+				double mTtot3_opp = calculateMTtot(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second));
+				double mTtot4_opp = calculateMTtot(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second));
+				int W_lep_idx =remaining_idx(OSSF_pair, cat_name);
 				
 				std::map< std::string, double > hist_variable_map = {
 																{"cutflow", 0}, 
@@ -602,10 +587,10 @@ void DCH_presel_test(const char* ext = ".root"){
 																{"pT2", leptons[1].pt},
 																{"pT3", leptons[2].pt},
 																{"pT4", leptons[3].pt},
-																{"dR1", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second))},
-																{"dR2", deltaR(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second))}, 
-																{"dR3", deltaR(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second))},
-																{"dR4", deltaR(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second))},
+																{"dR1", deltaR(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second))},
+																{"dR2", deltaR(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second))}, 
+																{"dR3", deltaR(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second))},
+																{"dR4", deltaR(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second))},
 																{"dRll", dRll},
 																{"dRll2", dRll2},
 																{"dR1_met", deltaR((LepV(H_pair[0].first)+LepV(H_pair[0].second)), MET)},
@@ -652,31 +637,31 @@ void DCH_presel_test(const char* ext = ".root"){
 			}//CR
 //===========================Histograms with VR cuts=============================
 			if (selection == "VR"){	
-				vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
-				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair);
-				if (SFopp_pair.size() < 1) continue; 
-				//cout<< SFopp_pair.size()<<endl;
+				vector<pair<int, int>> OSSF_pair, OSDF_pair, H_pair;
+				processPairs(cat_name, OSSF_pair, OSSF_pair, H_pair, OSDF_pair);
+				if (OSSF_pair.size() < 1) continue; 
+				//cout<< OSSF_pair.size()<<endl;
 				double mll1 = (LepV(H_pair[0].first)+LepV(H_pair[0].second)).M();
-				double mZ1 = (LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)).M();
-				double mZ2 = (LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second)).M();
+				double mZ1 = (LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second)).M();
+				double mZ2 = (LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second)).M();
 				double dRll = deltaR(LepV(H_pair[0].first),LepV(H_pair[0].second));
 				double mll2 = (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M();
-				double mZ3 = (LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second)).M();
-				double mZ4 = (LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second)).M();	
+				double mZ3 = (LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second)).M();
+				double mZ4 = (LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second)).M();	
 				double dRll2 = deltaR(LepV(H_pair[1].first),LepV(H_pair[1].second));
 				double mT1 = calculateMT(LepV(H_pair[0].first)+LepV(H_pair[0].second), MET);
 				double mT2 = calculateMT(LepV(H_pair[1].first)+LepV(H_pair[1].second), MET);
 				double mTtot1 = calculateMTtot(LepV(H_pair[0].first),LepV(H_pair[0].second));
 				double mTtot2 = calculateMTtot(LepV(H_pair[1].first),LepV(H_pair[1].second));
-				double mT1_opp = calculateMT(LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second),MET);
-				double mT2_opp = calculateMT(LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second),MET);
-				double mT3_opp = calculateMT(LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second),MET);
-				double mT4_opp = calculateMT(LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second),MET);
-				double mTtot1_opp = calculateMTtot(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second));
-				double mTtot2_opp = calculateMTtot(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second));
-				double mTtot3_opp = calculateMTtot(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
-				double mTtot4_opp = calculateMTtot(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
-				int W_lep_idx =remaining_idx(SFopp_pair, cat_name);
+				double mT1_opp = calculateMT(LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second),MET);
+				double mT2_opp = calculateMT(LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second),MET);
+				double mT3_opp = calculateMT(LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second),MET);
+				double mT4_opp = calculateMT(LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second),MET);
+				double mTtot1_opp = calculateMTtot(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second));
+				double mTtot2_opp = calculateMTtot(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second));
+				double mTtot3_opp = calculateMTtot(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second));
+				double mTtot4_opp = calculateMTtot(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second));
+				int W_lep_idx =remaining_idx(OSSF_pair, cat_name);
 				
 				std::map< std::string, double > hist_variable_map = {
 																{"cutflow", 0}, 
@@ -707,10 +692,10 @@ void DCH_presel_test(const char* ext = ".root"){
 																{"pT2", leptons[1].pt},
 																{"pT3", leptons[2].pt},
 																{"pT4", leptons[3].pt},
-																{"dR1", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second))},
-																{"dR2", deltaR(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second))}, 
-																{"dR3", deltaR(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second))},
-																{"dR4", deltaR(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second))},
+																{"dR1", deltaR(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second))},
+																{"dR2", deltaR(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second))}, 
+																{"dR3", deltaR(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second))},
+																{"dR4", deltaR(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second))},
 																{"dRll", dRll},
 																{"dRll2", dRll2},
 																{"dR1_met", deltaR((LepV(H_pair[0].first)+LepV(H_pair[0].second)), MET)},
@@ -725,22 +710,22 @@ void DCH_presel_test(const char* ext = ".root"){
 					//if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
 					if (Ntau == 0){ 
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
-						if (st > 360){ continue;}
+						if (st > 400){ continue;}
 						FillHists(tau0Dir, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dR_HH, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 						
 					}	
 					else if (Ntau == 1){
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
-						if (st > 340){ continue;}
+						if (st > 400){ continue;}
 						FillHists(tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dR_HH, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if (Ntau == 2){
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
-						if (st > 340){ continue;}
+						if (st > 400){ continue;}
 						FillHists(tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dR_HH, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if (Ntau == 3){
-						if (st > 320){ continue;}
+						if (st > 100){ continue;}
 						FillHists(tau3Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dR_HH, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					
@@ -748,7 +733,7 @@ void DCH_presel_test(const char* ext = ".root"){
 				else if(cat >= 22 and cat <=39){//3-lep
 					//if (abs(mZ1-mZ) > 10 and abs(mZ2-mZ) > 10) continue;
 					if(Ntau == 0){
-						if (st > 200){ continue;}
+						if (st > 300){ continue;}
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10) continue;
 						FillHists(lep3tau0Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dR_HH, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
@@ -758,38 +743,38 @@ void DCH_presel_test(const char* ext = ".root"){
 						FillHists(lep3tau1Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dR_HH, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}
 					else if(Ntau == 2){
-						if (st > 200){ continue;}
+						if (st > 100){ continue;}
 						FillHists(lep3tau2Dir, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_dR_HH, h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 					}			
 				}//3-lep
 			}//VR
 //==============================================================================
 			if (selection == "Pre"){	
-				vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
-				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair);
-				if (SFopp_pair.size() < 1) continue; 
-				//cout<< SFopp_pair.size()<<endl;
+				vector<pair<int, int>> OSSF_pair, OSDF_pair, H_pair;
+				processPairs(cat_name, OSSF_pair, OSSF_pair, H_pair, OSDF_pair);
+				if (OSSF_pair.size() < 1) continue; 
+				//cout<< OSSF_pair.size()<<endl;
 				double mll1 = (LepV(H_pair[0].first)+LepV(H_pair[0].second)).M();
-				double mZ1 = (LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)).M();
-				double mZ2 = (LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second)).M();
+				double mZ1 = (LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second)).M();
+				double mZ2 = (LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second)).M();
 				double dRll = deltaR(LepV(H_pair[0].first),LepV(H_pair[0].second));
 				double mll2 = (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M();
-				double mZ3 = (LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second)).M();
-				double mZ4 = (LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second)).M();	
+				double mZ3 = (LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second)).M();
+				double mZ4 = (LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second)).M();	
 				double dRll2 = deltaR(LepV(H_pair[1].first),LepV(H_pair[1].second));
 				double mT1 = calculateMT(LepV(H_pair[0].first)+LepV(H_pair[0].second),MET);
 				double mT2 = calculateMT(LepV(H_pair[1].first)+LepV(H_pair[1].second),MET);
 				double mTtot1 = calculateMTtot(LepV(H_pair[0].first),LepV(H_pair[0].second));
 				double mTtot2 = calculateMTtot(LepV(H_pair[1].first),LepV(H_pair[1].second));
-				double mT1_opp = calculateMT(LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second),MET);
-				double mT2_opp = calculateMT(LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second),MET);
-				double mT3_opp = calculateMT(LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second),MET);
-				double mT4_opp = calculateMT(LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second),MET);
-				double mTtot1_opp = calculateMTtot(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second));
-				double mTtot2_opp = calculateMTtot(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second));
-				double mTtot3_opp = calculateMTtot(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
-				double mTtot4_opp = calculateMTtot(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
-				int W_lep_idx =remaining_idx(SFopp_pair, cat_name);
+				double mT1_opp = calculateMT(LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second),MET);
+				double mT2_opp = calculateMT(LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second),MET);
+				double mT3_opp = calculateMT(LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second),MET);
+				double mT4_opp = calculateMT(LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second),MET);
+				double mTtot1_opp = calculateMTtot(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second));
+				double mTtot2_opp = calculateMTtot(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second));
+				double mTtot3_opp = calculateMTtot(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second));
+				double mTtot4_opp = calculateMTtot(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second));
+				int W_lep_idx =remaining_idx(OSSF_pair, cat_name);
 				
 				std::map< std::string, double > hist_variable_map = {
 																{"cutflow", 0}, 
@@ -820,10 +805,10 @@ void DCH_presel_test(const char* ext = ".root"){
 																{"pT2", leptons[1].pt},
 																{"pT3", leptons[2].pt},
 																{"pT4", leptons[3].pt},
-																{"dR1", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second))},
-																{"dR2", deltaR(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second))}, 
-																{"dR3", deltaR(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second))},
-																{"dR4", deltaR(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second))},
+																{"dR1", deltaR(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second))},
+																{"dR2", deltaR(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second))}, 
+																{"dR3", deltaR(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second))},
+																{"dR4", deltaR(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second))},
 																{"dRll", dRll},
 																{"dRll2", dRll2},
 																{"dR1_met", deltaR((LepV(H_pair[0].first)+LepV(H_pair[0].second)), MET)},
@@ -973,31 +958,31 @@ void DCH_presel_test(const char* ext = ".root"){
 			}//MY SLECTIONS
 //===================================================================================
 			if(selection == "test"){//######OLD PRe##########
-			vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
-				processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair);
-				if (SFopp_pair.size() < 1) continue;
-				//cout<< SFopp_pair.size()<<endl;
+			vector<pair<int, int>> OSSF_pair, OSDF_pair, H_pair;
+				processPairs(cat_name, OSSF_pair, OSSF_pair, H_pair, OSDF_pair);
+				if (OSSF_pair.size() < 1) continue;
+				//cout<< OSSF_pair.size()<<endl;
 				double mll1 = (LepV(H_pair[0].first)+LepV(H_pair[0].second)).M();
-				double mZ1 = (LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)).M();
-				double mZ2 = (LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second)).M();
+				double mZ1 = (LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second)).M();
+				double mZ2 = (LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second)).M();
 				double dRll = deltaR(LepV(H_pair[0].first),LepV(H_pair[0].second));
 				double mll2 = (LepV(H_pair[1].first)+LepV(H_pair[1].second)).M();
-				double mZ3 = (LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second)).M();
-				double mZ4 = (LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second)).M();
+				double mZ3 = (LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second)).M();
+				double mZ4 = (LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second)).M();
 				double dRll2 = deltaR(LepV(H_pair[1].first),LepV(H_pair[1].second));
 				double mT1 = calculateMT(LepV(H_pair[0].first)+LepV(H_pair[0].second),MET);
 				double mT2 = calculateMT(LepV(H_pair[1].first)+LepV(H_pair[1].second),MET);
 				double mTtot1 = calculateMTtot(LepV(H_pair[0].first),LepV(H_pair[0].second));
 				double mTtot2 = calculateMTtot(LepV(H_pair[1].first),LepV(H_pair[1].second));
-				double mT1_opp = calculateMT(LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second),MET);
-				double mT2_opp = calculateMT(LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second),MET);
-				double mT3_opp = calculateMT(LepV(SFopp_pair[2].first)+LepV(SFopp_pair[2].second),MET);
-				double mT4_opp = calculateMT(LepV(SFopp_pair[3].first)+LepV(SFopp_pair[3].second),MET);
-				double mTtot1_opp = calculateMTtot(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second));
-				double mTtot2_opp = calculateMTtot(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second));
-				double mTtot3_opp = calculateMTtot(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second));
-				double mTtot4_opp = calculateMTtot(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second));
-				int W_lep_idx =remaining_idx(SFopp_pair, cat_name);
+				double mT1_opp = calculateMT(LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second),MET);
+				double mT2_opp = calculateMT(LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second),MET);
+				double mT3_opp = calculateMT(LepV(OSSF_pair[2].first)+LepV(OSSF_pair[2].second),MET);
+				double mT4_opp = calculateMT(LepV(OSSF_pair[3].first)+LepV(OSSF_pair[3].second),MET);
+				double mTtot1_opp = calculateMTtot(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second));
+				double mTtot2_opp = calculateMTtot(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second));
+				double mTtot3_opp = calculateMTtot(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second));
+				double mTtot4_opp = calculateMTtot(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second));
+				int W_lep_idx =remaining_idx(OSSF_pair, cat_name);
 
 				std::map< std::string, double > hist_variable_map = {
 																{"cutflow", 0},
@@ -1028,10 +1013,10 @@ void DCH_presel_test(const char* ext = ".root"){
 																{"pT2", leptons[1].pt},
 																{"pT3", leptons[2].pt},
 																{"pT4", leptons[3].pt},
-																{"dR1", deltaR(LepV(SFopp_pair[0].first),LepV(SFopp_pair[0].second))},
-																{"dR2", deltaR(LepV(SFopp_pair[1].first),LepV(SFopp_pair[1].second))},
-																{"dR3", deltaR(LepV(SFopp_pair[2].first),LepV(SFopp_pair[2].second))},
-																{"dR4", deltaR(LepV(SFopp_pair[3].first),LepV(SFopp_pair[3].second))},
+																{"dR1", deltaR(LepV(OSSF_pair[0].first),LepV(OSSF_pair[0].second))},
+																{"dR2", deltaR(LepV(OSSF_pair[1].first),LepV(OSSF_pair[1].second))},
+																{"dR3", deltaR(LepV(OSSF_pair[2].first),LepV(OSSF_pair[2].second))},
+																{"dR4", deltaR(LepV(OSSF_pair[3].first),LepV(OSSF_pair[3].second))},
 																{"dRll", dRll},
 																{"dRll2", dRll2},
 																{"dR1_met", deltaR((LepV(H_pair[0].first)+LepV(H_pair[0].second)), MET)},

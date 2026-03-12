@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include "include/Xsections.C"
+#include "include/cms_plots.h"
 
 void yield_summary() {
     gStyle->SetOptStat(0);
@@ -27,25 +28,31 @@ void yield_summary() {
 	std::string summary_type = "tau_ch", year = "Run2";
     // Define histograms to retrieve
     std::vector<std::string> hist_list;
+    const char* plot_description; 
     if (summary_type == "tau_ch") {
     	hist_list = { "0tau/h_cat","1tau/h_cat","2tau/h_cat","3tau/h_cat","3lep0tau/h_cat","3lep1tau/h_cat","3lep2tau/h_cat"};
-    	bkg_stack = new THStack("bkg_stack", "Yield summary in VR;;Events");
+    	bkg_stack = new THStack("bkg_stack", " ;;Events / bin");//empty title
+    	plot_description = "Yield summary in VR";
     }
     else if  (summary_type == "3lep") {
     	hist_list = {"h_met_ee","h_met_eee","h_met_eem","h_met_eet","h_metv_ett","h_met_mm","h_met_emm","h_met_mmm","h_met_mmt","h_metv_mtt"};
-   		bkg_stack = new THStack("bkg_stack", "2l and 3l channel summary in Z-window;;Events");
+   		bkg_stack = new THStack("bkg_stack", ";;Events / bin");
+   		plot_description = "2l and 3l channel summary in Z-window";
     }
     else if  (summary_type == "3lep-veto") {
     	hist_list = {"h_metv_ee","h_metv_eee","h_metv_eem","h_metv_eet","h_met_ett","h_metv_mm","h_metv_emm","h_metv_mmm","h_metv_mmt","h_met_mtt"};
-    	bkg_stack = new THStack("bkg_stack", "2l and 3l channel summary in Z-veto;;Events");
+    	bkg_stack = new THStack("bkg_stack", ";;Events / bin");
+    	plot_description = "2l and 3l channel summary in Z-veto";
     }
     else if  (summary_type == "4lep") { 
     	hist_list = {"h_met_eeee","h_met_eeem","h_met_eemm","h_met_mmem","h_met_mmmm","h_met_eeet","h_met_eemt","h_met_eett","h_met_emtt","h_met_emmt","h_met_ettt","h_met_mmmt","h_met_mmtt","h_met_mttt"};
-    	bkg_stack = new THStack("bkg_stack", "4l channel summary in Z-window;;Events");
+    	bkg_stack = new THStack("bkg_stack", ";;Events / bin");
+    	plot_description = "4l channel summary in Z-window";
     }
     else if  (summary_type == "4lep-veto") {
     	hist_list = {"h_metv_eeee","h_metv_eeem","h_metv_eemm","h_metv_mmem","h_metv_mmmm","h_metv_eeet","h_metv_eemt","h_metv_eett","h_metv_emtt","h_metv_emmt","h_metv_ettt","h_metv_mmmt","h_metv_mmtt","h_metv_mttt"};
-    	bkg_stack = new THStack("bkg_stack", "4l channel summary in Z-veto;;Events");
+    	bkg_stack = new THStack("bkg_stack", ";;Events / bin");
+    	plot_description = "4l channel summary in Z-veto";
     }
     int bins = hist_list.size();
 
@@ -214,12 +221,9 @@ void yield_summary() {
     h_summaries["data"]->Draw("E SAME");
 
 	// Create a TLatex object
-	TLatex latex;
-	latex.SetNDC(); // Use normalized coordinates (0 to 1)
-	latex.SetTextSize(0.04); // Set text size
-	latex.SetTextAlign(31); // Align right (horizontal) and top (vertical)
-	latex.DrawLatex(0.95, 0.95, const_cast<char*>(year.c_str())); // Position (x, y) and text
-
+	DrawCMSLabel();
+	PlotDescription(plot_description);
+	
     //auto legend = new TLegend(0.7, 0.6, 0.88, 0.88);
     auto legend = new TLegend(0.12, 0.6, 0.3, 0.88);
     for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW","ttZ", "WJ","QCD", "ZZ","ZH", "ST", "TTbar", "other"}) {
@@ -233,11 +237,11 @@ void yield_summary() {
     h_ratio->SetTitle(""); // Remove the title for the ratio plot
 	h_ratio->Divide(h_bkg_total);
 	h_ratio->SetLineColor(kBlack);
-	h_ratio->SetMarkerStyle(2);
-	h_ratio->GetYaxis()->SetTitle("Data/MC");
+	h_ratio->SetMarkerStyle(20);
+	h_ratio->GetYaxis()->SetTitle("Data / Background");
 	h_ratio->GetYaxis()->SetNdivisions(505);
-	h_ratio->GetYaxis()->SetTitleSize(0.1);
-	h_ratio->GetYaxis()->SetTitleOffset(0.5);
+	h_ratio->GetYaxis()->SetTitleSize(0.09);
+	h_ratio->GetYaxis()->SetTitleOffset(0.4);
 	h_ratio->GetYaxis()->SetLabelSize(0.07);
 	h_ratio->GetXaxis()->SetTitleSize(0.1);
 	
@@ -303,7 +307,7 @@ void yield_summary() {
 
     // Output
     //std::string pdfname = "summary_"+summary_type+"_"+year+".pdf";
-    std::string pngname = "summary_"+summary_type+"_"+year+".png";
+    std::string pngname = "summary_"+summary_type+"_"+year+".pdf";
     //canvas->SaveAs(const_cast<char*>(pdfname.c_str()));
     canvas->SaveAs(const_cast<char*>(pngname.c_str()));
 }

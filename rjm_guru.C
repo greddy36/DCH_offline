@@ -10,9 +10,6 @@
 #include "TMinuit.h"
 #include "TMath.h"
 
-void print4Vec(TLorentzVector &Vec){
-	cout<< Vec.Pt()<<"\t"<<Vec.Eta()<<"\t"<<Vec.Phi()<<"\t"<<Vec.Pz()<<endl;
-}
 //-----------if one and two alphas, solve for empherical solutions---------------------
 double solve_one_alpha(const TVector3 &uLxy, const TVector3 &MET) {
 	double alpha = MET.Mag();//uLxy.Dot(MET);

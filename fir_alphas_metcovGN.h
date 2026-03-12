@@ -1,4 +1,3 @@
-// fit_alphas_multiplicative.h
 // Gauss-Newton solver for multiplicative mass constraint with MET covariance.
 // Assumes the nonlinearity is on system A: M_A = mvisA * sqrt((1+alpha1)*(1+alpha2))
 // and system B mass is fixed (mvisB). If you need the reverse, swap A/B inputs.
@@ -8,6 +7,7 @@
 #include <array>
 #include <cmath>
 #include <iostream>
+#include "3nu.h"
 
 inline vec2 add(const vec2 &a,const vec2 &b){ return vec2{a[0]+b[0], a[1]+b[1]}; }
 inline vec2 subv(const vec2 &a,const vec2 &b){ return vec2{a[0]-b[0], a[1]-b[1]}; }
@@ -81,7 +81,7 @@ bool FitAlphasMultiplicativeGN(
 
     // Initialize alpha to alpha_hat as a starting guess
     //vec2 alpha = alpha_hat;
-
+    
     // Iterative Gauss-Newton
     for (int iter = 0; iter < maxIter; ++iter) {
         // compute M_A(alpha) = mvisA * sqrt((1+alpha1)*(1+alpha2))
@@ -89,7 +89,7 @@ bool FitAlphasMultiplicativeGN(
         double onep_a2 = 1.0 + alpha[1];
         if (onep_a1 <= 0 || onep_a2 <= 0) {
             // invalid region -> cannot take sqrt; abort
-            cout<<"BAD SQRT"<<endl;
+            //cout<<"BAD SQRT"<<endl;
             return false;
         }
         double MA = mvisA * std::sqrt(onep_a1 * onep_a2);
