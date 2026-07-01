@@ -6,7 +6,7 @@ double XSec(std::string fname){
 	else if(fname.find("ttWJets") < fname.length()) return 0.4611;
 	else if(fname.find("ttZJets") < fname.length()) return 0.95;
 	else if(fname.find("WJetsToLNu_NLO") < fname.length()) return 67350;
-	else if(fname.find("WJetsToLNu_HT-70To100") < fname.length()) return  1264.0*1.1421;
+	else if(fname.find("WJetsToLNu_HT-70To100") < fname.length()) return  1264.0*1.1421; //*k-factor
 	else if(fname.find("WJetsToLNu_HT-100To200") < fname.length()) return 1256.0*1.1421;
 	else if(fname.find("WJetsToLNu_HT-200To400") < fname.length()) return 335.5*1.1421;
 	else if(fname.find("WJetsToLNu_HT-400To600") < fname.length()) return 45.25*1.1421;
@@ -72,6 +72,93 @@ double applyXSec(TFile* ifile){
 	return xs_weight;
 }
 
+#include <fstream>
+#include <map>
+
+double applyXSec_FR(TFile* ifile){
+	
+	double lumi_2016 = 35900;
+    double lumi_2016_pre = 19500;
+    double lumi_2016_post = 16400;
+    double lumi_2017 = 42070;
+    double lumi_2018 = 59560;
+    double lumi_run2 = 138000; // pb^-1
+
+    double xs_weight = 1.0;
+
+    std::string fname = ifile->GetName();
+
+    // -----------------------------------
+    // Read denominator file only once
+    // -----------------------------------
+    static std::map<std::string,double> denomMap;
+    static bool loaded = false;
+
+    if(!loaded){
+
+        std::ifstream infile("denominators.txt");
+
+        std::string filetmp;
+        double val;
+
+        while(infile >> filetmp >> val){
+            denomMap[filetmp] = val;
+        }
+
+        infile.close();
+
+        loaded = true;
+    }
+
+    // -----------------------------------
+    // Get only filename without path
+    // -----------------------------------
+    std::string shortname = fname;
+
+    size_t slash = shortname.find_last_of("/");
+
+    if(slash != std::string::npos)
+        shortname = shortname.substr(slash+1);
+
+    // -----------------------------------
+    // Skip data
+    // -----------------------------------
+    if(XSec(shortname) == 1)
+        return xs_weight;
+
+    // -----------------------------------
+    // Check denominator exists
+    // -----------------------------------
+    if(denomMap.find(shortname) == denomMap.end()){
+
+        std::cout << "[WARNING] No denominator for "
+                  << shortname << std::endl;
+
+        return xs_weight;
+    }
+
+    double denominator = denomMap[shortname];
+
+    // -----------------------------------
+    // Compute XS weight
+    // -----------------------------------
+    if (fname.find("2016pre") < fname.length())
+        xs_weight = lumi_2016_pre * XSec(shortname) / denominator;
+	else if (fname.find("2016") < fname.length())
+        xs_weight = lumi_2016_post * XSec(shortname) / denominator;
+        
+    else if (fname.find("2017") < fname.length())
+        xs_weight = lumi_2017 * XSec(shortname) / denominator;
+
+    else if (fname.find("2018") < fname.length())
+        xs_weight = lumi_2018 * XSec(shortname) / denominator;
+
+    else if (fname.find("run2") < fname.length())
+        xs_weight = lumi_run2 * XSec(shortname) / denominator;
+
+    return xs_weight;
+}
+
 double XSec_Uncert(std::string fname){//in %
 	if(fname.find("ttHTo") < fname.length()) return 6.96;
 	else if(fname.find("ttWJets") < fname.length()) return 7.47;
@@ -80,13 +167,13 @@ double XSec_Uncert(std::string fname){//in %
 	//else if(fname.find("WZTo2Q2L") < fname.length()) return 4.12;
 	//else if(fname.find("WZTo3LNu") < fname.length()) return 4.12;
 	//else if(fname.find("WZ_") < fname.length()) return 4.12;
-	else if(fname.find("WZTo") < fname.length()) return 0.0195477*100/1.03002; 
+	else if(fname.find("WZTo") < fname.length()) return sqrt(pow(4.12,2)+pow(0.012937*100/1.033462, 2)); 
 	else if(fname.find("ZHToMuMu") < fname.length()) return 4.1;
 	else if(fname.find("ZHToTauTau") < fname.length()) return 4.1;
 	//else if(fname.find("ZZTo2L2Nu") < fname.length()) return 4.41;
 	//else if(fname.find("ZZTo2Q2L") < fname.length()) return 4.41;
 	//else if(fname.find("ZZTo4L") < fname.length()) return 4.41;
-	else if(fname.find("ZZTo") < fname.length()) return 0.0352558*100/1.30291;//from roofit 
+	else if(fname.find("ZZTo") < fname.length()) return sqrt(pow(4.41,2)+pow(0.031507*100/1.284495, 2));//from roofit 
 	else if(fname.find("GluGluZH_") < fname.length()) return 4.1;
 	else if(fname.find("DYJetsToLLM10to50") < fname.length()) return 0;
 	else if(fname.find("DYJetsToLLM50") < fname.length()) return 2.49;

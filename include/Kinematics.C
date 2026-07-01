@@ -365,7 +365,7 @@ string pairFunc(int m, int n, string cat, double Zwindow){//checks if a pair is 
 			}
 			else if (cat[m-1] == 't') return "ZttPair" ;
 		}
-		else return "OSOFpair";
+		else return "OSDFpair";
 	}
 	else "messed up";
 }
@@ -400,7 +400,7 @@ TLorentzVector LepV(int n){
 }
 */
 
-void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& Ztt_pair, vector<pair<int, int>>& SS_pair, vector<pair<int,int>>& OSOF_pair) {//global function to process pairs
+void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& Ztt_pair, vector<pair<int, int>>& SS_pair, vector<pair<int,int>>& OSDF_pair) {//global function to process pairs
 	int len = strlen(cat_name);
 
     vector<bool> used(len+1,false);
@@ -419,11 +419,11 @@ void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<
 
             if(pair_name=="Zwindow"){
                 double mass = (LepV(m)+LepV(n)).M(); 
-                double diff = fabs(mass - 91.1876);
+                double diff = fabs(mass - 91.2);
                 Zcands.push_back({m,n,diff});
             }
             else if(pair_name=="ZttPair") Ztt_pair.push_back({m,n});//might have overlapping idxs
-            else if(pair_name=="OSOFpair") OSOF_pair.push_back({m,n});//might have overlapping idxs
+            else if(pair_name=="OSDFpair") OSDF_pair.push_back({m,n});//might have overlapping idxs
             else if(pair_name=="SSpair") SS_pair.push_back({m,n});
         }
     }
@@ -472,14 +472,16 @@ vector<pair<int,int>> removeOverlap(const vector<pair<int,int>>& pairs, int nLep
     return clean;
 }
 
-std::string classifyTauRegion(std::string cat_name, double LT, vector<pair<int, int>> OSSF_pair){
+std::string classifyTauRegion(std::string cat_name, double LT, vector<pair<int, int>> OS_pair){
 	int Ntau = cat_name.size()-cat_lepCount(cat_name,'e','m'); 
 	double Zwindow = 10, Zmass = 91.2;
-	double mZ[4] = {-99, -99, -99, -99};
+	double mPair = 0;
 	int numZ =0;
-	for (int i = 0; i<OSSF_pair.size(); i++){
-		mZ[i] = (LepV(OSSF_pair[i].first)+LepV(OSSF_pair[i].second)).M();
-		if (abs(mZ[i]- Zmass) <= Zwindow) numZ += 1;
+	for (int i = 0; i<OS_pair.size(); i++){
+		int ia = OS_pair[i].first, ib = OS_pair[i].second;
+		if (cat_name[ia-1]=='t' or cat_name[ia-1] != cat_name[ib-1])continue;
+		mPair = (LepV(ia)+LepV(ib)).M();
+		if (abs(mPair- Zmass) <= Zwindow) numZ += 1;
 		
 	}
 	if (cat_name.size()==2){
@@ -520,7 +522,6 @@ std::string classifyLepRegion(std::string cat_name, vector<pair<int, int>> pairV
 	if(cat_size == 2) return cat_name;
 	
 	vector<bool> used(cat_name.size(), false);
-	std::sort(pairVec.begin(), pairVec.end());
     //add paired leptons first
     for (auto &p : pairVec) {
     	//lepRegion += cat_name[p.first]+cat_name[p.second];//this is WRONG as they are strings. so C++ adds their ASCII values before appending.
@@ -535,10 +536,11 @@ std::string classifyLepRegion(std::string cat_name, vector<pair<int, int>> pairV
         if (used[i]) continue;
         extra += cat_name[i];
     }
+
     if (extra == "me") extra = "em";
     else if (extra == "te") extra = "et";
     else if (extra == "tm") extra = "mt";
     lepRegion += extra; 
-    	
+    
     return lepRegion;
 }

@@ -127,11 +127,10 @@ void DCH_presel_peter(const char* ext = ".root"){
 
 
 		TH1D* hNWEvts;
-		if(XSec(fname)!=1){
-			hNWEvts = (TH1D*)ifile->Get("hNWEvts")->Clone("hNWEvts");
-			if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts")->Clone("hNWEvts");
-		}
+		if(XSec(fname)!=1) hNWEvts = (TH1D*)ifile->Get("hNWEvts")->Clone("hNWEvts");	
+		if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts")->Clone("hNWEvts");
 		hNWEvts->Write();
+		
 		double xs_wt = applyXSec(ifile);
 		cout<<xs_wt<<endl;
 		TTree *tree = (TTree*)ifile->Get("Events");

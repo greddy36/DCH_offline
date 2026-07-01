@@ -95,7 +95,7 @@ std::tuple<int, double, double, double, double, bool> get_legs_comb(std::string 
 			alpha[i] = alpha1;
 			alpha[j] = alpha2;*/
 			
-			/*vec2 alpha_star = {{0,0}};
+			vec2 alpha_star = {{0,0}};
 			mat2 cov_alpha_star = {{{0, 0},{0, 0}}};
 			vec2 alpha_init = {{alpha1,alpha2}};	
 			if ((i==0 and j==2) or (i==0 and j==3) or (i==1 and j==2) or (i==1 and j==3)){ 
@@ -180,7 +180,7 @@ std::tuple<int, double, double, double, double, bool> get_legs_comb(std::string 
 				mHb = sqrt((1+alpha_star[0])*(1+alpha_star[1]))*mll_2;
 				//cout<<mHa<<"\t"<<mHb<<endl;
 				isOpp = false;
-			}*/
+			}
 
 			//TESTING 3nu.h
 			/*TMatrixD SigmaMET(2,2);
@@ -255,7 +255,7 @@ std::tuple<int, double, double, double, double, bool> get_legs_comb(std::string 
 				cout<<"mH1: "<<mHa<<"\t mH2: "<<mHb<<endl;
 			}*/
 			//testing 3nu_good.h
-			for(int k=j+1;k<4;k++){cout<<"INDEX: "<<i<<j<<k<<endl;
+			/*for(int k=j+1;k<4;k++){cout<<"INDEX: "<<i<<j<<k<<endl;
 				bool k_in = std::find(ileg.begin(), ileg.end(), k) != ileg.end();
 				//if(!k_in) continue;
 				vec3 alp;
@@ -279,7 +279,7 @@ std::tuple<int, double, double, double, double, bool> get_legs_comb(std::string 
 				alpha[k]=out.x[2]/Lep_ref[k].Pt();
 
 				cout<<"mH1: "<<out.mA<<"\t mH2: "<<out.mB<<endl;
-			}
+			}*/
 			//testing 3nu_best.h
 			/*for(int k=j+1;k<4;k++){cout<<"INDEX: "<<i<<j<<k<<endl;
 				bool k_in = std::find(ileg.begin(), ileg.end(), k) != ileg.end();

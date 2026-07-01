@@ -91,7 +91,7 @@ void roofit(){
     std::map<std::string, std::vector<TFile*>> open_files;
     for (auto& kv : files) {
         for (const auto& fname : kv.second) {
-			TFile* file = new TFile(("hist_CR_ZZ/" + fname).c_str(), "READ");
+			TFile* file = new TFile(("hist_test_nopair/" + fname).c_str(), "READ");
             if (!file || file->IsZombie()) continue;
 	        open_files[kv.first].push_back(file);
 	        //cout<<fname<<endl;
@@ -100,7 +100,10 @@ void roofit(){
    	std::map<std::string, double> tot_uncert_quadr;
     for (auto& kv : open_files) {
 			for (auto* f : kv.second) {
-				TH1D* h = (TH1D*)f->Get("0tau/h_ST");
+				TH1D* h = (TH1D*)f->Get("h_LT_eeee");
+				h->Add((TH1D*)f->Get("h_LT_mmmm"));
+				h->Add((TH1D*)f->Get("h_LT_eemm"));
+				h->Rebin(10);
 				if(!h) continue;
 				h->Sumw2();
 		       	h->Scale(applyXSec(f));
@@ -162,12 +165,19 @@ RooExtendPdf other_ext("other_ext", "Other Extended PDF", other_pdf, other_norm_
 	model.plotOn(frame, Components("other_ext"), LineColor(2));
 	
 	frame->Draw();
+	
+	TLatex latex;
+    latex.SetNDC(); // use normalized coordinates
+    latex.SetTextFont(52);
+    latex.SetTextSize(0.04);
+    
 	double zz_fitted = zz_norm.getVal();
 	double zz_nominal = h_bkg_group["ZZ"]->Integral();
 	double zz_fit_err = zz_norm.getError(); 
 	double scale_factor_ZZ = zz_fitted / zz_nominal;
 	double sf_err = zz_fit_err / zz_nominal;
-
+	std::string printsf = "ZZ scale factor = "; printsf += std::to_string(scale_factor_ZZ); printsf += " + "; printsf += std::to_string(sf_err);
+	latex.DrawLatex(0.6, 0.5,printsf.c_str());
 	std::cout << "ZZ scale factor = " << scale_factor_ZZ <<"+-"<< sf_err<< std::endl;
 
 }

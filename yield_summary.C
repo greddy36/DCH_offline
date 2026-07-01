@@ -180,12 +180,12 @@ void yield_summary() {
             }
             h_summaries[kv.first]->SetBinContent(i+1, h_sum->GetBinContent(1));
             h_summaries[kv.first]->SetBinError(i+1, h_sum->GetBinError(1));
-            cout<<i+1<<"\t"<<kv.first<<"\t"<<h_summaries[kv.first]->GetBinContent(i+1)<<endl;
+            cout<<i+1<<"\t"<<kv.first<<"\t"<<h_summaries[kv.first]->GetBinError(i+1)<<endl;
         }
     }
     //========================scale facotrs===============
-	h_summaries["ZZ"]->Scale(1.30291);
-	h_summaries["VV"]->Scale(1.03002);
+	h_summaries["ZZ"]->Scale(1.284495);
+	h_summaries["VV"]->Scale(1.033462);
 	//h_summaries["DY"]->SetBinContent(4, h_summaries["DY"]->GetBinContent(4)*1.21);
 	//h_summaries["DY"]->SetBinContent(9, h_summaries["DY"]->GetBinContent(9)*1.21);
 	//h_summaries["TTbar"]->SetBinContent(6, h_summaries["TTbar"]->GetBinContent(6)*2.5);
@@ -208,6 +208,7 @@ void yield_summary() {
 		h_mc_uncert_band->SetBinContent(i+1, 1.0);  // center at ratio = 1
 		if (h_bkg_total->GetBinContent(i+1) != 0) h_mc_uncert_band->SetBinError(i+1, h_bkg_total->GetBinError(i+1)/h_bkg_total->GetBinContent(i+1));//scaling error with bin content
 		else h_mc_uncert_band->SetBinError(i+1,0);
+		cout<<h_bkg_total->GetBinContent(i+1)<<"\t"<<h_bkg_total->GetBinError(i+1)<<"\t"<<h_mc_uncert_band->GetBinError(i+1)<<endl;
 	} 
 	
     // Draw main plot
@@ -230,6 +231,7 @@ void yield_summary() {
         legend->AddEntry(h_summaries[bkg_group], bkg_group.c_str(), "f");
     }
     legend->AddEntry(h_summaries["data"], "Data", "lep");
+    legend->SetBorderSize(0);
     legend->Draw();
 
     // Ratio histogram: data / MC
@@ -246,13 +248,13 @@ void yield_summary() {
 	h_ratio->GetXaxis()->SetTitleSize(0.1);
 	
 	if (summary_type == "tau_ch") {
-		h_ratio->GetXaxis()->SetBinLabel(1,"0#tau 4l");
-		h_ratio->GetXaxis()->SetBinLabel(2,"1#tau 4l");
-		h_ratio->GetXaxis()->SetBinLabel(3,"2#tau 4l");
-		h_ratio->GetXaxis()->SetBinLabel(4,"3#tau 4l");
-		h_ratio->GetXaxis()->SetBinLabel(5,"0#tau 3l");
-		h_ratio->GetXaxis()->SetBinLabel(6,"1#tau 3l");
-		h_ratio->GetXaxis()->SetBinLabel(7,"2#tau 3l");
+		h_ratio->GetXaxis()->SetBinLabel(1,"4l,0#tau");
+		h_ratio->GetXaxis()->SetBinLabel(2,"4l,1#tau");
+		h_ratio->GetXaxis()->SetBinLabel(3,"4l,2#tau");
+		h_ratio->GetXaxis()->SetBinLabel(4,"4l,3#tau");
+		h_ratio->GetXaxis()->SetBinLabel(5,"3l,0#tau");
+		h_ratio->GetXaxis()->SetBinLabel(6,"3l,1#tau");
+		h_ratio->GetXaxis()->SetBinLabel(7,"3l,2#tau");
 	}	
 	else if (summary_type == "3lep" or summary_type == "3lep-veto" ) {
 		h_ratio->GetXaxis()->SetBinLabel(1,"ee");

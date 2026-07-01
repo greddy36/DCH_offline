@@ -1,342 +1,318 @@
+#include <TFile.h>
 #include <TH1D.h>
 #include <TCanvas.h>
+#include <TStyle.h>
+#include <THStack.h>
+#include <TPad.h>
 #include <TLegend.h>
+#include <vector>
+#include <string>
+#include <map>
+#include "include/Xsections.C"
+#include "include/cms_plots.h"
 
 void yield_summary_test() {
-	TFile *ifile_sig = new TFile("hist_CR/WW_2016.root","READ");               
-	TFile *ifile_DY1 = new TFile("hist_CR/DYJetsToLLM10to50_2016.root","READ");     
-	TFile *ifile_DY2 = new TFile("hist_CR/DYJetsToLLM50_2016.root","READ"); 
-		    
-	//TFile *ifile_VV1 = new TFile("hist_CR/WGToLNuG_2016.root","READ");
-	TFile *ifile_VV2 = new TFile("hist_CR/WW_2016.root","READ");
-	TFile *ifile_VV3 = new TFile("hist_CR/WWTo2L2Nu_2016.root","READ");
-	//TFile *ifile_VV4 = new TFile("hist_CR/WZ_2016.root","READ");
-	TFile *ifile_VV5 = new TFile("hist_CR/WZTo2Q2L_2016.root","READ");
-	TFile *ifile_VV6 = new TFile("hist_CR/WZTo3LNu_2016.root","READ");
+    gStyle->SetOptStat(0);
+    TCanvas* canvas = new TCanvas("canvas", "Stacked histograms", 800, 700);
 
-	TFile *ifile_VVV1 = new TFile("hist_CR/WWW_2016.root","READ");
-	TFile *ifile_VVV2 = new TFile("hist_CR/WZZ_2016.root","READ");
-	TFile *ifile_VVV3 = new TFile("hist_CR/ZZZ_2016.root","READ");
-
-	TFile *ifile_ttV1 = new TFile("hist_CR/ttWJets_2016.root","READ");
-	TFile *ifile_ttV2 = new TFile("hist_CR/ttZJets_2016.root","READ");
+    // Split canvas for main plot and ratio plot
+    TPad* pad1 = new TPad("pad1", "Top pad", 0.0, 0.3, 1.0, 1.0);
+    TPad* pad2 = new TPad("pad2", "Bottom pad", 0.0, 0.0, 1.0, 0.3);
+    pad1->SetBottomMargin(0.01);
+    pad2->SetTopMargin(0.01);
+    pad2->SetBottomMargin(0.3);
+    pad1->Draw();
+    pad2->Draw();
 	
-	TFile *ifile_WJ1 = new TFile("hist_CR/WJetsToLNu_NLO_2016.root","READ");
-	TFile *ifile_WJ2 = new TFile("hist_CR/WJetsToLNu_HT-70To100_2016.root","READ");
-	TFile *ifile_WJ3 = new TFile("hist_CR/WJetsToLNu_HT-100To200_2016.root","READ");
-	TFile *ifile_WJ4 = new TFile("hist_CR/WJetsToLNu_HT-200To400_2016.root","READ");
-	TFile *ifile_WJ5 = new TFile("hist_CR/WJetsToLNu_HT-400To600_2016.root","READ");
-	TFile *ifile_WJ6 = new TFile("hist_CR/WJetsToLNu_HT-600To800_2016.root","READ");
-	TFile *ifile_WJ7 = new TFile("hist_CR/WJetsToLNu_HT-800To1200_2016.root","READ");
-	//TFile *ifile_WJ8 = new TFile("hist_CR/WJetsToLNu_HT-1200To2500_2016.root","READ");
-	//TFile *ifile_WJ9 = new TFile("hist_CR/WJetsToLNu_HT-2500ToInf_2016.root","READ");
+	THStack* bkg_stack;
+	std::string summary_type = "tau_ch", year = "2017";
+    // Define histograms to retrieve
+    std::vector<std::string> hist_list;
+    const char* plot_description; 
+    if (summary_type == "tau_ch") {
+    	hist_list = { "h_met_CR_0tau", "h_met_CR_1tau", "h_met_CR_2tau", "h_met_CR_3tau", "h_met_CR_3lep0tau", "h_met_CR_3lep1tau", "h_met_CR_3lep2tau"};
+    	plot_description = "Yield summary in CR";
+    	bkg_stack = new THStack("bkg_stack", " ;;Events / bin");//empty title
+    }
+    else if  (summary_type == "3lep") {
+    	hist_list = {"h_met_ee","h_met_eee","h_met_eem","h_met_eet","h_metv_ett","h_met_mm","h_met_emm","h_met_mmm","h_met_mmt","h_metv_mtt"};
+   		bkg_stack = new THStack("bkg_stack", ";;Events / bin");
+   		plot_description = "2l and 3l channel summary in Z-window";
+    }
+    else if  (summary_type == "3lep-veto") {
+    	hist_list = {"h_metv_ee","h_metv_eee","h_metv_eem","h_metv_eet","h_met_ett","h_metv_mm","h_metv_emm","h_metv_mmm","h_metv_mmt","h_met_mtt"};
+    	bkg_stack = new THStack("bkg_stack", ";;Events / bin");
+    	plot_description = "2l and 3l channel summary in Z-veto";
+    }
+    else if  (summary_type == "4lep") { 
+    	hist_list = {"h_met_eeee","h_met_eeem","h_met_eemm","h_met_mmem","h_met_mmmm","h_met_eeet","h_met_eemt","h_met_eett","h_met_emtt","h_met_emmt","h_met_ettt","h_met_mmmt","h_met_mmtt","h_met_mttt"};
+    	bkg_stack = new THStack("bkg_stack", ";;Events / bin");
+    	plot_description = "4l channel summary in Z-window";
+    }
+    else if  (summary_type == "4lep-veto") {
+    	hist_list = {"h_metv_eeee","h_metv_eeem","h_metv_eemm","h_metv_mmem","h_metv_mmmm","h_metv_eeet","h_metv_eemt","h_metv_eett","h_metv_emtt","h_metv_emmt","h_metv_ettt","h_metv_mmmt","h_metv_mmtt","h_metv_mttt"};
+    	bkg_stack = new THStack("bkg_stack", ";;Events / bin");
+    	plot_description = "4l channel summary in Z-veto";
+    }
+    int bins = hist_list.size();
+
+    // Categories with input files
+    std::map<std::string, std::vector<std::string>> files;
+    if (year == "2016") files = {
+        {"DY",    {"DYJetsToLLM10to50_2016.root", "DYJetsToLLM50_2016.root"}},
+        {"VV",    {"WW_2016.root", "WWTo2L2Nu_2016.root", "WZTo2Q2L_2016.root", "WZTo3LNu_2016.root"}},
+        {"VVV",   {"WWW_2016.root", "WZZ_2016.root", "ZZZ_2016.root"}},
+        {"ttV",   {"ttWJets_2016.root", "ttZJets_2016.root"}},
+        {"WJ",    {"WJetsToLNu_NLO_2016.root", "WJetsToLNu_HT-70To100_2016.root", "WJetsToLNu_HT-100To200_2016.root", 
+                   "WJetsToLNu_HT-200To400_2016.root", "WJetsToLNu_HT-400To600_2016.root", 
+                   "WJetsToLNu_HT-600To800_2016.root", "WJetsToLNu_HT-800To1200_2016.root", "WJetsToLNu_HT-1200To2500_2016.root", "WJetsToLNu_HT-2500ToInf_2016.root"}},
+        {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo4L_2016.root"}},
+        {"ST",    {"ST_s-channel_2016.root", "ST_t-channel_antitop_2016.root", "ST_t-channel_top_2016.root", 
+                   "ST_tW_antitop_2016.root", "ST_tW_top_2016.root"}},
+        {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root"}},
+        {"other", {"ttHToTauTau_2016.root", "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root","ttHToEE_2016.root","ttHTo2L2Nu_2016.root"}},
+        {"data",  {"SingleElectron_2016.root","EGamma_2016.root", "SingleMuon_2016.root"}}
+    };
+    else if (year == "2017") files = {
+        {"DY",    {"DYJetsToLLM10to50_2017.root", "DYJetsToLLM50_2017.root"}},
+        {"VV",    {"WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root"}},
+        {"VVV",   {"WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root"}},
+        {"ttW",     {"ttWJets_2017.root"}},
+            {"ttZ", {"ttZJets_2017.root"}},
+        {"WJ",    {"WJetsToLNu_NLO_2017.root", "WJetsToLNu_HT-70To100_2017.root", "WJetsToLNu_HT-100To200_2017.root", 
+                   "WJetsToLNu_HT-200To400_2017.root", "WJetsToLNu_HT-400To600_2017.root", 
+                   "WJetsToLNu_HT-600To800_2017.root", "WJetsToLNu_HT-800To1200_2017.root", "WJetsToLNu_HT-1200To2500_2017.root", "WJetsToLNu_HT-2500ToInf_2017.root"}},
+        {"ZZ",    {"ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root"}},
+        {"ST",    {"ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", 
+                   "ST_tW_antitop_2017.root", "ST_tW_top_2017.root"}},
+        {"TTbar", {"TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root"}},
+        {"ZH",   {"ZHToMuMu_2017.root", "ZHToTauTau_2017.root", "GluGluZH_2017.root"}},
+            {"other",   {"ttHToTauTau_2017.root", "ttHToEE_2017.root", "ttHTo2L2Nu_2017.root"}},
+            {"data",    {"SingleElectronB_2017.root", "SingleElectronC_2017.root", "SingleElectronD_2017.root", "SingleElectronE_2017.root", "SingleElectronF_2017.root", "SingleMuonB_2017.root", "SingleMuonC_2017.root", "SingleMuonD_2017.root", "SingleMuonE_2017.root", "SingleMuonF_2017.root"}}
+    };
+    else if (year == "2018") files = {
+        {"DY",    {"DYJetsToLLM10to50_2018.root", "DYJetsToLLM50_2018.root"}},
+        {"VV",    {"WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
+        {"VVV",   {"WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
+        {"ttW",     {"ttWJets_2018.root"}},
+            {"ttZ", {"ttZJets_2018.root"}},
+        {"WJ",    {"WJetsToLNu_NLO_2018.root", "WJetsToLNu_HT-70To100_2018.root", "WJetsToLNu_HT-100To200_2018.root", 
+                   "WJetsToLNu_HT-200To400_2018.root", "WJetsToLNu_HT-400To600_2018.root", 
+                   "WJetsToLNu_HT-600To800_2018.root", "WJetsToLNu_HT-800To1200_2018.root", "WJetsToLNu_HT-1200To2500_2018.root", "WJetsToLNu_HT-2500ToInf_2018.root"}},
+        {"ZZ",    {"ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
+        {"ST",    {"ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", 
+                   "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
+        {"TTbar", {"TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
+        {"ZH",   {"ZHToMuMu_2018.root", "ZHToTauTau_2018.root", "GluGluZH_2018.root"}},
+            {"other",   {"ttHToTauTau_2018.root", "ttHToEE_2018.root", "ttHTo2L2Nu_2018.root"}},
+            {"data",    {"EGammaA_2018.root", "EGammaB_2018.root", "EGammaC_2018.root", "EGammaD_2018.root", "SingleMuonA_2018.root", "SingleMuonB_2018.root", "SingleMuonC_2018.root", "SingleMuonD_2018.root"}}
+    };
+    else if (year == "Run2") files = {
+                        {"signal",    {"HppM1000_2016.root", "HppM1000_2017.root", "HppM1000_2018.root"}},
+        {"DY",    {"DYJetsToLLM10to50_2016.root", "DYJetsToLLM50_2016.root","DYJetsToLLM10to50_2017.root", "DYJetsToLLM50_2017.root","DYJetsToLLM10to50_2018.root", "DYJetsToLLM50_2018.root"}},
+        {"VV",    {"WW_2016.root", "WWTo2L2Nu_2016.root", "WZTo2Q2L_2016.root", "WZTo3LNu_2016.root","WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root","WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
+        {"VVV",   {"WWW_2016.root", "WZZ_2016.root", "ZZZ_2016.root","WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root","WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
+        {"ttW",   {"ttWJets_2016.root", "ttWJets_2017.root","ttWJets_2018.root"}},
+        {"ttZ",   {"ttZJets_2016.root", "ttZJets_2017.root","ttZJets_2018.root"}},
+        {"WJ",    {"WJetsToLNu_NLO_2016.root", "WJetsToLNu_HT-70To100_2016.root", "WJetsToLNu_HT-100To200_2016.root", 
+                   "WJetsToLNu_HT-200To400_2016.root", "WJetsToLNu_HT-400To600_2016.root", 
+                   "WJetsToLNu_HT-600To800_2016.root", "WJetsToLNu_HT-800To1200_2016.root", "WJetsToLNu_HT-1200To2500_2016.root", "WJetsToLNu_HT-2500ToInf_2016.root","WJetsToLNu_NLO_2017.root", "WJetsToLNu_HT-70To100_2017.root", "WJetsToLNu_HT-100To200_2017.root", 
+                   "WJetsToLNu_HT-200To400_2017.root", "WJetsToLNu_HT-400To600_2017.root", 
+                   "WJetsToLNu_HT-600To800_2017.root", "WJetsToLNu_HT-800To1200_2017.root", "WJetsToLNu_HT-1200To2500_2017.root", "WJetsToLNu_HT-2500ToInf_2017.root","WJetsToLNu_NLO_2018.root", "WJetsToLNu_HT-70To100_2018.root", "WJetsToLNu_HT-100To200_2018.root", 
+                   "WJetsToLNu_HT-200To400_2018.root", "WJetsToLNu_HT-400To600_2018.root", 
+                   "WJetsToLNu_HT-600To800_2018.root", "WJetsToLNu_HT-800To1200_2018.root", "WJetsToLNu_HT-1200To2500_2018.root", "WJetsToLNu_HT-2500ToInf_2018.root"}},
+        {"QCD",   {"QCD_HT1000to1500_2016.root", "QCD_HT1000to1500_2017.root", "QCD_HT100to200_2016.root", "QCD_HT100to200_2017.root", "QCD_HT1500to2000_2016.root", "QCD_HT1500to2000_2017.root", "QCD_HT2000toInf_2016.root", "QCD_HT2000toInf_2017.root", "QCD_HT200to300_2016.root", "QCD_HT200to300_2017.root", "QCD_HT300to500_2016.root", "QCD_HT300to500_2017.root", "QCD_HT500to700_2016.root", "QCD_HT500to700_2017.root", "QCD_HT50to100_2016.root", "QCD_HT50to100_2017.root", "QCD_HT700to1000_2016.root", "QCD_HT700to1000_2017.root"}},
+        {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo4L_2016.root","ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root","ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
+        {"ST",    {"ST_s-channel_2016.root", "ST_t-channel_antitop_2016.root", "ST_t-channel_top_2016.root", 
+                   "ST_tW_antitop_2016.root", "ST_tW_top_2016.root","ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", 
+                   "ST_tW_antitop_2017.root", "ST_tW_top_2017.root","ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", 
+                   "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
+        {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root","TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root","TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
+        {"ZH", {"ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root"}},
+        {"other", {"ttHJetToNonbb_2016.root","ttHJetToNonbb_2017.root","ttHJetToNonbb_2018.root","TWZToLL_2016.root","TWZToLL_2017.root","TWZToLL_2018.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016.root","HZJ_HToWWTo2L2Nu_ZTo2L_2017.root","HZJ_HToWWTo2L2Nu_ZTo2L_2018.root"}},
+        {"data",  {"SingleElectronB_2016.root","SingleElectronC_2016.root","SingleElectronD_2016.root","SingleElectronE_2016.root","SingleElectronF_2016.root","SingleElectronG_2016.root","SingleElectronH_2016.root", "SingleMuonB_2016.root","SingleMuonC_2016.root","SingleMuonD_2016.root","SingleMuonE_2016.root","SingleMuonF_2016.root","SingleMuonG_2016.root","SingleMuonH_2016.root","SingleElectronB_2017.root","SingleElectronC_2017.root","SingleElectronD_2017.root","SingleElectronE_2017.root","SingleElectronF_2017.root", "SingleMuonB_2017.root","SingleMuonC_2017.root","SingleMuonD_2017.root","SingleMuonE_2017.root","SingleMuonF_2017.root","EGammaA_2018.root","EGammaB_2018.root","EGammaC_2018.root","EGammaD_2018.root", "SingleMuonA_2018.root","SingleMuonB_2018.root","SingleMuonC_2018.root","SingleMuonD_2018.root"}}
+	};
+    std::map<std::string, TH1D*> h_summaries;
+    std::map<std::string, int> fill_colors = {
+        {"DY", 7}, {"VV", 8}, {"VVV", 6}, {"ttW", 4}, {"ttZ", 2}, {"WJ", 9}, {"QCD", 11}, {"ZZ", 5},
+		    {"ST", 30}, {"TTbar", 46}, {"other", 28},{"ZH", 29}, {"data", 1}
+    };
+
+    // Open files
+    std::map<std::string, std::vector<TFile*>> open_files;
+    for (auto& kv : files) {
+        for (const auto& fname : kv.second) {
+        	TFile* file;
+            if (summary_type == "tau_ch") file = new TFile(("hist_test_nopair/" + fname).c_str(), "READ");
+            else file = new TFile(("hist_test_nopair/" + fname).c_str(), "READ");
+            if (!file || file->IsZombie()) continue;
+	        open_files[kv.first].push_back(file);
+        }
+        h_summaries[kv.first] = new TH1D(("h_summary_" + kv.first).c_str(), "Yields;;Yield", bins, 0.5, bins + 0.5);
+        h_summaries[kv.first]->Sumw2();
+        h_summaries[kv.first]->SetFillColor(fill_colors[kv.first]);
+    }
+
 	
-	TFile *ifile_ZZ1 = new TFile("hist_CR/ZZTo2L2Nu_2016.root","READ");
-	TFile *ifile_ZZ2 = new TFile("hist_CR/ZZTo2Q2L_2016.root","READ");
-	TFile *ifile_ZZ3 = new TFile("hist_CR/ZZTo4L_2016.root","READ");
-
-	TFile *ifile_ST1 = new TFile("hist_CR/ST_s-channel_2016.root","READ");          
-	TFile *ifile_ST2 = new TFile("hist_CR/ST_t-channel_antitop_2016.root","READ");  
-	TFile *ifile_ST3 = new TFile("hist_CR/ST_t-channel_top_2016.root","READ");  
-	TFile *ifile_ST4 = new TFile("hist_CR/ST_tW_antitop_2016.root","READ");  
-	TFile *ifile_ST5 = new TFile("hist_CR/ST_tW_top_2016.root","READ");            
-
-	TFile *ifile_ttH1 = new TFile("hist_CR/ttHTo2L2Nu_2016.root","READ");
-	//TFile *ifile_ttH2 = new TFile("hist_CR/ttHToEE_2016.root","READ");
-	//TFile *ifile_ttH3 = new TFile("hist_CR/ttHToMuMu_2016.root","READ");
-	//TFile *ifile_ttH4 = new TFile("hist_CR/ttHToTauTau_2016.root","READ");
+    // Loop over histograms and fill yield summaries and ratio plot
+    //double tot_uncert_quadr[bins];
+    for (int i = 0; i < bins; ++i) {
+        std::string hist_name = hist_list[i];
+        for (auto& kv : open_files) {
+            double total = 0; 
+            TH1D* h_sum = new TH1D("h_sum"," ;;;",1,0,1); h_sum->Sumw2();
+            for (auto* f : kv.second) {
+                TH1D* h = (TH1D*)f->Get(hist_name.c_str());
+                if (h) {
+                	h_sum->Sumw2();
+                	h->Scale(applyXSec(f));
+                	h->Rebin(h->GetNbinsX());
+                	double stat_err = h->GetBinError(1);//poisson error
+                	double sys_err = h->GetBinContent(1)*XSec_Uncert(f->GetName())/100;
+                	double tot_uncert_quadr = (stat_err*stat_err + sys_err*sys_err);
+                	if (kv.first != "data") {
+                		if(summary_type == "tau_ch"){
+                			if (hist_name.find("3lep") < hist_name.length()) tot_uncert_quadr += fake_uncert_squared("3lep", f->GetName())*h->GetBinContent(1)*h->GetBinContent(1);
+                			else tot_uncert_quadr += fake_uncert_squared("4lep", f->GetName())*h->GetBinContent(1)*h->GetBinContent(1);
+                		}
+                		else if(hist_name != "h_met_ee" and hist_name != "h_met_mm" and hist_name != "h_metv_ee" and hist_name != "h_metv_mm") tot_uncert_quadr += fake_uncert_squared(summary_type, f->GetName())*h->GetBinContent(1)*h->GetBinContent(1);
+                	}
+                	h->SetBinError(1,sqrt(tot_uncert_quadr));
+                	h_sum->Add(h);
+                }
+            }
+            h_summaries[kv.first]->SetBinContent(i+1, h_sum->GetBinContent(1));
+            h_summaries[kv.first]->SetBinError(i+1, h_sum->GetBinError(1));
+            cout<<i+1<<"\t"<<kv.first<<"\t"<<h_summaries[kv.first]->GetBinError(i+1)<<endl;
+        }
+    }
+    //========================scale facotrs===============
+	h_summaries["ZZ"]->Scale(1.284495);
+	h_summaries["VV"]->Scale(1.033462);
+	//h_summaries["DY"]->SetBinContent(4, h_summaries["DY"]->GetBinContent(4)*1.21);
+	//h_summaries["DY"]->SetBinContent(9, h_summaries["DY"]->GetBinContent(9)*1.21);
+	//h_summaries["TTbar"]->SetBinContent(6, h_summaries["TTbar"]->GetBinContent(6)*2.5);
+	//h_summaries["TTbar"]->SetBinContent(1, h_summaries["TTbar"]->GetBinContent(1)*1.5);
 	
-	TFile *ifile_TTbar1 = new TFile("hist_CR/TTTo2L2Nu_2016.root","READ");
-	TFile *ifile_TTbar2 = new TFile("hist_CR/TTToSemiLeptonic_2016.root","READ");
-	TFile *ifile_TTbar3 = new TFile("hist_CR/TTToHadronic_2016.root","READ");
+	//====================================================
+    // Stack backgrounds
+    TH1D* h_bkg_total = (TH1D*)h_summaries["DY"]->Clone("h_bkg_total");
+    h_bkg_total->Reset(); h_bkg_total->Sumw2();
+    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW","ttZ", "WJ", "QCD", "ZZ","ZH", "ST", "TTbar", "other"}) {
+        bkg_stack->Add(h_summaries[bkg_group]);
+        bkg_stack->SetMinimum(1); // Show zero bins
+        h_bkg_total->Add(h_summaries[bkg_group]);
+    }
+    
+    TH1D* h_mc_uncert_band = (TH1D*) h_bkg_total->Clone("h_mc_uncert_band");
+    h_mc_uncert_band->Sumw2();
+	h_mc_uncert_band->Reset(); // we'll fill the error by hand
+	for (int i = 0; i < bins; ++i) {
+		h_mc_uncert_band->SetBinContent(i+1, 1.0);  // center at ratio = 1
+		if (h_bkg_total->GetBinContent(i+1) != 0) h_mc_uncert_band->SetBinError(i+1, h_bkg_total->GetBinError(i+1)/h_bkg_total->GetBinContent(i+1));//scaling error with bin content
+		else h_mc_uncert_band->SetBinError(i+1,0);
+		cout<<h_bkg_total->GetBinContent(i+1)<<"\t"<<h_bkg_total->GetBinError(i+1)<<"\t"<<h_mc_uncert_band->GetBinError(i+1)<<endl;
+	} 
 	
-	TFile *ifile_ZH1 = new TFile("hist_CR/ZHToMuMu_2016.root","READ");
-	//TFile *ifile_ZH2 = new TFile("hist_CR/ZHToTauTau_2016.root","READ");
-	TFile *ifile_ZH3 = new TFile("hist_CR/GluGluZH_2016.root","READ");
+    // Draw main plot
+    pad1->cd();
+    gPad->SetLogy(1);
+    bkg_stack->Draw("hist");
+    double pad_max = std::max(bkg_stack->GetMaximum(),h_summaries["data"]->GetMaximum());
+	bkg_stack->SetMaximum(1.1*pad_max);
+    h_summaries["data"]->SetMarkerStyle(20);
+    h_summaries["data"]->SetMarkerColor(kBlack);
+    h_summaries["data"]->Draw("E SAME");
+
+	// Create a TLatex object
+	DrawCMSLabel();
+	PlotDescription(plot_description);
 	
-	TFile *ifile_D1 = new TFile("hist_CR/SingleElectron_2016.root","READ");
-	//TFile *ifile_D2 = new TFile("hist_CR/DoubleMuon_2016.root","READ");
-	//TFile *ifile_D3 = new TFile("hist_CR/Tau_2016.root","READ");
-	//TFile *ifile_D4 = new TFile("hist_CR/MuonEG_2016.root","READ");
-	TFile *ifile_D5 = new TFile("hist_CR/SingleMuon_2016.root","READ");
+    //auto legend = new TLegend(0.7, 0.6, 0.88, 0.88);
+    auto legend = new TLegend(0.12, 0.6, 0.3, 0.88);
+    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW","ttZ", "WJ","QCD", "ZZ","ZH", "ST", "TTbar", "other"}) {
+        legend->AddEntry(h_summaries[bkg_group], bkg_group.c_str(), "f");
+    }
+    legend->AddEntry(h_summaries["data"], "Data", "lep");
+    legend->SetBorderSize(0);
+    legend->Draw();
 
-	const char *hist_list[] = {"0tau/h_cat","1tau/h_cat","2tau/h_cat","3tau/h_cat","3lep0tau/h_cat","3lep1tau/h_cat","3lep2tau/h_cat"};
+    // Ratio histogram: data / MC
+    TH1D* h_ratio = (TH1D*)h_summaries["data"]->Clone("h_ratio");
+    h_ratio->SetTitle(""); // Remove the title for the ratio plot
+	h_ratio->Divide(h_bkg_total);
+	h_ratio->SetLineColor(kBlack);
+	h_ratio->SetMarkerStyle(20);
+	h_ratio->GetYaxis()->SetTitle("Data / Background");
+	h_ratio->GetYaxis()->SetNdivisions(505);
+	h_ratio->GetYaxis()->SetTitleSize(0.09);
+	h_ratio->GetYaxis()->SetTitleOffset(0.4);
+	h_ratio->GetYaxis()->SetLabelSize(0.07);
+	h_ratio->GetXaxis()->SetTitleSize(0.1);
 	
-	const char *hist_names[] = {"yields in 0-#tau 4l", "yields in 1-#tau 4l","yields in 2-#tau 4l","yields in 3-#tau -4l","yields in 0-#tau 3l","yields in 1-#tau 3l","yields in 2-#tau 3l"};
-
-	TCanvas* canvas = new TCanvas("canvas", "Stacked histograms", 800, 700);//600);
-	gStyle->SetOptStat(0);	
-	
-// make changes to take in xs from a csv file
-	for(int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++){
-		//TH1D *h_sig = (TH1D*)ifile_sig->Get(hist_list[i]); h_sig->SetLineStyle(5);h_sig->SetLineWidth(2);h_sig->SetLineColor(2);h_sig->Scale(10);
-		TH1D *h_DY1 = (TH1D*)ifile_DY1->Get(hist_list[i]);h_DY1->SetFillColor(7);//h_DY1->SetLineColor(7);
-		TH1D *h_DY2 = (TH1D*)ifile_DY2->Get(hist_list[i]);h_DY2->SetFillColor(7);//h_DY2->SetLineColor(7);
-		
-		//TH1D *h_VV1 = (TH1D*)ifile_VV1->Get(hist_list[i]);h_VV1->SetFillColor(8);h_VV1->SetLineColor(8);
-		TH1D *h_VV2 = (TH1D*)ifile_VV2->Get(hist_list[i]);h_VV2->SetFillColor(8);//h_VV2->SetLineColor(8);
-		TH1D *h_VV3 = (TH1D*)ifile_VV3->Get(hist_list[i]);h_VV3->SetFillColor(8);//h_VV3->SetLineColor(8);
-		//TH1D *h_VV4 = (TH1D*)ifile_VV4->Get(hist_list[i]);h_VV4->SetFillColor(8);//h_VV4->SetLineColor(8);
-		TH1D *h_VV5 = (TH1D*)ifile_VV5->Get(hist_list[i]);h_VV5->SetFillColor(8);//h_VV5->SetLineColor(8);
-		TH1D *h_VV6 = (TH1D*)ifile_VV6->Get(hist_list[i]);h_VV6->SetFillColor(8);//h_VV6->SetLineColor(8);
-		
-		TH1D *h_VVV1 = (TH1D*)ifile_VVV1->Get(hist_list[i]);h_VVV1->SetFillColor(6);//h_VVV1->SetLineColor(6);
-		TH1D *h_VVV2 = (TH1D*)ifile_VVV2->Get(hist_list[i]);h_VVV2->SetFillColor(6);//h_VVV2->SetLineColor(6);
-		TH1D *h_VVV3 = (TH1D*)ifile_VVV3->Get(hist_list[i]);h_VVV3->SetFillColor(6);//h_VVV3->SetLineColor(6);
-		
-		TH1D *h_ttV1 = (TH1D*)ifile_ttV1->Get(hist_list[i]);h_ttV1->SetFillColor(4);//h_ttV1->SetLineColor(4);
-		TH1D *h_ttV2 = (TH1D*)ifile_ttV2->Get(hist_list[i]);h_ttV2->SetFillColor(4);//h_ttV2->SetLineColor(4);
-		
-		TH1D *h_WJ1 = (TH1D*)ifile_WJ1->Get(hist_list[i]);h_WJ1->SetFillColor(9);
-		TH1D *h_WJ2 = (TH1D*)ifile_WJ2->Get(hist_list[i]);h_WJ2->SetFillColor(9);
-		TH1D *h_WJ3 = (TH1D*)ifile_WJ3->Get(hist_list[i]);h_WJ3->SetFillColor(9);
-		TH1D *h_WJ4 = (TH1D*)ifile_WJ4->Get(hist_list[i]);h_WJ4->SetFillColor(9);
-		TH1D *h_WJ5 = (TH1D*)ifile_WJ5->Get(hist_list[i]);h_WJ5->SetFillColor(9);
-		TH1D *h_WJ6 = (TH1D*)ifile_WJ6->Get(hist_list[i]);h_WJ6->SetFillColor(9);
-		TH1D *h_WJ7 = (TH1D*)ifile_WJ7->Get(hist_list[i]);h_WJ7->SetFillColor(9);
-		//TH1D *h_WJ8 = (TH1D*)ifile_WJ8->Get(hist_list[i]);h_WJ8->SetFillColor(9);
-		//TH1D *h_WJ9 = (TH1D*)ifile_WJ9->Get(hist_list[i]);h_WJ9->SetFillColor(9);
-			
-		TH1D *h_ZZ1 = (TH1D*)ifile_ZZ1->Get(hist_list[i]);h_ZZ1->SetFillColor(5);//h_ZZ1->SetLineColor(5);
-		TH1D *h_ZZ2 = (TH1D*)ifile_ZZ2->Get(hist_list[i]);h_ZZ2->SetFillColor(5);//h_ZZ2->SetLineColor(5);
-		TH1D *h_ZZ3 = (TH1D*)ifile_ZZ3->Get(hist_list[i]);h_ZZ3->SetFillColor(5);//h_ZZ3->SetLineColor(5);
-		
-		TH1D *h_ST1 = (TH1D*)ifile_ST1->Get(hist_list[i]);h_ST1->SetFillColor(30);
-		TH1D *h_ST2 = (TH1D*)ifile_ST2->Get(hist_list[i]);h_ST2->SetFillColor(30);
-		TH1D *h_ST3 = (TH1D*)ifile_ST3->Get(hist_list[i]);h_ST3->SetFillColor(30);
-		TH1D *h_ST4 = (TH1D*)ifile_ST4->Get(hist_list[i]);h_ST4->SetFillColor(30);
-		TH1D *h_ST5 = (TH1D*)ifile_ST5->Get(hist_list[i]);h_ST5->SetFillColor(30);
-
-		TH1D *h_TTbar1 = (TH1D*)ifile_TTbar1->Get(hist_list[i]);h_TTbar1->SetFillColor(46);
-		TH1D *h_TTbar2 = (TH1D*)ifile_TTbar2->Get(hist_list[i]);h_TTbar2->SetFillColor(46);
-		TH1D *h_TTbar3 = (TH1D*)ifile_TTbar3->Get(hist_list[i]);h_TTbar3->SetFillColor(46);
-		TH1D *h_ttH1 = (TH1D*)ifile_ttH1->Get(hist_list[i]);h_ttH1->SetFillColor(28);
-		//TH1D *h_ttH2 = (TH1D*)ifile_ttH2->Get(hist_list[i]);h_ttH2->SetFillColor(28);
-		//TH1D *h_ttH3 = (TH1D*)ifile_ttH3->Get(hist_list[i]);h_ttH3->SetFillColor(28);
-		//TH1D *h_ttH4 = (TH1D*)ifile_ttH4->Get(hist_list[i]);h_ttH4->SetFillColor(28);
-		TH1D *h_ZH1 = (TH1D*)ifile_ZH1->Get(hist_list[i]);h_ZH1->SetFillColor(28);
-		//TH1D *h_ZH2 = (TH1D*)ifile_ZH2->Get(hist_list[i]);h_ZH2->SetFillColor(28);
-		TH1D *h_ZH3 = (TH1D*)ifile_ZH3->Get(hist_list[i]);h_ZH3->SetFillColor(28);
-		
-		TH1D *h_D1 = (TH1D*)ifile_D1->Get(hist_list[i]);
-		//TH1D *h_D2 = (TH1D*)ifile_D2->Get(hist_list[i]);
-		//TH1D *h_D3 = (TH1D*)ifile_D3->Get(hist_list[i]);
-		//TH1D *h_D4 = (TH1D*)ifile_D4->Get(hist_list[i]);
-		TH1D *h_D5 = (TH1D*)ifile_D5->Get(hist_list[i]);
-		
-		for (auto hist : {h_DY1, h_DY2, /*h_VV1,*/ h_VV2, h_VV3, /*h_VV4,*/ h_VV5, h_VV6, h_VVV1, h_VVV2, h_VVV3, h_ttV1, h_ttV2, h_ZZ1, h_ZZ2, h_ZZ3, h_WJ1, h_WJ2, h_WJ3, h_WJ4, h_WJ5, h_WJ6, h_WJ7, /*h_WJ8, h_WJ9,*/ h_ST1, h_ST2, h_ST3, h_ST4, h_ST5, h_TTbar1, h_TTbar2, h_TTbar3,h_ttH1,/* h_ttH2, h_ttH3,h_ttH4,*/ h_ZH1,/* h_ZH2,*/ h_ZH3, h_D1, /*h_D2,hD3,h_D4,*/ h_D5}) {
-		    int nbins = hist->GetNbinsX();  // number of bins in X-axis
-		    double overflowContent = hist->GetBinContent(nbins + 1);  // overflow bin content
-		    double overflowError = hist->GetBinError(nbins + 1);      // overflow bin error
-
-		    // Update the last visible bin with overflow content
-		    hist->SetBinContent(nbins, hist->GetBinContent(nbins) + overflowContent);
-		    hist->SetBinError(nbins, sqrt(pow(hist->GetBinError(nbins), 2) + pow(overflowError, 2)));
-		    //hist->Rebin(5);		    
-		}
-		
-		float DY_count = h_DY1->Integral()+h_DY2->Integral();
-		float VV_count = /*h_VV1->Integral()+*/h_VV2->Integral()+h_VV3->Integral()+/*h_VV4->Integral()+*/h_VV5->Integral()+h_VV6->Integral();
-		float VVV_count = h_VVV1->Integral()+h_VVV2->Integral()+h_VVV3->Integral();
-		float ttV_count = h_ttV1->Integral()+h_ttV2->Integral();
-		float WJ_count = h_WJ1->Integral()+h_WJ2->Integral()+h_WJ3->Integral()+h_WJ4->Integral()+h_WJ5->Integral()+h_WJ6->Integral()+h_WJ7->Integral();//+h_WJ8->Integral()+h_WJ9->Integral();
-		float ZZ_count = h_ZZ1->Integral()+h_ZZ2->Integral()+h_ZZ3->Integral();
-		float ST_count = h_ST1->Integral()+h_ST2->Integral()+h_ST3->Integral()+h_ST4->Integral()+h_ST5->Integral();
-		float TT_count = h_TTbar1->Integral()+h_TTbar2->Integral()+h_TTbar3->Integral();
-		float other_count = h_ttH1->Integral()/*+h_ttH2->Integral()+h_ttH3->Integral()+h_ttH4->Integral()*/+h_ZH1->Integral()/*+h_ZH2->Integral()*/+h_ZH3->Integral();
-		float data_count = h_D1->Integral()/*+h_D2->Integral()+h_D3->Integral()+h_D4->Integral()+h_D5->Integral()*/;
-		//float data_count1 = h_D2->Integral();
-		//float data_count2 = h_D4->Integral();
-		float data_count3 = h_D5->Integral();
-				
-		TString DY_legend = "DY"+ TString::Format("\t %.2f", DY_count);//Set precision to 2 decimal places
-		TString VV_legend = "VV"+ TString::Format("\t %.2f", VV_count);
-		TString VVV_legend = "VVV"+ TString::Format("\t %.2f", VVV_count);
-		TString ttV_legend = "ttV"+ TString::Format("\t %.2f", ttV_count);
-		TString WJ_legend = "WJ"+ TString::Format("\t %.2f", WJ_count);
-		TString ZZ_legend = "ZZ"+ TString::Format("\t %.2f", ZZ_count);
-		TString ST_legend = "ST"+ TString::Format("\t %.2f", ST_count);
-		TString TT_legend = "TTbar"+ TString::Format("\t %.2f", TT_count);
-		TString other_legend = "other Bkg"+ TString::Format("\t %.2f", other_count);
-		TString data_legend = "EGamma Data"+ TString::Format("\t %.0f", data_count);
-		//TString data_legend1 = "DoubleMu Data"+ TString::Format("\t %.0f", data_count1);
-		//TString data_legend2 = "MuonEG Data"+ TString::Format("\t %.0f", data_count2);
-		TString data_legend3 = "SingleMu Data"+ TString::Format("\t %.0f", data_count3);
-		
-		// bkg_stack histograms
-		THStack* bkg_stack = new THStack("bkg_stack", hist_names[i]);
-		bkg_stack->Add(h_DY1);
-		bkg_stack->Add(h_DY2);
-		//bkg_stack->Add(h_VV1);
-		bkg_stack->Add(h_VV2);
-		bkg_stack->Add(h_VV3);
-		//bkg_stack->Add(h_VV4);
-		bkg_stack->Add(h_VV5);
-		bkg_stack->Add(h_VV6);
-		bkg_stack->Add(h_VVV1);
-		bkg_stack->Add(h_VVV2);
-		bkg_stack->Add(h_VVV3);
-		bkg_stack->Add(h_ttV1);
-		bkg_stack->Add(h_ttV2);
-		bkg_stack->Add(h_WJ1);
-		bkg_stack->Add(h_WJ2);
-		bkg_stack->Add(h_WJ3);
-		bkg_stack->Add(h_WJ4);
-		bkg_stack->Add(h_WJ5);
-		bkg_stack->Add(h_WJ6);
-		bkg_stack->Add(h_WJ7);
-		//bkg_stack->Add(h_WJ8);
-		//bkg_stack->Add(h_WJ9);
-		bkg_stack->Add(h_ZZ1);
-		bkg_stack->Add(h_ZZ2);
-		bkg_stack->Add(h_ZZ3);
-		bkg_stack->Add(h_ST1);
-		bkg_stack->Add(h_ST2);
-		bkg_stack->Add(h_ST3);
-		bkg_stack->Add(h_ST4);
-		bkg_stack->Add(h_ST5);
-		bkg_stack->Add(h_TTbar1);
-		bkg_stack->Add(h_TTbar2);
-		bkg_stack->Add(h_TTbar3);
-		bkg_stack->Add(h_ttH1);
-		//bkg_stack->Add(h_ttH2);
-		//bkg_stack->Add(h_ttH3);
-		//bkg_stack->Add(h_ttH4);	
-		bkg_stack->Add(h_ZH1);
-		//bkg_stack->Add(h_ZH2);
-		bkg_stack->Add(h_ZH3);
-		
-
-		TH1D *h_bkg_total = (TH1D*)h_DY1->Clone("h_bkg_total");
-    	h_bkg_total->Add(h_DY2);
-    	//h_bkg_total->Add(h_VV1);
-		h_bkg_total->Add(h_VV2);
-		h_bkg_total->Add(h_VV3);
-		//h_bkg_total->Add(h_VV4);
-		h_bkg_total->Add(h_VV5);
-		h_bkg_total->Add(h_VV6);
-		h_bkg_total->Add(h_VVV1);
-		h_bkg_total->Add(h_VVV2);
-		h_bkg_total->Add(h_VVV3);
-		h_bkg_total->Add(h_ttV1);
-		h_bkg_total->Add(h_ttV2);
-		h_bkg_total->Add(h_WJ1);
-		h_bkg_total->Add(h_WJ2);
-		h_bkg_total->Add(h_WJ3);
-		h_bkg_total->Add(h_WJ4);
-		h_bkg_total->Add(h_WJ5);
-		h_bkg_total->Add(h_WJ6);
-		h_bkg_total->Add(h_WJ7);
-		//h_bkg_total->Add(h_WJ8);
-		//h_bkg_total->Add(h_WJ9);
-		h_bkg_total->Add(h_ZZ1);
-		h_bkg_total->Add(h_ZZ2);
-		h_bkg_total->Add(h_ZZ3);
-		h_bkg_total->Add(h_ST1);
-		h_bkg_total->Add(h_ST2);
-		h_bkg_total->Add(h_ST3);
-		h_bkg_total->Add(h_ST4);
-		h_bkg_total->Add(h_ST5);
-		h_bkg_total->Add(h_TTbar1);
-		h_bkg_total->Add(h_TTbar2);
-		h_bkg_total->Add(h_TTbar3);
-		h_bkg_total->Add(h_ttH1);
-		//h_bkg_total->Add(h_ttH2);
-		//h_bkg_total->Add(h_ttH3);
-		//h_bkg_total->Add(h_ttH4);
-		h_bkg_total->Add(h_ZH1);
-		//h_bkg_total->Add(h_ZH2);
-		h_bkg_total->Add(h_ZH3);
-		TH1D *h_data_total = (TH1D*)h_D1->Clone("h_data_total");
-		h_data_total->SetTitle(hist_names[i]);
-		h_data_total->SetMarkerColor(1);
-		h_data_total->SetMarkerStyle(kFullDotLarge);
-		//h_data_total->Add(h_D2);
-		//h_data_total->Add(h_D4);
-		h_data_total->Add(h_D5);
-
-		canvas->Divide(1, 2);				
-		// Adjust the upper pad (stacked plot)
-		TPad *pad1 = (TPad*)canvas->cd(1);
-		pad1->SetPad(0, 0.3, 1, 1);
-		pad1->SetBottomMargin(0.01); // Remove bottom margin to reduce gap
-
-		double max_data = h_data_total->GetMaximum();
-		double max_bkg = bkg_stack->GetMaximum();
-		bkg_stack->SetMaximum(std::max(max_data, max_bkg)*1.1);//give 10% extra space
-		bkg_stack->Draw("HIST");		
-		h_data_total->Draw("E SAME");
-		
-		/*TPaveText *textbox = new TPaveText(0.4, 0.85, 0.6, 0.9, "NDC");
-		textbox->AddText("Era D");
-		textbox->Draw();*/
-		
-		//TLegend* legend = new TLegend(0.1, 0.9, 0.3, 0.7);
-		TLegend* legend = new TLegend(0.65, 0.5, 0.9, 0.9);	
-		//legend->AddEntry(h_sig, "M900*1000");
-		legend->AddEntry(h_VV6, VV_legend, "f");
-		legend->AddEntry(h_VVV1, VVV_legend, "f");
-		legend->AddEntry(h_DY1, DY_legend, "f");
-		legend->AddEntry(h_ZZ1, ZZ_legend, "f");
-		legend->AddEntry(h_ttV1, ttV_legend, "f");
-		legend->AddEntry(h_WJ1, WJ_legend, "f");
-		legend->AddEntry(h_ST1, ST_legend, "f");
-		legend->AddEntry(h_TTbar1, TT_legend, "f");
-		legend->AddEntry(h_ttH1, other_legend, "f");
-		legend->AddEntry(h_data_total, data_legend);
-		legend->AddEntry(h_data_total, data_legend3);
-		//legend->AddEntry(h_data_total, data_legend1);
-		//legend->AddEntry(h_data_total, data_legend2);
-		//legend->Draw();		
-
-		// Create a TLatex object
-		TLatex latex;
-		latex.SetNDC(); // Use normalized coordinates (0 to 1)
-		latex.SetTextSize(0.04); // Set text size
-		latex.SetTextAlign(31); // Align right (horizontal) and top (vertical)
-		latex.DrawLatex(0.95, 0.95, "2016"); // Position (x, y) and text
-
-		// Adjust the lower pad (ratio plot)
-		TPad *pad2 = (TPad*)canvas->cd(2);
-		pad2->SetPad(0, 0, 1, 0.3);
-		pad2->SetTopMargin(0.01);
-		pad2->SetBottomMargin(0.3);
-		
-		// Create the Data/MC ratio plot
-		TH1D *h_ratio = (TH1D*)h_data_total->Clone("h_ratio");
-		h_ratio->Divide(h_bkg_total);
-		h_ratio->SetLineColor(kBlack);
-		h_ratio->SetMarkerStyle(2);
-		h_ratio->SetTitle(""); // Remove the title for the ratio plot
-		h_ratio->GetYaxis()->SetTitle("Data/MC");
-		h_ratio->GetYaxis()->SetNdivisions(505);
-		h_ratio->GetYaxis()->SetTitleSize(0.1);
-		h_ratio->GetYaxis()->SetTitleOffset(0.5);
-		h_ratio->GetYaxis()->SetLabelSize(0.07);
-		h_ratio->GetXaxis()->SetTitleSize(0.1);
-		h_ratio->GetXaxis()->SetLabelSize(0.1);
-		h_ratio->SetMinimum(0); // Set the minimum y-value for the ratio plot
-h_ratio->SetMaximum(2); // Set the maximum y-value for the ratio plot
-		h_ratio->Draw("E");
-		
-		// Draw lines for reference
-		TLine *line1 = new TLine(h_ratio->GetXaxis()->GetXmin(), 1, h_ratio->GetXaxis()->GetXmax(), 1);
-		TLine *line2 = new TLine(h_ratio->GetXaxis()->GetXmin(), 0.5, h_ratio->GetXaxis()->GetXmax(), 0.5);
-		TLine *line3 = new TLine(h_ratio->GetXaxis()->GetXmin(), 1.5, h_ratio->GetXaxis()->GetXmax(), 1.5);
-		line1->SetLineStyle(2);line2->SetLineStyle(2);line3->SetLineStyle(2);
-		line1->Draw();line2->Draw();line3->Draw();
-
-		// Show the canvas
-		canvas->Update();
-		canvas->Modified();
-		
-		std::string s =  "hist/", s1, s2;
-		s1 = s + i +".png";
-		//s2 = s + hist_list[i]+".svg";
-		char* title1 = const_cast<char*>(s1.c_str());//converting string to char
-		//char* title2 = const_cast<char*>(s2.c_str());//converting string to char
-		canvas->SaveAs(title1);
-		//canvas->SaveAs(title2);
-		canvas->Clear();
+	if (summary_type == "tau_ch") {
+		h_ratio->GetXaxis()->SetBinLabel(1,"4l,0#tau");
+		h_ratio->GetXaxis()->SetBinLabel(2,"4l,1#tau");
+		h_ratio->GetXaxis()->SetBinLabel(3,"4l,2#tau");
+		h_ratio->GetXaxis()->SetBinLabel(4,"4l,3#tau");
+		h_ratio->GetXaxis()->SetBinLabel(5,"3l,0#tau");
+		h_ratio->GetXaxis()->SetBinLabel(6,"3l,1#tau");
+		h_ratio->GetXaxis()->SetBinLabel(7,"3l,2#tau");
+	}	
+	else if (summary_type == "3lep" or summary_type == "3lep-veto" ) {
+		h_ratio->GetXaxis()->SetBinLabel(1,"ee");
+		h_ratio->GetXaxis()->SetBinLabel(2,"ee+e");
+		h_ratio->GetXaxis()->SetBinLabel(3,"ee+#mu");
+		h_ratio->GetXaxis()->SetBinLabel(4,"ee+#tau");
+		h_ratio->GetXaxis()->SetBinLabel(5,"e#tau#tau");
+		h_ratio->GetXaxis()->SetBinLabel(6,"#mu#mu");
+		h_ratio->GetXaxis()->SetBinLabel(7,"#mu#mu+e");
+		h_ratio->GetXaxis()->SetBinLabel(8,"#mu#mu+#mu");
+		h_ratio->GetXaxis()->SetBinLabel(9,"#mu#mu+#tau");
+		h_ratio->GetXaxis()->SetBinLabel(10,"#mu#tau#tau");
 	}
+	else if (summary_type == "4lep" or summary_type == "4lep-veto") {
+		h_ratio->GetXaxis()->SetBinLabel(1,"eeee");
+		h_ratio->GetXaxis()->SetBinLabel(2,"eee#mu");
+		h_ratio->GetXaxis()->SetBinLabel(3,"ee#mu#mu");
+		h_ratio->GetXaxis()->SetBinLabel(4,"#mu#mue#mu");
+		h_ratio->GetXaxis()->SetBinLabel(5,"#mu#mu#mu#mu");
+		h_ratio->GetXaxis()->SetBinLabel(6,"eee#tau");
+		h_ratio->GetXaxis()->SetBinLabel(7,"ee#mu#tau");
+		h_ratio->GetXaxis()->SetBinLabel(8,"ee#tau#tau");
+		h_ratio->GetXaxis()->SetBinLabel(9,"e#mu#tau#tau");
+		h_ratio->GetXaxis()->SetBinLabel(10,"e#mu#mu#tau");
+		h_ratio->GetXaxis()->SetBinLabel(11,"e#tau#tau#tau");
+		h_ratio->GetXaxis()->SetBinLabel(12,"#mu#mu#mu#tau");
+		h_ratio->GetXaxis()->SetBinLabel(13,"#mu#mu#tau#tau");
+		h_ratio->GetXaxis()->SetBinLabel(14,"#mu#tau#tau#tau");
+	}
+	
+	h_ratio->GetXaxis()->SetLabelSize(0.15);
+	h_ratio->SetMinimum(0); // Set the minimum y-value for the ratio plot
+	h_ratio->SetMaximum(2); // Set the maximum y-value for the ratio plot
+	
+    // Draw ratio plot
+    pad2->cd();
+    h_ratio->SetMinimum(0.0);
+    h_ratio->SetMaximum(2.0);
+    h_ratio->Draw("E");
+    
+    h_mc_uncert_band->SetFillColor(kGray+2);
+	h_mc_uncert_band->SetFillStyle(3001); // hatched
+	h_mc_uncert_band->SetLineColor(0);
+	h_mc_uncert_band->Draw("E2 same"); // as a filled error band
+	
+    // Draw lines for reference
+	TLine *line1 = new TLine(h_ratio->GetXaxis()->GetXmin(), 1, h_ratio->GetXaxis()->GetXmax(), 1);
+	TLine *line2 = new TLine(h_ratio->GetXaxis()->GetXmin(), 0.5, h_ratio->GetXaxis()->GetXmax(), 0.5);
+	TLine *line3 = new TLine(h_ratio->GetXaxis()->GetXmin(), 1.5, h_ratio->GetXaxis()->GetXmax(), 1.5);
+	line1->SetLineStyle(2);line2->SetLineStyle(2);line3->SetLineStyle(2);
+	line1->Draw();line2->Draw();line3->Draw();
+
+    // Output
+    //std::string pdfname = "summary_"+summary_type+"_"+year+".pdf";
+    std::string pngname = "summary_"+summary_type+"_"+year+".pdf";
+    //canvas->SaveAs(const_cast<char*>(pdfname.c_str()));
+    canvas->SaveAs(const_cast<char*>(pngname.c_str()));
 }

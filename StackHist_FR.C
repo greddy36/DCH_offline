@@ -10,8 +10,9 @@
 #include <map>
 #include "include/Xsections.C"
 #include "include/cms_plots.h"
+#include "TError.h"
 
-void StackHist_test() {
+void StackHist_FR() { gErrorIgnoreLevel =kError;
 	std::string summary_type = "tau_ch", year = "Run2";
     // Define histograms to retrieve
     const char *hist_list[] = 
@@ -25,7 +26,7 @@ void StackHist_test() {
  "h_mZ2_VR_0tau", "h_mZ2_VR_1tau", "h_mZ2_VR_2tau", "h_mZ2_VR_3tau", "h_mZ2_VR_3lep0tau", "h_mZ2_VR_3lep1tau", "h_mZ2_VR_3lep2tau", "h_mZ2_CR_0tau", "h_mZ2_CR_1tau", "h_mZ2_CR_2tau", "h_mZ2_CR_3tau", "h_mZ2_CR_3lep0tau", "h_mZ2_CR_3lep1tau", "h_mZ2_CR_3lep2tau", "h_mZ2_SR_0tau", "h_mZ2_SR_1tau", "h_mZ2_SR_2tau", "h_mZ2_SR_3tau", "h_mZ2_SR_3lep0tau", "h_mZ2_SR_3lep1tau", "h_mZ2_SR_3lep2tau", "h_mZ2_DYCR_0tau", "h_mZ2_DYCR_1tau", "h_mZ2_DYveto_0tau", "h_mZ2_DYveto_1tau", "h_mZ2_ee", "h_mZ2_em", "h_mZ2_mm", "h_mZ2_eee", "h_mZ2_eem", "h_mZ2_eet", "h_mZ2_emt", "h_mZ2_mme", "h_mZ2_mmm", "h_mZ2_mmt", "h_mZ2_ett", "h_mZ2_mtt", "h_mZ2_eeee", "h_mZ2_eeem", "h_mZ2_eemm", "h_mZ2_mmem", "h_mZ2_mmmm", "h_mZ2_eeet", "h_mZ2_eemt", "h_mZ2_eett", "h_mZ2_mmet", "h_mZ2_ttem", "h_mZ2_ttet", "h_mZ2_mmmt", "h_mZ2_mmtt", "h_mZ2_ttmt", /*"h_mZ2_v_ee", "h_mZ2_v_em", "h_mZ2_v_mm", "h_mZ2_v_eee", "h_mZ2_v_eem", "h_mZ2_v_eet", "h_mZ2_v_emt", "h_mZ2_v_mme", "h_mZ2_v_mmm", "h_mZ2_v_mmt", "h_mZ2_v_ett", "h_mZ2_v_mtt", "h_mZ2_v_eeee", "h_mZ2_v_eeem", "h_mZ2_v_eemm", "h_mZ2_v_mmem", "h_mZ2_v_mmmm", "h_mZ2_v_eeet", "h_mZ2_v_eemt", "h_mZ2_v_eett", "h_mZ2_v_mmet", "h_mZ2_v_ttem", "h_mZ2_v_ttet", "h_mZ2_v_mmmt", "h_mZ2_v_mmtt", "h_mZ2_v_ttmt",*/
  "h_mH1_VR_0tau", "h_mH1_VR_1tau", "h_mH1_VR_2tau", "h_mH1_VR_3tau", "h_mH1_VR_3lep0tau", "h_mH1_VR_3lep1tau", "h_mH1_VR_3lep2tau", "h_mH1_CR_0tau", "h_mH1_CR_1tau", "h_mH1_CR_2tau", "h_mH1_CR_3tau", "h_mH1_CR_3lep0tau", "h_mH1_CR_3lep1tau", "h_mH1_CR_3lep2tau", "h_mH1_SR_0tau", "h_mH1_SR_1tau", "h_mH1_SR_2tau", "h_mH1_SR_3tau", "h_mH1_SR_3lep0tau", "h_mH1_SR_3lep1tau", "h_mH1_SR_3lep2tau", "h_mH1_DYCR_0tau", "h_mH1_DYCR_1tau", "h_mH1_DYveto_0tau", "h_mH1_DYveto_1tau", "h_mH1_ee", "h_mH1_em", "h_mH1_mm", "h_mH1_eee", "h_mH1_eem", "h_mH1_eet", "h_mH1_emt", "h_mH1_mme", "h_mH1_mmm", "h_mH1_mmt", "h_mH1_ett", "h_mH1_mtt", "h_mH1_eeee", "h_mH1_eeem", "h_mH1_eemm", "h_mH1_mmem", "h_mH1_mmmm", "h_mH1_eeet", "h_mH1_eemt", "h_mH1_eett", "h_mH1_mmet", "h_mH1_ttem", "h_mH1_ttet", "h_mH1_mmmt", "h_mH1_mmtt", "h_mH1_ttmt", /*"h_mH1_v_ee", "h_mH1_v_em", "h_mH1_v_mm", "h_mH1_v_eee", "h_mH1_v_eem", "h_mH1_v_eet", "h_mH1_v_emt", "h_mH1_v_mme", "h_mH1_v_mmm", "h_mH1_v_mmt", "h_mH1_v_ett", "h_mH1_v_mtt", "h_mH1_v_eeee", "h_mH1_v_eeem", "h_mH1_v_eemm", "h_mH1_v_mmem", "h_mH1_v_mmmm", "h_mH1_v_eeet", "h_mH1_v_eemt", "h_mH1_v_eett", "h_mH1_v_mmet", "h_mH1_v_ttem", "h_mH1_v_ttet", "h_mH1_v_mmmt", "h_mH1_v_mmtt", "h_mH1_v_ttmt",*/
  "h_mH2_VR_0tau", "h_mH2_VR_1tau", "h_mH2_VR_2tau", "h_mH2_VR_3tau", "h_mH2_VR_3lep0tau", "h_mH2_VR_3lep1tau", "h_mH2_VR_3lep2tau", "h_mH2_CR_0tau", "h_mH2_CR_1tau", "h_mH2_CR_2tau", "h_mH2_CR_3tau", "h_mH2_CR_3lep0tau", "h_mH2_CR_3lep1tau", "h_mH2_CR_3lep2tau", "h_mH2_SR_0tau", "h_mH2_SR_1tau", "h_mH2_SR_2tau", "h_mH2_SR_3tau", "h_mH2_SR_3lep0tau", "h_mH2_SR_3lep1tau", "h_mH2_SR_3lep2tau", "h_mH2_DYCR_0tau", "h_mH2_DYCR_1tau", "h_mH2_DYveto_0tau", "h_mH2_DYveto_1tau", "h_mH2_ee", "h_mH2_em", "h_mH2_mm", "h_mH2_eee", "h_mH2_eem", "h_mH2_eet", "h_mH2_emt", "h_mH2_mme", "h_mH2_mmm", "h_mH2_mmt", "h_mH2_ett", "h_mH2_mtt", "h_mH2_eeee", "h_mH2_eeem", "h_mH2_eemm", "h_mH2_mmem", "h_mH2_mmmm", "h_mH2_eeet", "h_mH2_eemt", "h_mH2_eett", "h_mH2_mmet", "h_mH2_ttem", "h_mH2_ttet", "h_mH2_mmmt", "h_mH2_mmtt", "h_mH2_ttmt", /*"h_mH2_v_ee", "h_mH2_v_em", "h_mH2_v_mm", "h_mH2_v_eee", "h_mH2_v_eem", "h_mH2_v_eet", "h_mH2_v_emt", "h_mH2_v_mme", "h_mH2_v_mmm", "h_mH2_v_mmt", "h_mH2_v_ett", "h_mH2_v_mtt", "h_mH2_v_eeee", "h_mH2_v_eeem", "h_mH2_v_eemm", "h_mH2_v_mmem", "h_mH2_v_mmmm", "h_mH2_v_eeet", "h_mH2_v_eemt", "h_mH2_v_eett", "h_mH2_v_mmet", "h_mH2_v_ttem", "h_mH2_v_ttet", "h_mH2_v_mmmt", "h_mH2_v_mmtt", "h_mH2_v_ttmt",*/
- "h_met_VR_0tau", "h_met_VR_1tau", "h_met_VR_2tau", "h_met_VR_3tau", "h_met_VR_3lep0tau", "h_met_VR_3lep1tau", "h_met_VR_3lep2tau", "h_met_CR_0tau", "h_met_CR_1tau", "h_met_CR_2tau", "h_met_CR_3tau", "h_met_CR_3lep0tau", "h_met_CR_3lep1tau", "h_met_CR_3lep2tau", "h_met_SR_0tau", "h_met_SR_1tau", "h_met_SR_2tau", "h_met_SR_3tau", "h_met_SR_3lep0tau", "h_met_SR_3lep1tau", "h_met_SR_3lep2tau", "h_met_DYCR_0tau", "h_met_DYCR_1tau", "h_met_DYveto_0tau", "h_met_DYveto_1tau", "h_met_ee", "h_met_em", "h_met_mm", "h_met_eee", "h_met_eem", "h_met_eet", "h_met_emt", "h_met_mme", "h_met_mmm", "h_met_mmt", "h_met_ett", "h_met_mtt", "h_met_eeee", "h_met_eeem", "h_met_eemm", "h_met_mmem", "h_met_mmmm", "h_met_eeet", "h_met_eemt", "h_met_eett", "h_met_mmet", "h_met_ttem", "h_met_ttet", "h_met_mmmt", "h_met_mmtt", "h_met_ttmt",/* "h_met_v_ee", "h_met_v_em", "h_met_v_mm", "h_met_v_eee", "h_met_v_eem", "h_met_v_eet", "h_met_v_emt", "h_met_v_mme", "h_met_v_mmm", "h_met_v_mmt", "h_met_v_ett", "h_met_v_mtt", "h_met_v_eeee", "h_met_v_eeem", "h_met_v_eemm", "h_met_v_mmem", "h_met_v_mmmm", "h_met_v_eeet", "h_met_v_eemt", "h_met_v_eett", "h_met_v_mmet", "h_met_v_ttem", "h_met_v_ttet", "h_met_v_mmmt", "h_met_v_mmtt", "h_met_v_ttmt",
+/* "h_met_VR_0tau", "h_met_VR_1tau", "h_met_VR_2tau", "h_met_VR_3tau", "h_met_VR_3lep0tau", "h_met_VR_3lep1tau", "h_met_VR_3lep2tau", "h_met_CR_0tau", "h_met_CR_1tau", "h_met_CR_2tau", "h_met_CR_3tau", "h_met_CR_3lep0tau", "h_met_CR_3lep1tau", "h_met_CR_3lep2tau", "h_met_SR_0tau", "h_met_SR_1tau", "h_met_SR_2tau", "h_met_SR_3tau", "h_met_SR_3lep0tau", "h_met_SR_3lep1tau", "h_met_SR_3lep2tau", "h_met_DYCR_0tau", "h_met_DYCR_1tau", "h_met_DYveto_0tau", "h_met_DYveto_1tau", "h_met_ee", "h_met_em", "h_met_mm", "h_met_eee", "h_met_eem", "h_met_eet", "h_met_emt", "h_met_mme", "h_met_mmm", "h_met_mmt", "h_met_ett", "h_met_mtt", "h_met_eeee", "h_met_eeem", "h_met_eemm", "h_met_mmem", "h_met_mmmm", "h_met_eeet", "h_met_eemt", "h_met_eett", "h_met_mmet", "h_met_ttem", "h_met_ttet", "h_met_mmmt", "h_met_mmtt", "h_met_ttmt",*//* "h_met_v_ee", "h_met_v_em", "h_met_v_mm", "h_met_v_eee", "h_met_v_eem", "h_met_v_eet", "h_met_v_emt", "h_met_v_mme", "h_met_v_mmm", "h_met_v_mmt", "h_met_v_ett", "h_met_v_mtt", "h_met_v_eeee", "h_met_v_eeem", "h_met_v_eemm", "h_met_v_mmem", "h_met_v_mmmm", "h_met_v_eeet", "h_met_v_eemt", "h_met_v_eett", "h_met_v_mmet", "h_met_v_ttem", "h_met_v_ttet", "h_met_v_mmmt", "h_met_v_mmtt", "h_met_v_ttmt",
 "h_mT_ee", "h_mT_mm", "h_dRll_ee","h_dRll_mm",*/
 "h_LT_VR_0tau", "h_LT_VR_1tau", "h_LT_VR_2tau", "h_LT_VR_3tau", "h_LT_VR_3lep0tau", "h_LT_VR_3lep1tau", "h_LT_VR_3lep2tau", "h_LT_CR_0tau", "h_LT_CR_1tau", "h_LT_CR_2tau", "h_LT_CR_3tau", "h_LT_CR_3lep0tau", "h_LT_CR_3lep1tau", "h_LT_CR_3lep2tau", "h_LT_SR_0tau", "h_LT_SR_1tau", "h_LT_SR_2tau", "h_LT_SR_3tau", "h_LT_SR_3lep0tau", "h_LT_SR_3lep1tau", "h_LT_SR_3lep2tau", "h_LT_DYCR_0tau", "h_LT_DYCR_1tau", "h_LT_DYveto_0tau", "h_LT_DYveto_1tau", "h_LT_ee", "h_LT_em", "h_LT_mm", "h_LT_eee", "h_LT_eem", "h_LT_eet", "h_LT_emt", "h_LT_mme", "h_LT_mmm", "h_LT_mmt", "h_LT_ett", "h_LT_mtt", "h_LT_eeee", "h_LT_eeem", "h_LT_eemm", "h_LT_mmem", "h_LT_mmmm", "h_LT_eeet", "h_LT_eemt", "h_LT_eett", "h_LT_mmet", "h_LT_ttem", "h_LT_ttet", "h_LT_mmmt", "h_LT_mmtt", "h_LT_ttmt", /*"h_LT_v_ee", "h_LT_v_em", "h_LT_v_mm", "h_LT_v_eee", "h_LT_v_eem", "h_LT_v_eet", "h_LT_v_emt", "h_LT_v_mme", "h_LT_v_mmm", "h_LT_v_mmt", "h_LT_v_ett", "h_LT_v_mtt", "h_LT_v_eeee", "h_LT_v_eeem", "h_LT_v_eemm", "h_LT_v_mmem", "h_LT_v_mmmm", "h_LT_v_eeet", "h_LT_v_eemt", "h_LT_v_eett", "h_LT_v_mmet", "h_LT_v_ttem", "h_LT_v_ttet", "h_LT_v_mmmt", "h_LT_v_mmtt", "h_LT_v_ttmt",*/
 //"h_pt1_VR_0tau", "h_pt1_VR_1tau", "h_pt1_VR_2tau", "h_pt1_VR_3tau", "h_pt1_VR_3lep0tau", "h_pt1_VR_3lep1tau", "h_pt1_VR_3lep2tau", "h_pt1_CR_0tau", "h_pt1_CR_1tau", "h_pt1_CR_2tau", "h_pt1_CR_3tau", "h_pt1_CR_3lep0tau", "h_pt1_CR_3lep1tau", "h_pt1_CR_3lep2tau", "h_pt1_SR_0tau", "h_pt1_SR_1tau", "h_pt1_SR_2tau", "h_pt1_SR_3tau", "h_pt1_SR_3lep0tau", "h_pt1_SR_3lep1tau", "h_pt1_SR_3lep2tau", "h_pt1_DYCR_0tau", "h_pt1_DYCR_1tau", "h_pt1_DYveto_0tau", "h_pt1_DYveto_1tau", "h_pt1_ee", "h_pt1_em", "h_pt1_mm", "h_pt1_eee", "h_pt1_eem", "h_pt1_eet", "h_pt1_emt", "h_pt1_mme", "h_pt1_mmm", "h_pt1_mmt", "h_pt1_ett", "h_pt1_mtt", "h_pt1_eeee", "h_pt1_eeem", "h_pt1_eemm", "h_pt1_mmem", "h_pt1_mmmm", "h_pt1_eeet", "h_pt1_eemt", "h_pt1_eett", "h_pt1_mmet", "h_pt1_ttem", "h_pt1_ttet", "h_pt1_mmmt", "h_pt1_mmtt", "h_pt1_ttmt", "h_pt1_v_ee", "h_pt1_v_em", "h_pt1_v_mm", "h_pt1_v_eee", "h_pt1_v_eem", "h_pt1_v_eet", "h_pt1_v_emt", "h_pt1_v_mme", "h_pt1_v_mmm", "h_pt1_v_mmt", "h_pt1_v_ett", "h_pt1_v_mtt", "h_pt1_v_eeee", "h_pt1_v_eeem", "h_pt1_v_eemm", "h_pt1_v_mmem", "h_pt1_v_mmmm", "h_pt1_v_eeet", "h_pt1_v_eemt", "h_pt1_v_eett", "h_pt1_v_mmet", "h_pt1_v_ttem", "h_pt1_v_ttet", "h_pt1_v_mmmt", "h_pt1_v_mmtt", "h_pt1_v_ttmt",
@@ -63,87 +64,94 @@ void StackHist_test() {
 	
     // Categories with input files
     std::map<std::string, std::vector<std::string>> files;
-    if (year == "2016") files = {
-    	{"signal",    {"HppM1000_2016.root"}},
-        {"DY",    {"DYJetsToLLM10to50_2016.root", "DYJetsToLLM50_2016.root"}},
-        {"VV",    {"WW_2016.root", "WWTo2L2Nu_2016.root", "WZTo2Q2L_2016.root", "WZTo3LNu_2016.root"}},
-        {"VVV",   {"WWW_2016.root", "WZZ_2016.root", "ZZZ_2016.root"}},
-        {"ttV",   {"ttWJets_2016.root", "ttZJets_2016.root"}},
-        {"WJ",    {"WJetsToLNu_NLO_2016.root", "WJetsToLNu_HT-70To100_2016.root", "WJetsToLNu_HT-100To200_2016.root", 
-                   "WJetsToLNu_HT-200To400_2016.root", "WJetsToLNu_HT-400To600_2016.root", 
-                   "WJetsToLNu_HT-600To800_2016.root", "WJetsToLNu_HT-800To1200_2016.root", "WJetsToLNu_HT-1200To2500_2016.root", "WJetsToLNu_HT-2500ToInf_2016.root"}},
-        {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo4L_2016.root"}},
-        {"ST",    {"ST_s-channel_2016.root", "ST_t-channel_antitop_2016.root", "ST_t-channel_top_2016.root", 
-                   "ST_tW_antitop_2016.root", "ST_tW_top_2016.root"}},
-        {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root"}},
-        {"other", {"ttHToTauTau_2016.root", "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root","ttHToEE_2016.root","ttHTo2L2Nu_2016.root"}},
-        {"data",  {"SingleElectronB_2016.root","SingleElectronC_2016.root","SingleElectronD_2016.root","SingleElectronE_2016.root","SingleElectronF_2016.root","SingleElectronG_2016.root","SingleElectronH_2016.root", "SingleMuonB_2016.root","SingleMuonC_2016.root","SingleMuonD_2016.root","SingleMuonE_2016.root","SingleMuonF_2016.root","SingleMuonG_2016.root","SingleMuonH_2016.root"}}
-    };
-    else if (year == "2017") files = {
-    	{"signal",    {"HppM1000_2017.root"}},
-        {"DY",    {"DYJetsToLLM10to50_2017.root", "DYJetsToLLM50_2017.root"}},
-        {"VV",    {"WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root"}},
-        {"VVV",   {"WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root"}},
-        {"ttV",   {"ttWJets_2017.root", "ttZJets_2017.root"}},
-        {"WJ",    {"WJetsToLNu_NLO_2017.root", "WJetsToLNu_HT-70To100_2017.root", "WJetsToLNu_HT-100To200_2017.root", 
-                   "WJetsToLNu_HT-200To400_2017.root", "WJetsToLNu_HT-400To600_2017.root", 
-                   "WJetsToLNu_HT-600To800_2017.root", "WJetsToLNu_HT-800To1200_2017.root", "WJetsToLNu_HT-1200To2500_2017.root", "WJetsToLNu_HT-2500ToInf_2017.root"}},
-        {"ZZ",    {"ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root"}},
-        {"ST",    {"ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", 
-                   "ST_tW_antitop_2017.root", "ST_tW_top_2017.root"}},
-        {"TTbar", {"TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root"}},
-        {"other", {"ttHToTauTau_2017.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root","ttHToEE_2017.root", "ttHTo2L2Nu_2017.root"}},
-        {"data",  {"SingleElectronB_2017.root","SingleElectronC_2017.root","SingleElectronD_2017.root","SingleElectronE_2017.root","SingleElectronF_2017.root", "SingleMuonB_2017.root","SingleMuonC_2017.root","SingleMuonD_2017.root","SingleMuonE_2017.root","SingleMuonF_2017.root"}}
-    };
-    else if (year == "2018") files = {
-    	{"signal",    {"HppM1000_2018.root"}},
-        {"DY",    {"DYJetsToLLM10to50_2018.root", "DYJetsToLLM50_2018.root"}},
-        {"VV",    {"WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
-        {"VVV",   {"WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
-        {"ttV",   {"ttWJets_2018.root", "ttZJets_2018.root"}},
-        {"WJ",    {"WJetsToLNu_NLO_2018.root", "WJetsToLNu_HT-70To100_2018.root", "WJetsToLNu_HT-100To200_2018.root", 
-                   "WJetsToLNu_HT-200To400_2018.root", "WJetsToLNu_HT-400To600_2018.root", 
-                   "WJetsToLNu_HT-600To800_2018.root", "WJetsToLNu_HT-800To1200_2018.root", "WJetsToLNu_HT-1200To2500_2018.root", "WJetsToLNu_HT-2500ToInf_2018.root"}},
-        {"ZZ",    {"ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
-        {"ST",    {"ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", 
-                   "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
-        {"TTbar", {"TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
-        {"other", {"ttHToTauTau_2018.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root", "ttHToEE_2018.root", "ttHTo2L2Nu_2018.root"}},
-        {"data",  {"EGammaA_2018.root","EGammaB_2018.root","EGammaC_2018.root","EGammaD_2018.root", "SingleMuonA_2018.root","SingleMuonB_2018.root","SingleMuonC_2018.root","SingleMuonD_2018.root"}}
-    };
-    else if (year == "Run2") files = {
-    	{"signal",    {"HppM1000_2016.root", "HppM1000_2017.root", "HppM1000_2018.root"}},
-        {"DY",    {"DYJetsToLLM10to50_2016.root", "DYJetsToLLM50_2016.root","DYJetsToLLM10to50_2017.root", "DYJetsToLLM50_2017.root","DYJetsToLLM10to50_2018.root", "DYJetsToLLM50_2018.root"}},
-        {"VV",    {"WW_2016.root", "WWTo2L2Nu_2016.root", "WZTo2Q2L_2016.root", "WZTo3LNu_2016.root","WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root","WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
-        {"VVV",   {"WWW_2016.root", "WZZ_2016.root", "ZZZ_2016.root","WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root","WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
-        {"ttV",   {"ttWJets_2016.root", "ttZJets_2016.root","ttWJets_2017.root", "ttZJets_2017.root","ttWJets_2018.root", "ttZJets_2018.root"}},
-        {"WJ",    {"WJetsToLNu_NLO_2016.root", "WJetsToLNu_HT-70To100_2016.root", "WJetsToLNu_HT-100To200_2016.root", 
-                   "WJetsToLNu_HT-200To400_2016.root", "WJetsToLNu_HT-400To600_2016.root", 
-                   "WJetsToLNu_HT-600To800_2016.root", "WJetsToLNu_HT-800To1200_2016.root", "WJetsToLNu_HT-1200To2500_2016.root", "WJetsToLNu_HT-2500ToInf_2016.root","WJetsToLNu_NLO_2017.root", "WJetsToLNu_HT-70To100_2017.root", "WJetsToLNu_HT-100To200_2017.root", 
-                   "WJetsToLNu_HT-200To400_2017.root", "WJetsToLNu_HT-400To600_2017.root", 
-                   "WJetsToLNu_HT-600To800_2017.root", "WJetsToLNu_HT-800To1200_2017.root", "WJetsToLNu_HT-1200To2500_2017.root", "WJetsToLNu_HT-2500ToInf_2017.root","WJetsToLNu_NLO_2018.root", "WJetsToLNu_HT-70To100_2018.root", "WJetsToLNu_HT-100To200_2018.root", 
-                   "WJetsToLNu_HT-200To400_2018.root", "WJetsToLNu_HT-400To600_2018.root", 
-                   "WJetsToLNu_HT-600To800_2018.root", "WJetsToLNu_HT-800To1200_2018.root", "WJetsToLNu_HT-1200To2500_2018.root", "WJetsToLNu_HT-2500ToInf_2018.root"}},
-        {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo4L_2016.root","ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root","ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
-      /*  {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root"}},
-        {"ZZto4L",    {"ZZTo4L_2016.root","ZZTo4L_2017.root","ZZTo4L_2018.root"}},*/
-        {"ST",    {"ST_s-channel_2016.root", "ST_t-channel_antitop_2016.root", "ST_t-channel_top_2016.root", 
-                   "ST_tW_antitop_2016.root", "ST_tW_top_2016.root","ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", 
-                   "ST_tW_antitop_2017.root", "ST_tW_top_2017.root","ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", 
-                   "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
-        {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root","TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root","TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
-        {"other", {"ttHToTauTau_2016.root", "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root","ttHToTauTau_2017.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root","ttHToTauTau_2018.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root","ttHToEE_2016.root","ttHToEE_2017.root", "ttHToEE_2018.root","ttHTo2L2Nu_2016.root","ttHTo2L2Nu_2017.root", "ttHTo2L2Nu_2018.root","ttHJetToNonbb_2016.root","ttHJetToNonbb_2017.root","ttHJetToNonbb_2018.root","TWZToLL_2016.root","TWZToLL_2017.root","TWZToLL_2018.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016.root","HZJ_HToWWTo2L2Nu_ZTo2L_2017.root","HZJ_HToWWTo2L2Nu_ZTo2L_2018.root"}},
-        {"data",  {"SingleElectronB_2016.root","SingleElectronC_2016.root","SingleElectronD_2016.root","SingleElectronE_2016.root","SingleElectronF_2016.root","SingleElectronG_2016.root","SingleElectronH_2016.root", "SingleMuonB_2016.root","SingleMuonC_2016.root","SingleMuonD_2016.root","SingleMuonE_2016.root","SingleMuonF_2016.root","SingleMuonG_2016.root","SingleMuonH_2016.root","SingleElectronB_2017.root","SingleElectronC_2017.root","SingleElectronD_2017.root","SingleElectronE_2017.root","SingleElectronF_2017.root", "SingleMuonB_2017.root","SingleMuonC_2017.root","SingleMuonD_2017.root","SingleMuonE_2017.root","SingleMuonF_2017.root","EGammaA_2018.root","EGammaB_2018.root","EGammaC_2018.root","EGammaD_2018.root", "SingleMuonA_2018.root","SingleMuonB_2018.root","SingleMuonC_2018.root","SingleMuonD_2018.root"}}
-    };
+	if (year == "2016preVFP") {
+        files = {
+            {"DY10_50", {"DYJetsToLLM10to50_2016preVFP.root"}},
+            {"DY",      {"DYJetsToLLM50_2016preVFP.root"}},
+            {"VV",      {"WW_2016preVFP.root", "WWTo2L2Nu_2016preVFP.root", "WZTo2Q2L_2016preVFP.root", "WZTo3LNu_2016preVFP.root"}},
+            {"VVV",     {"WWW_2016preVFP.root", "WZZ_2016preVFP.root", "ZZZ_2016preVFP.root"}},
+            {"ttV",     {"ttWJets_2016preVFP.root", "ttZJets_2016preVFP.root"}},
+            {"WJ",      {"WJetsToLNu_NLO_part2_2016preVFP.root"}},
+            {"ZZ",      {"ZZTo2L2Nu_2016preVFP.root", "ZZTo2Q2L_2016preVFP.root", "ZZTo4L_2016preVFP.root"}},
+            {"ST",      {"ST_s-channel_2016preVFP.root", "ST_t-channel_antitop_2016preVFP.root", "ST_t-channel_top_2016preVFP.root", "ST_tW_antitop_2016preVFP.root", "ST_tW_top_2016preVFP.root"}},
+            {"TTbar",   {"TTTo2L2Nu_2016preVFP.root", "TTToSemiLeptonic_2016preVFP.root", "TTToHadronic_2016preVFP.root"}},
+            {"QCD",     {"QCD_HT50to100_2016preVFP.root", "QCD_HT100to200_2016preVFP.root", "QCD_HT200to300_2016preVFP.root", "QCD_HT300to500_2016preVFP.root", "QCD_HT500to700_2016preVFP.root", "QCD_HT700to1000_2016preVFP.root", "QCD_HT1000to1500_2016preVFP.root", "QCD_HT1500to2000_2016preVFP.root", "QCD_HT2000toInf_2016preVFP.root"}},
+            {"other",   {"ttHToTauTau_2016preVFP.root", "ZHToMuMu_2016preVFP.root", "ZHToTauTau_2016preVFP.root", "GluGluZH_2016preVFP.root", "ttHToEE_2016preVFP.root", "ttHTo2L2Nu_2016preVFP.root", "ttHJetToNonbb_2016preVFP.root", "TWZToLL_2016preVFP.root", "HZJ_HToWWTo2L2Nu_ZTo2L_2016preVFP.root"}},
+            {"data",    {"SingleElectronB_2016preVFP.root", "SingleElectronC_2016preVFP.root", "SingleElectronD_2016preVFP.root", "SingleElectronE_2016preVFP.root", "SingleElectronF_2016preVFP.root", "SingleMuonB_2016preVFP.root", "SingleMuonC_2016preVFP.root", "SingleMuonD_2016preVFP.root", "SingleMuonE_2016preVFP.root", "SingleMuonF_2016preVFP.root"}}
+        };
+    }
+    else if (year == "2016postVFP") {
+        files = {
+            {"DY10_50", {"DYJetsToLLM10to50_2016postVFP.root"}},
+            {"DY",      {"DYJetsToLLM50_2016postVFP.root"}},
+            {"VV",      {"WW_2016postVFP.root", "WWTo2L2Nu_2016postVFP.root", "WZTo2Q2L_2016postVFP.root", "WZTo3LNu_2016postVFP.root"}},
+            {"VVV",     {"WWW_2016postVFP.root", "WZZ_2016postVFP.root", "ZZZ_2016postVFP.root"}},
+            {"ttV",     {"ttWJets_2016postVFP.root", "ttZJets_2016postVFP.root"}},
+            {"WJ",      {"WJetsToLNu_NLO_2016postVFP.root"}},
+            {"ZZ",      {"ZZTo2L2Nu_2016postVFP.root", "ZZTo2Q2L_2016postVFP.root", "ZZTo4L_2016postVFP.root"}},
+            {"ST",      {"ST_s-channel_2016postVFP.root", "ST_t-channel_antitop_2016postVFP.root", "ST_t-channel_top_2016postVFP.root", "ST_tW_antitop_2016postVFP.root", "ST_tW_top_2016postVFP.root"}},
+            {"TTbar",   {"TTTo2L2Nu_2016postVFP.root", "TTToSemiLeptonic_2016postVFP.root", "TTToHadronic_2016postVFP.root"}},
+            {"QCD",     {"QCD_HT50to100_2016postVFP.root", "QCD_HT100to200_2016postVFP.root", "QCD_HT200to300_2016postVFP.root", "QCD_HT300to500_2016postVFP.root", "QCD_HT500to700_2016postVFP.root", "QCD_HT700to1000_2016postVFP.root", "QCD_HT1000to1500_2016postVFP.root", "QCD_HT1500to2000_2016postVFP.root", "QCD_HT2000toInf_2016postVFP.root"}},
+            {"other",   {"ttHToTauTau_2016postVFP.root", "ZHToMuMu_2016postVFP.root", "ZHToTauTau_2016postVFP.root", "GluGluZH_2016postVFP.root", "ttHToEE_2016postVFP.root", "ttHTo2L2Nu_2016postVFP.root"}},
+            {"data",    {"SingleElectronF_2016postVFP.root", "SingleElectronG_2016postVFP.root", "SingleElectronH_2016postVFP.root", "SingleMuonF_2016postVFP.root", "SingleMuonG_2016postVFP.root", "SingleMuonH_2016postVFP.root"}}
+        };
+    }
+    else if (year == "2017") {
+        files = {
+            {"DY10_50", {"DYJetsToLLM10to50_2017.root"}},
+            {"DY",      {"DYJetsToLLM50_2017.root"}},
+            {"VV",      {"WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root"}},
+            {"VVV",     {"WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root"}},
+            {"ttV",     {"ttWJets_2017.root", "ttZJets_2017.root"}},
+            {"WJ",      {"WJetsToLNu_NLO_2017.root"}},
+            {"ZZ",      {"ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root"}},
+            {"ST",      {"ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", "ST_tW_antitop_2017.root", "ST_tW_top_2017.root"}},
+            {"TTbar",   {"TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root"}},
+            {"QCD",     {"QCD_HT50to100_2017.root", "QCD_HT100to200_2017.root", "QCD_HT200to300_2017.root", "QCD_HT300to500_2017.root", "QCD_HT500to700_2017.root", "QCD_HT700to1000_2017.root", "QCD_HT1000to1500_2017.root", "QCD_HT1500to2000_2017.root", "QCD_HT2000toInf_2017.root"}},
+            {"other",   {"ttHToTauTau_2017.root", "ZHToMuMu_2017.root", "ZHToTauTau_2017.root", "GluGluZH_2017.root", "ttHToEE_2017.root", "ttHTo2L2Nu_2017.root"}},
+            {"data",    {"SingleElectronB_2017.root", "SingleElectronC_2017.root", "SingleElectronD_2017.root", "SingleElectronE_2017.root", "SingleElectronF_2017.root", "SingleMuonB_2017.root", "SingleMuonC_2017.root", "SingleMuonD_2017.root", "SingleMuonE_2017.root", "SingleMuonF_2017.root"}}
+        };
+    }
+    else if (year == "2018") {
+        files = {
+            {"DY10_50", {"DYJetsToLLM10to50_2018.root"}},
+            {"DY",      {"DYJetsToLLM50_2018.root"}},
+            {"VV",      {"WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
+            {"VVV",     {"WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
+            {"ttV",     {"ttWJets_2018.root", "ttZJets_2018.root"}},
+            {"WJ",      {"WJetsToLNu_NLO_2018.root"}},
+            {"ZZ",      {"ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
+            {"ST",      {"ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
+            {"TTbar",   {"TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
+            {"QCD",     {"QCD_HT50to100_2018.root", "QCD_HT100to200_2018.root", "QCD_HT200to300_2018.root", "QCD_HT300to500_2018.root", "QCD_HT500to700_2018.root", "QCD_HT700to1000_2018.root", "QCD_HT1000to1500_2018.root", "QCD_HT1500to2000_2018.root", "QCD_HT2000toInf_2018.root"}},
+            {"other",   {"ttHToTauTau_2018.root", "ZHToMuMu_2018.root", "ZHToTauTau_2018.root", "GluGluZH_2018.root", "ttHToEE_2018.root", "ttHTo2L2Nu_2018.root"}},
+            {"data",    {"EGammaA_2018.root", "EGammaB_2018.root", "EGammaC_2018.root", "EGammaD_2018.root", "SingleMuonA_2018.root", "SingleMuonB_2018.root", "SingleMuonC_2018.root", "SingleMuonD_2018.root"}}
+        };
+    }
+    else if (year == "Run2") {
+        files = {
+            {"DY",      {"DYJetsToLLM10to50_2016postVFP.root", "DYJetsToLLM10to50_2016preVFP.root", "DYJetsToLLM10to50_2017.root", "DYJetsToLLM10to50_2018.root","DYJetsToLLM50_2016postVFP.root", "DYJetsToLLM50_2016preVFP.root", "DYJetsToLLM50_2017.root", "DYJetsToLLM50_2018.root"}},
+            {"VV",      {"WW_2016postVFP.root", "WWTo2L2Nu_2016postVFP.root", "WZTo2Q2L_2016postVFP.root", "WZTo3LNu_2016postVFP.root", "WW_2016preVFP.root", "WWTo2L2Nu_2016preVFP.root", "WZTo2Q2L_2016preVFP.root", "WZTo3LNu_2016preVFP.root", "WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root", "WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
+            {"VVV",     {"WWW_2016postVFP.root", "WZZ_2016postVFP.root", "ZZZ_2016postVFP.root", "WWW_2016preVFP.root", "WZZ_2016preVFP.root", "ZZZ_2016preVFP.root", "WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root", "WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
+            {"ttV",     {"ttWJets_2016postVFP.root", "ttZJets_2016postVFP.root", "ttWJets_2016preVFP.root", "ttZJets_2016preVFP.root", "ttWJets_2017.root", "ttZJets_2017.root", "ttWJets_2018.root", "ttZJets_2018.root"}},
+            {"WJ",      {"WJetsToLNu_NLO_2016postVFP.root", "WJetsToLNu_NLO_part2_2016preVFP.root", "WJetsToLNu_NLO_2017.root", "WJetsToLNu_NLO_2018.root"}},
+            {"ZZ",      {"ZZTo2L2Nu_2016postVFP.root", "ZZTo2Q2L_2016postVFP.root", "ZZTo4L_2016postVFP.root", "ZZTo2L2Nu_2016preVFP.root", "ZZTo2Q2L_2016preVFP.root", "ZZTo4L_2016preVFP.root", "ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root", "ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
+            {"ST",      {"ST_s-channel_2016postVFP.root", "ST_t-channel_antitop_2016postVFP.root", "ST_t-channel_top_2016postVFP.root", "ST_tW_antitop_2016postVFP.root", "ST_tW_top_2016postVFP.root", "ST_s-channel_2016preVFP.root", "ST_t-channel_antitop_2016preVFP.root", "ST_t-channel_top_2016preVFP.root", "ST_tW_antitop_2016preVFP.root", "ST_tW_top_2016preVFP.root", "ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", "ST_tW_antitop_2017.root", "ST_tW_top_2017.root", "ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
+            {"TTbar",   {"TTTo2L2Nu_2016postVFP.root", "TTToSemiLeptonic_2016postVFP.root", "TTToHadronic_2016postVFP.root", "TTTo2L2Nu_2016preVFP.root", "TTToSemiLeptonic_2016preVFP.root", "TTToHadronic_2016preVFP.root", "TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root", "TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
+            {"QCD",     {"QCD_HT50to100_2016postVFP.root", "QCD_HT100to200_2016postVFP.root", "QCD_HT200to300_2016postVFP.root", "QCD_HT300to500_2016postVFP.root", "QCD_HT500to700_2016postVFP.root", "QCD_HT700to1000_2016postVFP.root", "QCD_HT1000to1500_2016postVFP.root", "QCD_HT1500to2000_2016postVFP.root", "QCD_HT2000toInf_2016postVFP.root", "QCD_HT50to100_2016preVFP.root", "QCD_HT100to200_2016preVFP.root", "QCD_HT200to300_2016preVFP.root", "QCD_HT300to500_2016preVFP.root", "QCD_HT500to700_2016preVFP.root", "QCD_HT700to1000_2016preVFP.root", "QCD_HT1000to1500_2016preVFP.root", "QCD_HT1500to2000_2016preVFP.root", "QCD_HT2000toInf_2016preVFP.root", "QCD_HT50to100_2017.root", "QCD_HT100to200_2017.root", "QCD_HT200to300_2017.root", "QCD_HT300to500_2017.root", "QCD_HT500to700_2017.root", "QCD_HT700to1000_2017.root", "QCD_HT1000to1500_2017.root", "QCD_HT1500to2000_2017.root", "QCD_HT2000toInf_2017.root", "QCD_HT50to100_2018.root", "QCD_HT100to200_2018.root", "QCD_HT200to300_2018.root", "QCD_HT300to500_2018.root", "QCD_HT500to700_2018.root", "QCD_HT700to1000_2018.root", "QCD_HT1000to1500_2018.root", "QCD_HT1500to2000_2018.root", "QCD_HT2000toInf_2018.root"}},
+            {"other",   {"ttHToTauTau_2016postVFP.root", "ZHToMuMu_2016postVFP.root", "ZHToTauTau_2016postVFP.root", "GluGluZH_2016postVFP.root", "ttHToEE_2016postVFP.root", "ttHTo2L2Nu_2016postVFP.root", "ttHToTauTau_2016preVFP.root", "ZHToMuMu_2016preVFP.root", "ZHToTauTau_2016preVFP.root", "GluGluZH_2016preVFP.root", "ttHToEE_2016preVFP.root", "ttHTo2L2Nu_2016preVFP.root", "ttHJetToNonbb_2016preVFP.root", "TWZToLL_2016preVFP.root", "HZJ_HToWWTo2L2Nu_ZTo2L_2016preVFP.root", "ttHToTauTau_2017.root", "ZHToMuMu_2017.root", "ZHToTauTau_2017.root", "GluGluZH_2017.root", "ttHToTauTau_2018.root", "ZHToMuMu_2018.root", "ZHToTauTau_2018.root", "GluGluZH_2018.root", "ttHToEE_2017.root", "ttHToEE_2018.root", "ttHTo2L2Nu_2017.root", "ttHTo2L2Nu_2018.root", "ttHJetToNonbb_2016postVFP.root", "ttHJetToNonbb_2017.root", "ttHJetToNonbb_2018.root", "TWZToLL_2016postVFP.root", "TWZToLL_2017.root", "TWZToLL_2018.root", "HZJ_HToWWTo2L2Nu_ZTo2L_2016postVFP.root", "HZJ_HToWWTo2L2Nu_ZTo2L_2017.root", "HZJ_HToWWTo2L2Nu_ZTo2L_2018.root"}},
+            {"data",    {"SingleElectronB_2016preVFP.root", "SingleElectronC_2016preVFP.root", "SingleElectronD_2016preVFP.root", "SingleElectronE_2016preVFP.root", "SingleElectronF_2016preVFP.root", "SingleElectronF_2016postVFP.root", "SingleElectronG_2016postVFP.root", "SingleElectronH_2016postVFP.root", "SingleMuonB_2016preVFP.root", "SingleMuonC_2016preVFP.root", "SingleMuonD_2016preVFP.root", "SingleMuonE_2016preVFP.root", "SingleMuonF_2016preVFP.root", "SingleMuonF_2016postVFP.root", "SingleMuonG_2016postVFP.root", "SingleMuonH_2016postVFP.root", "SingleElectronB_2017.root", "SingleElectronC_2017.root", "SingleElectronD_2017.root", "SingleElectronE_2017.root", "SingleElectronF_2017.root", "SingleMuonB_2017.root", "SingleMuonC_2017.root", "SingleMuonD_2017.root", "SingleMuonE_2017.root", "SingleMuonF_2017.root", "EGammaA_2018.root", "EGammaB_2018.root", "EGammaC_2018.root", "EGammaD_2018.root", "SingleMuonA_2018.root", "SingleMuonB_2018.root", "SingleMuonC_2018.root", "SingleMuonD_2018.root"}}
+        };
+    }
     std::map<std::string, std::vector<TFile*>> open_files;
     for (auto& kv : files) {
 		for (const auto& fname : kv.second) {
-		    TFile* file = new TFile(("hist_test_nopair/" + fname).c_str(), "READ");
+		    TFile* file = new TFile(("FR_test/" + fname).c_str(), "READ");
 		    if (!file || file->IsZombie()) continue;
 	        open_files[kv.first].push_back(file);
 	    }
 	}
-	TFile *ifile_D1 = new TFile("hist_test_nopair/EGammaB_2018.root","READ");
+	TFile *ifile_D1 = new TFile("FR_test/EGammaB_2018.root","READ");
 
 	for (int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++) {
 
@@ -253,7 +261,6 @@ void StackHist_test() {
 
 		int bins = 0;
 		for (auto& kv : open_files) {
-			cout<<ifile_D1->GetName();
 		    TH1D* tmp = (TH1D*)ifile_D1->Get(hist_list[i]);
 		    hist[kv.first] = (TH1D*)tmp->Clone();
 		    hist[kv.first]->Sumw2();
@@ -263,8 +270,9 @@ void StackHist_test() {
 		        TH1D* h = dynamic_cast<TH1D*>(f->Get(hist_list[i]));
 		        if (!h) continue;
 		        h->Sumw2();
-		        h->Scale(applyXSec(f));
-		        
+		        //if (kv.first!="data")cout <<h->Integral()<<"\t";
+		        h->Scale(applyXSec_FR(f));
+		        //if (kv.first!="data")cout <<h->Integral() <<"\t"<<applyXSec(f)<<"\t"<<f->GetName()<<endl;
 		        int rebin = (xmax-xmin)/(h->GetXaxis()->GetXmax()-h->GetXaxis()->GetXmin())*h->GetNbinsX()/50;//always has 50 bins
 		        h->Rebin(rebin);
 
@@ -314,8 +322,8 @@ void StackHist_test() {
 		
 		/*hist["VV"]->Scale(1.12631);
 		hist["ZZ"]->Scale(1.31366);*/
-		hist["VV"]->Scale(1.033462);
 		hist["ZZ"]->Scale(1.284495);
+		hist["VV"]->Scale(1.033462);
 		// Stack backgrounds
 		//THStack* bkg_stack = new THStack("bkg_stack", "2l and 3l channel summary in Z-window;;Events");
 		TH1D* h_bkg_total = (TH1D*)hist["DY"]->Clone("h_bkg_total");
@@ -353,14 +361,14 @@ void StackHist_test() {
 
 		//Signal
 		//hist["signal"]->SetLineStyle(5); 
-		hist["signal"]->SetLineColor(2);
+		/*hist["signal"]->SetLineColor(2);
 		hist["signal"]->SetFillStyle(3003);
 		hist["signal"]->SetFillColor(2);
 		hist["signal"]->Scale(1000);
 		//hist["signal"]->Scale(h_bkg_total->Integral()/hist["signal"]->Integral());
 		hist["signal"]->SetBinContent(bins, hist["signal"]->GetBinContent(bins)+hist["signal"]->GetBinContent(bins+1));
 		//hist["signal"]->Draw("SAME HIST ");
-		//hist["signal"]->GetXaxis()->SetRangeUser(xmin,xmax);
+		//hist["signal"]->GetXaxis()->SetRangeUser(xmin,xmax);*/
 		
 		// Create a TLatex object
 		DrawCMSLabel();
@@ -416,8 +424,8 @@ void StackHist_test() {
 		line1->Draw(); line2->Draw(); line3->Draw();
 
 		// Output
-		std::string s =  "hist_test_nopair/", s1, s2;
-		s1 = s + hist_list[i]+".pdf";
+		std::string s =  "FR_test/", s1, s2;
+		s1 = s + hist_list[i]+".png";
 		//s2 = s + hist_list[i]+".png";
 		char* title1 = const_cast<char*>(s1.c_str());//converting string to char
 		char* title2 = const_cast<char*>(s2.c_str());//converting string to char

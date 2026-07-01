@@ -178,8 +178,8 @@ void DCH_presel_tree(const char* ext = ".root"){
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
 		std::string fname = filename[j];
-		if (fname.find("skim_500_test") > fname.length()) continue;
-		if (XSec(filename[j])==1) continue; 
+		if (fname.find("ZZTo4") > fname.length()) continue;
+		//if (XSec(filename[j])==1) continue; 
 		cout<<filename[j]<<endl;
 		
 		const char* o_name;
@@ -202,10 +202,8 @@ void DCH_presel_tree(const char* ext = ".root"){
 
 
 		TH1D* hNWEvts;
-		if(XSec(fname)!=1){
-			hNWEvts = (TH1D*)ifile->Get("hNWEvts")->Clone("hNWEvts");
-			if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts")->Clone("hNWEvts");
-		}
+		if(XSec(fname)!=1) hNWEvts = (TH1D*)ifile->Get("hNWEvts")->Clone("hNWEvts");	
+		if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts")->Clone("hNWEvts");
 		hNWEvts->Write();
 		
 		TTree *tree = (TTree*)ifile->Get("Events");
@@ -216,13 +214,13 @@ void DCH_presel_tree(const char* ext = ".root"){
 		double xmin = 0, xmax = mDCH+1000; int binw = 10; int nbins = (xmax-xmin)/binw;
 		
 		std::map<std::string, TH1D*> cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat;
-		double mll_1, mll_2, dR_1, dR_2, evtwt;
+		double mll_1, mll_2, mH1, mH2, evtwt;
 		for(auto rootDirName: {"0tau","1tau","2tau","3tau","3lep0tau","3lep1tau","3lep2tau"}){
 			trimmed_tree[rootDirName] = new TTree("Events", "trees");
 			trimmed_tree[rootDirName]->Branch("mll1", &mll_1);
 			trimmed_tree[rootDirName]->Branch("mll2", &mll_2);
-			trimmed_tree[rootDirName]->Branch("dR1", &dR_1);
-			trimmed_tree[rootDirName]->Branch("dR2", &dR_2);
+			trimmed_tree[rootDirName]->Branch("mH1", &mH1);
+			trimmed_tree[rootDirName]->Branch("mH2", &mH2);
 			trimmed_tree[rootDirName]->Branch("evtwt", &evtwt);
 			
 			cutflow[rootDirName] = new TH1D("cutflow", "cutflow", 7, 0, 7);
@@ -313,8 +311,8 @@ void DCH_presel_tree(const char* ext = ".root"){
 			h_gencat[rootDirName]->Sumw2();
 		}
 		
-		TCanvas *c1 = new TCanvas("c1","",900,800);
-    	c1->Divide(1,2);
+		/*TCanvas *c1 = new TCanvas("c1","",900,800);
+    	c1->Divide(1,2);*/
 		TH1D* h_dR_Lnu = new TH1D("h_dR_Lnu", "dR(l,#nu)", 50, 0, 0.5);
 		TH1D* h_nudphi = new TH1D("h_nudphi", "#nu dPhi", 50, 0, 4);
 		TH1D* h_nuMETdphi = new TH1D("h_nuMETdphi", "d#Phi_{#nu,MET}", 50, 0, 4);
@@ -481,8 +479,8 @@ void DCH_presel_tree(const char* ext = ".root"){
 				}
 				double mll1 = (LepV(H1_idx1)+LepV(H1_idx2)).M();
 				double mll2 = (LepV(H2_idx1)+LepV(H2_idx2)).M();
-				double mll1_nu = (LepV(H1_idx1)+LepV(H1_idx2)+NuV(H1_idx1)+NuV(H1_idx2)).M();
-				double mll2_nu = (LepV(H2_idx1)+LepV(H2_idx2)+NuV(H2_idx1)+NuV(H2_idx2)).M();
+				double mll1_nu = 0;//(LepV(H1_idx1)+LepV(H1_idx2)+NuV(H1_idx1)+NuV(H1_idx2)).M();
+				double mll2_nu = 0;//(LepV(H2_idx1)+LepV(H2_idx2)+NuV(H2_idx1)+NuV(H2_idx2)).M();
 				double mZ1 = (LepV(OSSF_pair[0].first)+LepV(OSSF_pair[0].second)).M();
 				double mZ2 = (LepV(OSSF_pair[1].first)+LepV(OSSF_pair[1].second)).M();
 				double dRll = deltaR(LepV(H1_idx1),LepV(H1_idx2));
@@ -537,7 +535,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 
 				if (cat > 21) continue;
 				std::string Gencat_str = numberToCat(gen_cat);
-				if (cat_lepCount(Gencat_str,'t','g')!=3) continue;
+				//if (cat_lepCount(Gencat_str,'t','g')!=3) continue;
 				//if (Ntau !=2 ) continue;
 				
 				std::array<TLorentzVector,4> L;
@@ -573,12 +571,12 @@ void DCH_presel_tree(const char* ext = ".root"){
 				double min_dPhi_nuMET = 999;
 				TLorentzVector numer;
 				for(int i : {H1_idx1, H1_idx2, H2_idx1, H2_idx2}){numer += LepV(i);
-					if(NuV(i).Pt()){
+					/*if(NuV(i).Pt()){
 						h_dR_Lnu->Fill(deltaR(LepV(i), NuV(i)));
 						//cout<<"Lep: ";print4Vec(LepV(i));
 						cout<<"Nu: ";print4Vec(NuV(i));
 						if (min_dPhi_nuMET > deltaPhi(NuV(i),MET)) min_dPhi_nuMET = deltaPhi(NuV(i),MET);
-					}
+					}*/
 				}
 				h_nuMETdphi->Fill(min_dPhi_nuMET);
 				double boost = numer.Pz()/numer.E();
@@ -586,10 +584,10 @@ void DCH_presel_tree(const char* ext = ".root"){
 				totNu.Boost(0.0,0.0,-boost);
 				//h_nuPz->Fill((LepV(H1_idx1)+LepV(H1_idx2)+NuV(H1_idx1)+NuV(H1_idx2)).DeltaPhi((LepV(H2_idx1)+LepV(H2_idx2)+NuV(H2_idx1)+NuV(H2_idx2))));
 				h_nuPz->Fill(totNu.Pz());
-				cout<<"Total Nu pT: "<<(NuV(1)+NuV(2)+NuV(3)+NuV(4)).Pt()<<endl;
-				cout<<"Total Nu pz/E: "<<(NuV(1)+NuV(2)+NuV(3)+NuV(4)).Pz()/(NuV(1)+NuV(2)+NuV(3)+NuV(4)).E()<<endl;
-				print4Vec(MET);
-				cout<<"Event#: "<<evt<< "\t isOpp: "<<isOpp<<"\t"<<Gencat_str<<"\t"<<realcat<<"\t mll1_nu: "<<mll1_nu<<"\t mll2_nu: "<<mll2_nu<<endl<<endl;
+				//cout<<"Total Nu pT: "<<(NuV(1)+NuV(2)+NuV(3)+NuV(4)).Pt()<<endl;
+				//cout<<"Total Nu pz/E: "<<(NuV(1)+NuV(2)+NuV(3)+NuV(4)).Pz()/(NuV(1)+NuV(2)+NuV(3)+NuV(4)).E()<<endl;
+				//print4Vec(MET);
+				//cout<<"Event#: "<<evt<< "\t isOpp: "<<isOpp<<"\t"<<Gencat_str<<"\t"<<realcat<<"\t mll1_nu: "<<mll1_nu<<"\t mll2_nu: "<<mll2_nu<<endl<<endl;
 				auto [nlegs, Mdch1, Mdch2] = get_legs_tau(realcat, L, MET);
 				//if (nlegs !=1)continue;
 				
@@ -671,13 +669,13 @@ void DCH_presel_tree(const char* ext = ".root"){
 																{"cat", catToNumber(realcat)},
 																{"gen_cat", gen_cat}
 					};
-					//mll_1 = mll1; mll_2 = mll2; dR_1 = dR1; dR_2 = dR2; evtwt = evtwt_nom;
-					mll_1 = Mdch01; mll_2 = Mdch02; dR_1 = deltaPhi(LepV(H1_idx1),LepV(H1_idx2)); dR_2 = deltaPhi(LepV(H1_idx2),LepV(H2_idx2));; evtwt = evtwt_nom;
+					mll_1 = mll1; mll_2 = mll2; mH1 = Mdch01; mH2 = Mdch02; evtwt = evtwt_nom;
+					//mll_1 = Mdch01; mll_2 = Mdch02; dR_1 = deltaPhi(LepV(H1_idx1),LepV(H1_idx2)); dR_2 = deltaPhi(LepV(H1_idx2),LepV(H2_idx2));; evtwt = evtwt_nom;
 				if (cat <=21){//4-lep
 					if (Ntau == 0){ 
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
 						std::map<std::string, bool> cutbools = {
-							{"ST", (st >= 360)},
+							{"ST", (st >= 400)},
 							{"dRll", true},
 							{"M_ll1", true},
 							{"M_ll1+M_ll2 >= 500", true},
@@ -696,7 +694,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 					else if (Ntau == 1){
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
 						std::map<std::string, bool> cutbools = {
-							{"ST", (st >= 340)},
+							{"ST", (st >= 400)},
 							{"dRll", true},
 							{"M_ll1", true},
 							{"M_ll1+M_ll2 >= 500", true},
@@ -716,7 +714,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 					else if (Ntau == 2){
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
 						std::map<std::string, bool> cutbools = {
-							{"ST", (st >= 340)},
+							{"ST", (st >=400)},
 							{"dRll", true},
 							{"M_ll1", true},
 							{"M_ll1+M_ll2 >= 500", true},
@@ -735,7 +733,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 					}
 					else if (Ntau == 3){
 						std::map<std::string, bool> cutbools = {
-							{"ST", (st >= 320)},
+							{"ST", (st >= 100)},
 							{"dRll", true},
 							{"M_ll1", true},
 							{"M_ll1+M_ll2 >= 500", true},
@@ -758,7 +756,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 					if(Ntau == 0){	
 						if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10) continue;
 						std::map<std::string, bool> cutbools = {
-							{"ST", (st >= 200)},
+							{"ST", (st >= 300)},
 							{"dRll", true},
 							{"M_ll1", true},
 							{"M_ll1+M_ll2 >= 500", (mll1+mll2 >=250)},
@@ -797,7 +795,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 					}
 					else if(Ntau == 2){
 						std::map<std::string, bool> cutbools = {
-							{"ST", (st >= 200)},
+							{"ST", (st >= 100)},
 							{"dRll", true},
 							{"M_ll1", true},
 							{"M_ll1+M_ll2 >= 500", true},
@@ -826,7 +824,7 @@ void DCH_presel_tree(const char* ext = ".root"){
 		WriteHists(lep3tau1Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 		WriteHists(lep3tau2Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mT1_opp, h_mT2_opp, h_mT3_opp, h_mT4_opp, h_mTtot1_opp, h_mTtot2_opp,h_mTtot3_opp, h_mTtot4_opp, h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
 		
-		h_nudphi->Draw();
+		/*h_nudphi->Draw();
 		h_nuMETdphi->Draw();
 		gStyle->SetOptStat(0);
 		c1->cd(1);  h_nuPz->SetLineColor(kRed);h_nuPz->Draw();
@@ -834,8 +832,8 @@ void DCH_presel_tree(const char* ext = ".root"){
     	 TLegend* leg1 = new TLegend(0.55, 0.7, 0.88, 0.88);
     	 leg1->AddEntry(h_nuPz, "Pz vis in boosted frame", "l");
     	 leg1->AddEntry(h_visPz, "Pz", "l");
-    	 leg1->Draw();
-		//trimmed_tree->Write();
+    	 leg1->Draw();*/
+		//trimmed_treetrimmed_tree->Write();
 		//cout<< j <<"\t"<< oname <<endl;
 		//printf("%s %f\t %f\n ", oname,  h_Xmass_0t->Integral(), h_Xmass_3lep->Integral());
 		delete tree;

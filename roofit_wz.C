@@ -78,7 +78,7 @@ void roofit_wz(){
         {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root","TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root","TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
         {"ZH", {"ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root"}},
         {"other", {"ttHJetToNonbb_2016.root","ttHJetToNonbb_2017.root","ttHJetToNonbb_2018.root","TWZToLL_2016.root","TWZToLL_2017.root","TWZToLL_2018.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016.root","HZJ_HToWWTo2L2Nu_ZTo2L_2017.root","HZJ_HToWWTo2L2Nu_ZTo2L_2018.root"}},
-        {"data",  {"SingleElectron_2016.root","EGamma_2016.root", "SingleMuon_2016.root","SingleElectron_2017.root","EGamma_2017.root", "SingleMuon_2017.root","SingleElectron_2018.root","EGamma_2018.root", "SingleMuon_2018.root"}}
+        {"data",  {"SingleElectronB_2016.root","SingleElectronC_2016.root","SingleElectronD_2016.root","SingleElectronE_2016.root","SingleElectronF_2016.root","SingleElectronG_2016.root","SingleElectronH_2016.root", "SingleMuonB_2016.root","SingleMuonC_2016.root","SingleMuonD_2016.root","SingleMuonE_2016.root","SingleMuonF_2016.root","SingleMuonG_2016.root","SingleMuonH_2016.root","SingleElectronB_2017.root","SingleElectronC_2017.root","SingleElectronD_2017.root","SingleElectronE_2017.root","SingleElectronF_2017.root", "SingleMuonB_2017.root","SingleMuonC_2017.root","SingleMuonD_2017.root","SingleMuonE_2017.root","SingleMuonF_2017.root","EGammaA_2018.root","EGammaB_2018.root","EGammaC_2018.root","EGammaD_2018.root", "SingleMuonA_2018.root","SingleMuonB_2018.root","SingleMuonC_2018.root","SingleMuonD_2018.root"}}
     };
     
     std::map<std::string, TH1D*> h_bkg_group;
@@ -91,7 +91,7 @@ void roofit_wz(){
     std::map<std::string, std::vector<TFile*>> open_files;
     for (auto& kv : files) {
         for (const auto& fname : kv.second) {
-			TFile* file = new TFile(("hist_CR_WZ/" + fname).c_str(), "READ");
+			TFile* file = new TFile(("hist_test_nopair/" + fname).c_str(), "READ");
             if (!file || file->IsZombie()) continue;
 	        open_files[kv.first].push_back(file);
 	        //cout<<fname<<endl;
@@ -100,7 +100,11 @@ void roofit_wz(){
    	std::map<std::string, double> tot_uncert_quadr;
     for (auto& kv : open_files) {
 			for (auto* f : kv.second) {
-				TH1D* h = (TH1D*)f->Get("3lep0tau/h_ST");
+				TH1D* h = (TH1D*)f->Get("h_LT_eee");
+				h->Add((TH1D*)f->Get("h_LT_mmm"));
+				h->Add((TH1D*)f->Get("h_LT_eem"));
+				h->Add((TH1D*)f->Get("h_LT_mee"));
+				h->Rebin(10);
 				if(!h) continue;
 				h->Sumw2();
 				cout<<kv.first<<"\t"<<applyXSec(f)<<endl;
@@ -117,7 +121,7 @@ void roofit_wz(){
 		       	//cout<<kv.first<<"\t"<<tot_uncert_quadr[kv.first]<<"\t"<<h_bkg_group[kv.first]->Integral()<<endl;
 			}
 	}
-	h_bkg_group["ZZ"]->Scale(1.30291);
+	h_bkg_group["ZZ"]->Scale(1.2845);
 	TH1D* h_other_bkg = (TH1D*)h_bkg_group["other"]->Clone(); 
 	h_other_bkg->Add(h_bkg_group["DY"]);
 	h_other_bkg->Add(h_bkg_group["ZZ"]);
@@ -167,12 +171,19 @@ RooExtendPdf other_ext("other_ext", "Other Extended PDF", other_pdf, other_norm_
 	model.plotOn(frame, Components("other_ext"), LineColor(2));
 	
 	frame->Draw();
+	
+	TLatex latex;
+    latex.SetNDC(); // use normalized coordinates
+    latex.SetTextFont(52);
+    latex.SetTextSize(0.04);
+    
 	double wz_fitted = wz_norm.getVal();
 	double wz_nominal = h_bkg_group["VV"]->Integral();
 	double wz_fit_err = wz_norm.getError(); 
 	double scale_factor_VV = wz_fitted / wz_nominal;
 	double sf_err = wz_fit_err / wz_nominal;
-
-	std::cout << "VV scale factor = " << scale_factor_VV <<"+-"<< sf_err<< std::endl;
+	std::string printsf = "WZ scale factor = "; printsf += std::to_string(scale_factor_VV); printsf += " + "; printsf += std::to_string(sf_err);
+	latex.DrawLatex(0.6, 0.5,printsf.c_str());
+	std::cout << "VV scale factor = " << printsf << std::endl;
 
 }
