@@ -13,7 +13,7 @@ const char* numberToCat(int number){
           "mme", "mmm", "mmt",
           "mte", "mtm", "mtt",
           "tte", "ttm", "ttt",
-          "ee","em","et","mm","mt","tt"};
+          "ee","em","et","mm","mt","tt","e","m","t"};
  	// Check if the index is within the valid range
     if (number < 1 || number > sizeof(cat_names)) {
         return "Invalid";
@@ -36,7 +36,7 @@ int catToNumber(std::string_view cat) {
         "mme","mmm","mmt",
         "mte","mtm","mtt",
         "tte","ttm","ttt",
-        "ee","em","et","mm","mt","tt"
+        "ee","em","et","mm","mt","tt","e","m","t"
     };
 
     constexpr int size = sizeof(cat_names) / sizeof(cat_names[0]);

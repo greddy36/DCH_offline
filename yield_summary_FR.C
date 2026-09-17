@@ -11,7 +11,7 @@
 #include "include/Xsections.C"
 #include "include/cms_plots.h"
 
-void yield_summary_FR() {
+void yield_summary_FR() {gErrorIgnoreLevel = kError; 
     gStyle->SetOptStat(0);
     TCanvas* canvas = new TCanvas("canvas", "Stacked histograms", 800, 700);
 
@@ -34,13 +34,18 @@ void yield_summary_FR() {
     	bkg_stack = new THStack("bkg_stack", " ;;Events / bin");//empty title
     	plot_description = "Yield summary in CR";
     }
+    if (summary_type == "tau_ch-veto") {
+    	hist_list = { "h_LT_VR_0tau","h_LT_VR_1tau","h_LT_VR_2tau","h_LT_VR_3tau","h_LT_VR_3lep0tau","h_LT_VR_3lep1tau","h_LT_VR_3lep2tau"};
+    	bkg_stack = new THStack("bkg_stack", " ;;Events / bin");//empty title
+    	plot_description = "Yield summary in VR";
+    }
     else if  (summary_type == "3lep") {
     	hist_list = {"h_met_ee","h_met_eee","h_met_eem","h_met_eet","h_metv_ett","h_met_mm","h_met_emm","h_met_mmm","h_met_mmt","h_metv_mtt"};
    		bkg_stack = new THStack("bkg_stack", ";;Events / bin");
    		plot_description = "2l and 3l channel summary in Z-window";
     }
     else if  (summary_type == "3lep-veto") {
-    	hist_list = {"h_metv_ee","h_metv_eee","h_metv_eem","h_metv_eet","h_met_ett","h_metv_mm","h_metv_emm","h_metv_mmm","h_metv_mmt","h_met_mtt"};
+    	hist_list = {"h_metv_ee","h_metv_eee","h_metv_eem","h_metv_eet","h_met_ett","h_metv_mm","h_metv_mme","h_metv_mmm","h_metv_mmt","h_met_mtt"};
     	bkg_stack = new THStack("bkg_stack", ";;Events / bin");
     	plot_description = "2l and 3l channel summary in Z-veto";
     }
@@ -129,7 +134,8 @@ void yield_summary_FR() {
     else if (year == "Run2") {
         files = {
             {"DY",      {"DYJetsToLLM10to50_2016postVFP.root", "DYJetsToLLM10to50_2016preVFP.root", "DYJetsToLLM10to50_2017.root", "DYJetsToLLM10to50_2018.root","DYJetsToLLM50_2016postVFP.root", "DYJetsToLLM50_2016preVFP.root", "DYJetsToLLM50_2017.root", "DYJetsToLLM50_2018.root"}},
-            {"VV",      {"WW_2016postVFP.root", "WWTo2L2Nu_2016postVFP.root", "WZTo2Q2L_2016postVFP.root", "WZTo3LNu_2016postVFP.root", "WW_2016preVFP.root", "WWTo2L2Nu_2016preVFP.root", "WZTo2Q2L_2016preVFP.root", "WZTo3LNu_2016preVFP.root", "WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root", "WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
+            {"VV",      {"WW_2016postVFP.root", "WWTo2L2Nu_2016postVFP.root", "WZTo2Q2L_2016postVFP.root", "WW_2016preVFP.root", "WWTo2L2Nu_2016preVFP.root", "WZTo2Q2L_2016preVFP.root", "WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root"}},
+            {"WZ",      {"WZTo3LNu_2016postVFP.root", "WZTo3LNu_2016preVFP.root", "WZTo3LNu_2017.root", "WZTo3LNu_2018.root"}},
             {"VVV",     {"WWW_2016postVFP.root", "WZZ_2016postVFP.root", "ZZZ_2016postVFP.root", "WWW_2016preVFP.root", "WZZ_2016preVFP.root", "ZZZ_2016preVFP.root", "WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root", "WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
             {"ttW",     {"ttWJets_2016postVFP.root", "ttWJets_2016preVFP.root", "ttWJets_2017.root",  "ttWJets_2018.root"}},
             {"ttZ",     { "ttZJets_2016postVFP.root", "ttZJets_2016preVFP.root", "ttZJets_2017.root", "ttZJets_2018.root"}},
@@ -146,7 +152,7 @@ void yield_summary_FR() {
 	   
     std::map<std::string, TH1D*> h_summaries;
     std::map<std::string, int> fill_colors = {
-        {"DY", 7}, {"VV", 8}, {"VVV", 6}, {"ttW", 4}, {"ttZ", 2}, {"WJ", 9}, {"QCD", 11}, {"ZZ", 5},
+        {"DY", 7}, {"WZ", 8},{"VV", 8}, {"VVV", 6}, {"ttW", 4}, {"ttZ", 2}, {"WJ", 9}, {"QCD", 11}, {"ZZ", 5},
 		    {"ST", 30}, {"TTbar", 46}, {"other", 28},{"ZH", 29}, {"data", 1}
     };
 
@@ -154,9 +160,10 @@ void yield_summary_FR() {
     std::map<std::string, std::vector<TFile*>> open_files;
     for (auto& kv : files) {
         for (const auto& fname : kv.second) {
+        	//if (fname.find("preVFP") < fname.length()) continue;
         	TFile* file;
-            if (summary_type == "tau_ch") file = new TFile(("FR_test/" + fname).c_str(), "READ");
-            else file = new TFile(("FR_test/" + fname).c_str(), "READ");
+            if (summary_type == "tau_ch") file = new TFile(("hist_test_nopair_noFR/" + fname).c_str(), "READ");
+            else file = new TFile(("hist_test_nopair_noFR/" + fname).c_str(), "READ");
             if (!file || file->IsZombie()) continue;
 	        open_files[kv.first].push_back(file);
         }
@@ -180,7 +187,7 @@ void yield_summary_FR() {
             	TH1D* h = (TH1D*)f->Get(hist_name.c_str());
                 if (h) {
                 	h_sum->Sumw2();
-                	h->Scale(applyXSec_FR(f));
+                	h->Scale(applyXSec(f));
                 	h->Rebin(h->GetNbinsX());
                 	double stat_err = h->GetBinError(1);//poisson error
                 	double sys_err = h->GetBinContent(1)*XSec_Uncert(f->GetName())/100;
@@ -202,8 +209,8 @@ void yield_summary_FR() {
         }
     }
     //========================scale facotrs===============
-	h_summaries["ZZ"]->Scale(1.284495);
-	h_summaries["VV"]->Scale(1.033462);
+	h_summaries["ZZ"]->Scale(1.434627);
+	h_summaries["WZ"]->Scale(1.350932);
 	//h_summaries["DY"]->SetBinContent(4, h_summaries["DY"]->GetBinContent(4)*1.21);
 	//h_summaries["DY"]->SetBinContent(9, h_summaries["DY"]->GetBinContent(9)*1.21);
 	//h_summaries["TTbar"]->SetBinContent(6, h_summaries["TTbar"]->GetBinContent(6)*2.5);
@@ -213,7 +220,7 @@ void yield_summary_FR() {
     // Stack backgrounds
     TH1D* h_bkg_total = (TH1D*)h_summaries["DY"]->Clone("h_bkg_total");
     h_bkg_total->Reset(); h_bkg_total->Sumw2();
-    for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttW","ttZ", "WJ", "QCD", "ZZ","ZH", "ST", "TTbar", "other"}) {
+    for (const std::string& bkg_group : {"DY", "VV", "WZ", "VVV", "ttW","ttZ", "WJ", "QCD", "ZZ","ZH", "ST", "TTbar", "other"}) {
         bkg_stack->Add(h_summaries[bkg_group]);
         bkg_stack->SetMinimum(1); // Show zero bins
         h_bkg_total->Add(h_summaries[bkg_group]);
@@ -226,7 +233,7 @@ void yield_summary_FR() {
 		h_mc_uncert_band->SetBinContent(i+1, 1.0);  // center at ratio = 1
 		if (h_bkg_total->GetBinContent(i+1) != 0) h_mc_uncert_band->SetBinError(i+1, h_bkg_total->GetBinError(i+1)/h_bkg_total->GetBinContent(i+1));//scaling error with bin content
 		else h_mc_uncert_band->SetBinError(i+1,0);
-		cout<<h_bkg_total->GetBinContent(i+1)<<"\t"<<h_bkg_total->GetBinError(i+1)<<"\t"<<h_mc_uncert_band->GetBinError(i+1)<<endl;
+		//cout<<h_bkg_total->GetBinContent(i+1)<<"\t"<<h_bkg_total->GetBinError(i+1)<<"\t"<<h_mc_uncert_band->GetBinError(i+1)<<endl;
 	} 
 	
     // Draw main plot
@@ -237,7 +244,7 @@ void yield_summary_FR() {
 	bkg_stack->SetMaximum(1.1*pad_max);
     h_summaries["data"]->SetMarkerStyle(20);
     h_summaries["data"]->SetMarkerColor(kBlack);
-    h_summaries["data"]->Draw("E SAME");
+    h_summaries["data"]->Draw("E SAME ");
 
 	// Create a TLatex object
 	DrawCMSLabel();

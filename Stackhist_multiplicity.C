@@ -9,7 +9,6 @@
 #include <algorithm>
 #include <iostream>
 #include <map>
-#include <set>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -21,9 +20,8 @@
 static bool DRAW_BANDS = true;
 static bool USE_LOG_Y = false;
 static bool EVENTS_PER_BIN_WIDTH = false;
-static bool blind_SR = true;
-static std::string INPUT_DIR = "hists/run2_hists_tauFR_etau_roccor/";
-static std::string OUTPUT_DIR = "plots/run2_plots_tauFR_etau_roccor/";
+static std::string INPUT_DIR = "hists/run2_hists_noFR_roccor/";
+static std::string OUTPUT_DIR = "multiplicity_plots/run2_plots_noFR_roccor/";
 
 #include "Stack_modules/Labels.h"
 #include "Stack_modules/HistCache.h"
@@ -33,7 +31,7 @@ static std::string OUTPUT_DIR = "plots/run2_plots_tauFR_etau_roccor/";
 #include "Stack_modules/FileDiscovery.h"
 #include "Stack_modules/StackDraw.h"
 
-void Stackhist(std::string inYear = "2018", int firstVariable = 0, int nVariablesToRun = -1) {
+void Stackhist_multiplicity(std::string inYear = "2018", int firstVariable = 0, int nVariablesToRun = -1) {
     year = inYear;
 
     gROOT->SetBatch(kTRUE);
@@ -85,33 +83,25 @@ void Stackhist(std::string inYear = "2018", int firstVariable = 0, int nVariable
     for (int index = first; index < last; ++index) selectedVariables.insert(allVariables[index]);
 
     std::cout << "Pre-summing input histograms by process..." << std::endl;
-    mergeInputFilesByProcess(handles, selectedVariables, kAllKnownSystSources, "merged_");
+    mergeInputFilesByProcess(handles, selectedVariables, kAllKnownSystSources, "merged_multiplicity_");
     std::cout << "Input pre-summing complete." << std::endl;
 
-    std::set<std::string> plotNames;
-    for (auto& processEntry : handles) {
-        for (TFile* input : processEntry.second) {
-            for (const std::string& storedName : keysInFile(input)) {
-                if (storedName.rfind("h_", 0) != 0) continue;
-                if (isSystematicVariantName(storedName, kAllKnownSystSources)) continue;
-                const std::string hname = normalizeRegionName(storedName);
-                if (!selectedVariables.count(getVariableFromHname(hname))) continue;
-                plotNames.insert(hname);
-            }
-        }
-    }
+    std::cout << "Variables [" << first << ", " << last << "), regions per variable: " << regions.size() << std::endl;
 
-    std::cout << "Variables [" << first << ", " << last << "), existing nominal histograms to plot: " << plotNames.size() << std::endl;
+    for (int index = first; index < last; ++index) {
+        const std::string& var = allVariables[index];
+        std::cout << "\n=== Starting variable: " << var << " ===" << std::endl;
 
-    std::string previousVariable;
-    for (const std::string& hname : plotNames) {
-        const std::string var = getVariableFromHname(hname);
-        if (var != previousVariable) {
-            std::cout << "\n=== Starting variable: " << var << " ===" << std::endl;
-            previousVariable = var;
+        for (const auto& reg : regions) {
+            std::vector<std::string> sourceNames;
+            sourceNames.reserve(finalStates.size());
+            for (const auto& ch : finalStates) sourceNames.push_back("h_" + var + "_" + ch + "_" + reg);
+
+            const std::string hname = "h_" + var + "_" + reg;
+            drawAndSave(hname, sourceNames, handles, fill_colors, outdir, useLog, kAllSystSources, false);
         }
-        const bool isSR = hname.find("_SR_") != std::string::npos;
-        drawAndSave(hname, {hname}, handles, fill_colors, outdir, useLog, kAllSystSources, true, isSR && blind_SR);
+
+        CleanUpROOTMemory();
     }
 
     for (auto& processEntry : handles) {

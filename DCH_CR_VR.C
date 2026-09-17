@@ -5,9 +5,9 @@
 #include "TH1D.h"
 #include "TF1.h"
 #include "TFile.h"
-#include "include/MyBranch.C"//branch definitons
+#include "include/MyBranch_FR_new.C"//#include "include/MyBranch.C"//branch definitons
 #include "include/Kinematics.C"//Kine fns
-#include "include/MET_split.C"
+//#include "include/MET_split.C"
 #include "include/Xsections.C"
 
 
@@ -17,14 +17,14 @@ void createHistograms(std::map<std::string, TH1D*>& histograms,
                       const std::string& label,
                       int bins, double low, double high) {
     for (const std::string& channel : {"VR_0tau","VR_1tau","VR_2tau","VR_3tau","VR_3lep0tau","VR_3lep1tau","VR_3lep2tau",
- "CR_0tau","CR_1tau","CR_2tau","CR_3tau","CR_3lep0tau","CR_3lep1tau","CR_3lep2tau",
- "SR_0tau","SR_1tau","SR_2tau","SR_3tau","SR_3lep0tau","SR_3lep1tau","SR_3lep2tau",
- "DYCR_0tau","DYCR_1tau","DYveto_0tau","DYveto_1tau",
- "ee", "em", "mm", "eee", "eem", "eet", "emt", "mme", "mmm", "mmt",
-	 "ett", "mtt", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
-	 "eett", "mmet", "ttem", "ttet", "mmmt", "mmtt", "ttmt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_mme", "v_mmm", "v_mmt",
-	 "v_tte", "v_mtt", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
-	 "v_eett", "v_mmet", "v_ettm", "v_ettt", "v_mmmt", "v_mmtt", "v_ttmt"}) {
+	 "CR_0tau","CR_1tau","CR_2tau","CR_3tau","CR_3lep0tau","CR_3lep1tau","CR_3lep2tau",
+	 "SR_0tau","SR_1tau","SR_2tau","SR_3tau","SR_3lep0tau","SR_3lep1tau","SR_3lep2tau",
+	 "DYCR_0tau","DYCR_1tau","DYveto_0tau","DYveto_1tau",
+	 "ee", "em", "mm", "eee", "eem", "eet", "emt", "mme", "mmm", "mmt",
+	 "tte", "ttm", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
+	 "eett", "emmt", "ttem", "ttet", "mmmt", "mmtt", "ttmt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_mme", "v_mmm", "v_mmt",
+	 "v_tte", "v_ttm", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
+	 "v_eett", "v_emmt", "v_ttem", "v_ttet", "v_mmmt", "v_mmtt", "v_ttmt"}) {
         std::string hist_name = prefix + "_" + channel;
         std::string hist_label = label + " " + channel;
         
@@ -84,14 +84,14 @@ void fillHistograms(const std::string& channel,
 
 void scaleAndWriteHistograms(std::map<std::string, TH1D*>& histograms, double xs_weight) {
     for (const std::string& channel : {"VR_0tau","VR_1tau","VR_2tau","VR_3tau","VR_3lep0tau","VR_3lep1tau","VR_3lep2tau",
- "CR_0tau","CR_1tau","CR_2tau","CR_3tau","CR_3lep0tau","CR_3lep1tau","CR_3lep2tau",
- "SR_0tau","SR_1tau","SR_2tau","SR_3tau","SR_3lep0tau","SR_3lep1tau","SR_3lep2tau",
- "DYCR_0tau","DYCR_1tau","DYveto_0tau","DYveto_1tau",
- "ee", "em", "mm", "eee", "eem", "eet", "emt", "mme", "mmm", "mmt",
-	 "ett", "mtt", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
-	 "eett", "mmet", "ttem", "ttet", "mmmt", "mmtt", "ttmt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_mme", "v_mmm", "v_mmt",
-	 "v_tte", "v_mtt", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
-	 "v_eett", "v_mmet", "v_ettm", "v_ettt", "v_mmmt", "v_mmtt", "v_ttmt"}) {
+	 "CR_0tau","CR_1tau","CR_2tau","CR_3tau","CR_3lep0tau","CR_3lep1tau","CR_3lep2tau",
+	 "SR_0tau","SR_1tau","SR_2tau","SR_3tau","SR_3lep0tau","SR_3lep1tau","SR_3lep2tau",
+	 "DYCR_0tau","DYCR_1tau","DYveto_0tau","DYveto_1tau",
+	 "ee", "em", "mm", "eee", "eem", "eet", "emt", "mme", "mmm", "mmt",
+	 "tte", "ttm", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
+	 "eett", "emmt", "ttem", "ttet", "mmmt", "mmtt", "ttmt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_mme", "v_mmm", "v_mmt",
+	 "v_tte", "v_ttm", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
+	 "v_eett", "v_emmt", "v_ttem", "v_ttet", "v_mmmt", "v_mmtt", "v_ttmt"}) {
         histograms[channel]->Scale(xs_weight);
         histograms[channel]->Write();
     }
@@ -102,7 +102,7 @@ void DCH_CR_VR(const char* ext = "root"){
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
 	const char* entry;
-	const char* filename[100];
+	const char* filename[400];
 	TString str; Int_t nfiles = 0;
 	while((entry = (char*)gSystem->GetDirEntry(dirp))){
 	  	str = entry;
@@ -121,20 +121,22 @@ void DCH_CR_VR(const char* ext = "root"){
 		TFile *ifile = new TFile(filename[j],"READ");
 		std::string fname = filename[j];
 		if (fname.find("_2018.") > fname.length()) continue;
-		if (fname.find("EGa") > fname.length()) continue;
+		//if (fname.find("EGa") > fname.length()) continue;
 		//if (fname.find("ZZTo4L_2018") > fname.length()) continue;
 		//if (XSec(filename[j])==1) continue; 
 		
 		//cout<<XSec(filename[j])<<endl;
 		const char* o_name;
+		TString base = gSystem->BaseName(fname.c_str());
 		if (selection =="none") o_name = "hist";
 		else if (selection =="Pre") o_name = "hist_MY";
 		else if (selection =="APre") o_name = "hist_APre";
 		else if (selection =="CR") o_name = "hist_CR";
 		else if (selection =="VR") o_name = "hist_VR";
-		else if (selection =="test") o_name = "hist_test_nopair";
+		else if (selection =="test") o_name = "hist_test_nopair_noFR";
 		else cout<< "SELECTION NOT DEFINED!!!"<<endl;
-		char *oname = gSystem->ConcatFileName(o_name, filename[j]);
+		gSystem->mkdir(o_name, kTRUE);
+		char *oname = gSystem->ConcatFileName(o_name, base);
 		TFile* ofile = new TFile(oname, "RECREATE"); 
 		
 		TH1D* hNWEvts;
@@ -355,10 +357,10 @@ void DCH_CR_VR(const char* ext = "root"){
 	 "SR_0tau","SR_1tau","SR_2tau","SR_3tau","SR_3lep0tau","SR_3lep1tau","SR_3lep2tau",
 	 "DYCR_0tau","DYCR_1tau","DYveto_0tau","DYveto_1tau",
 	 "ee", "em", "mm", "eee", "eem", "eet", "emt", "mme", "mmm", "mmt",
-	 "ett", "mtt", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
-	 "eett", "mmet", "ttem", "ttet", "mmmt", "mmtt", "ttmt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_mme", "v_mmm", "v_mmt",
-	 "v_tte", "v_mtt", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
-	 "v_eett", "v_mmet", "v_ettm", "v_ettt", "v_mmmt", "v_mmtt", "v_ttmt"};//makes lookup faster!!
+	 "tte", "ttm", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
+	 "eett", "emmt", "ttem", "ttet", "mmmt", "mmtt", "ttmt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_mme", "v_mmm", "v_mmt",
+	 "v_tte", "v_ttm", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
+	 "v_eett", "v_emmt", "v_ttem", "v_ttet", "v_mmmt", "v_mmtt", "v_ttmt"};//makes lookup faster!!
 				
 
 				std::string channel = classifyTauRegion(cat_name, LT, OS_pair);	
@@ -373,9 +375,6 @@ void DCH_CR_VR(const char* ext = "root"){
 				std::string channel1 = classifyLepRegion(cat_name, OS_pair);
 				if (channel1=="mmee") channel1 = "eemm";
 				if (channel1=="mmee") channel1 = "eemm";
-				//if (Z_pair.size()>1 and (LepV(Z_pair[1].first)+LepV(Z_pair[1].second)).M() > 102) {
-				//cout<<cat_name<<"\t"<<channel1<<(LepV(Z_pair[1].first)+LepV(Z_pair[1].second)).M()<<"\t"<<Z_pair.size()<<"\t"<<Zv_pair.size()<<endl;
-					//for (auto a:Z_pair) cout<<a.first<<"\t"<<a.second<<endl;}
 				
 				if(!histCh.count(channel1)) continue;
 				

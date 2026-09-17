@@ -41,7 +41,7 @@ double XSec(std::string fname){
 	else if(fname.find("ttHJetToNonbb") < fname.length()) return 0.24111;
 	else if(fname.find("TWZToLL") < fname.length()) return 0.001669;
 	else if(fname.find("HZJ") < fname.length()) return 0.00177;
-	else if(fname.find("HppM") < fname.length()) return 0.0000494;//0.001;//Signal
+	else if(fname.find("HppM") < fname.length()) return 0.001;//Signal
 	else if(fname.find("EGamma") < fname.length()) return 1;//Data
 	else if(fname.find("Muon") < fname.length()) return 1;//Data
 	else if(fname.find("Tau") < fname.length()) return 1;//Data
@@ -53,15 +53,24 @@ double XSec(std::string fname){
 }
 
 double applyXSec(TFile* ifile){
-	double lumi_2016 = 36310, lumi_2017 = 42070, lumi_2018 = 59560, lumi_run2 = 138000;//in pb^-1
+	//double lumi_2016 = 36310, lumi_2017 = 42070, lumi_2018 = 59560, lumi_run2 = 138000;//in pb^-1
+	double lumi_2016_pre = 19520;
+    double lumi_2016_post = 16810;
+    double lumi_2017 = 41480;
+    double lumi_2018 = 59830;
+    double lumi_2016 = lumi_2016_pre + lumi_2016_post;
+    double lumi_run2 = lumi_2016 + lumi_2017 + lumi_2018; // pb^-1
+
 	double xs_weight = 1.0;
 	std::string fname = ifile->GetName();
 	if(XSec(fname)!=1){
 			TH1D* hNWEvts = (TH1D*)ifile->Get("hNWEvts");
 			if(!hNWEvts)  hNWEvts = (TH1D*)ifile->Get("hnevts");//old naming
 			if(!hNWEvts) return xs_weight;
-			if (fname.find("2016") < fname.length()) 
-				xs_weight = lumi_2016*XSec(fname)/hNWEvts->Integral();
+			if (fname.find("2016pre") < fname.length()) 
+				xs_weight = lumi_2016_pre*XSec(fname)/hNWEvts->Integral();
+			else if (fname.find("2016post") < fname.length()) 
+				xs_weight = lumi_2016_post*XSec(fname)/hNWEvts->Integral();
 			else if (fname.find("2017") < fname.length()) 
 				xs_weight = lumi_2017*XSec(fname)/hNWEvts->Integral();
 			else if (fname.find("2018") < fname.length()) 
@@ -72,92 +81,6 @@ double applyXSec(TFile* ifile){
 	return xs_weight;
 }
 
-#include <fstream>
-#include <map>
-
-double applyXSec_FR(TFile* ifile){
-	
-	double lumi_2016 = 35900;
-    double lumi_2016_pre = 19500;
-    double lumi_2016_post = 16400;
-    double lumi_2017 = 42070;
-    double lumi_2018 = 59560;
-    double lumi_run2 = 138000; // pb^-1
-
-    double xs_weight = 1.0;
-
-    std::string fname = ifile->GetName();
-
-    // -----------------------------------
-    // Read denominator file only once
-    // -----------------------------------
-    static std::map<std::string,double> denomMap;
-    static bool loaded = false;
-
-    if(!loaded){
-
-        std::ifstream infile("denominators.txt");
-
-        std::string filetmp;
-        double val;
-
-        while(infile >> filetmp >> val){
-            denomMap[filetmp] = val;
-        }
-
-        infile.close();
-
-        loaded = true;
-    }
-
-    // -----------------------------------
-    // Get only filename without path
-    // -----------------------------------
-    std::string shortname = fname;
-
-    size_t slash = shortname.find_last_of("/");
-
-    if(slash != std::string::npos)
-        shortname = shortname.substr(slash+1);
-
-    // -----------------------------------
-    // Skip data
-    // -----------------------------------
-    if(XSec(shortname) == 1)
-        return xs_weight;
-
-    // -----------------------------------
-    // Check denominator exists
-    // -----------------------------------
-    if(denomMap.find(shortname) == denomMap.end()){
-
-        std::cout << "[WARNING] No denominator for "
-                  << shortname << std::endl;
-
-        return xs_weight;
-    }
-
-    double denominator = denomMap[shortname];
-
-    // -----------------------------------
-    // Compute XS weight
-    // -----------------------------------
-    if (fname.find("2016pre") < fname.length())
-        xs_weight = lumi_2016_pre * XSec(shortname) / denominator;
-	else if (fname.find("2016") < fname.length())
-        xs_weight = lumi_2016_post * XSec(shortname) / denominator;
-        
-    else if (fname.find("2017") < fname.length())
-        xs_weight = lumi_2017 * XSec(shortname) / denominator;
-
-    else if (fname.find("2018") < fname.length())
-        xs_weight = lumi_2018 * XSec(shortname) / denominator;
-
-    else if (fname.find("run2") < fname.length())
-        xs_weight = lumi_run2 * XSec(shortname) / denominator;
-
-    return xs_weight;
-}
 
 double XSec_Uncert(std::string fname){//in %
 	if(fname.find("ttHTo") < fname.length()) return 6.96;

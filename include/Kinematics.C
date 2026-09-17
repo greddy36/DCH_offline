@@ -510,7 +510,7 @@ std::string classifyTauRegion(std::string cat_name, double LT, vector<pair<int, 
 		else if (Ntau==2) return "CR_2tau";//will be empty as we don't make Z with taus
 		else if (Ntau==3) return "CR_3tau";//will be empty as we don't make Z with taus
 	}
-	else {cout<<"CRAAAPPP "<<cat_name<<"\t"<<numZ<<endl; return "crap";}
+	else {/*cout<<"CRAAAPPP "<<cat_name<<"\t"<<numZ<<endl;*/ return "crap";}
 }
 
 std::string classifyLepRegion(std::string cat_name, vector<pair<int, int>> pairVec){//classifies channels based on OSSF (CR/VR) or SS (Signal) pairing 
@@ -542,5 +542,12 @@ std::string classifyLepRegion(std::string cat_name, vector<pair<int, int>> pairV
     else if (extra == "tm") extra = "mt";
     lepRegion += extra; 
     
+    if (lepRegion == "mmee") lepRegion = "eemm";
+    else if (lepRegion == "ttee") lepRegion = "eett";
+    else if (lepRegion == "ttmm") lepRegion = "mmtt";
+    else if (lepRegion == "ttee") lepRegion = "eett";
+    else if (lepRegion == "ttmm") lepRegion = "mmtt";
+    else if (lepRegion == "ttee") lepRegion = "eett";
+
     return lepRegion;
 }

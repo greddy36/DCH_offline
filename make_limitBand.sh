@@ -1,7 +1,7 @@
 #!/bin/bash
 #need to put mass and the sysmtotic limit print below that line into limits.txt
 # Input file
-input_file="limits.txt"
+input_file="limits_mH1.txt"
 
 # Check if the file exists
 if [ ! -f "$input_file" ]; then

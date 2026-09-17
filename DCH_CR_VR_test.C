@@ -1,14 +1,37 @@
+
 //To apply various kinematics selections right after online analysis.
+
 #include "TMath.h"
 #include <cmath>
 #include <vector>
 #include "TH1D.h"
 #include "TF1.h"
 #include "TFile.h"
+#include "correction.h"
 #include "include/MyBranch_FR_new.C"//branch definitons
 #include "include/Kinematics.C"//Kine fns
 //#include "include/MET_split.C"
 #include "include/Xsections.C"
+
+
+#include "HTT-utilities/RecoilCorrections/interface/RecoilCorrector.h"
+#include "DCH_modules/CommonConfig.h"
+#include "DCH_modules/HistUtils.h"
+#include "DCH_modules/ObjectAccessors.h"
+#include "DCH_modules/METCorrections.h"
+#include "DCH_modules/RecoilCorrections.h"
+#include "DCH_modules/RoccoRCorrections.h"
+#include "DCH_modules/TruthMatching.h"
+#include "DCH_modules/ZPtReweight.h"
+#include "DCH_modules/FileJob.h"
+#include "DCH_modules/TauFakeRate.h"
+#include "DCH_modules/EtauFakeRate.h"
+#include "DCH_modules/EventWeights.h"
+#include "DCH_modules/PairBuilder.h"
+#include "DCH_modules/TauFRSystematics.h"
+#include "DCH_modules/MEtSysWrapper.h"
+#include "DCH_modules/SystematicPlan.h"
+#include "DCH_modules/FlatXsecSystematic.h"
 
 
 // Histogram creation utility to avoid code duplication
@@ -17,14 +40,14 @@ void createHistograms(std::map<std::string, TH1D*>& histograms,
                       const std::string& label,
                       int bins, double low, double high) {
     for (const std::string& channel : {"VR_0tau","VR_1tau","VR_2tau","VR_3tau","VR_3lep0tau","VR_3lep1tau","VR_3lep2tau",
- "CR_0tau","CR_1tau","CR_2tau","CR_3tau","CR_3lep0tau","CR_3lep1tau","CR_3lep2tau",
- "SR_0tau","SR_1tau","SR_2tau","SR_3tau","SR_3lep0tau","SR_3lep1tau","SR_3lep2tau",
- "DYCR_0tau","DYCR_1tau","DYveto_0tau","DYveto_1tau",
- "ee", "em", "mm", "eee", "eem", "eet", "emt", "emm", "mmm", "mmt",
- "ett", "mtt", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
- "eett", "emmt", "emtt", "ettt", "mmmt", "mmtt", "mttt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_emm", "v_mmm", "v_mmt",
-	 "v_ett", "v_mtt", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
-	 "v_eett", "v_emmt", "v_emtt", "v_ettt", "v_mmmt", "v_mmtt", "v_mttt"}) {
+	 "CR_0tau","CR_1tau","CR_2tau","CR_3tau","CR_3lep0tau","CR_3lep1tau","CR_3lep2tau",
+	 "SR_0tau","SR_1tau","SR_2tau","SR_3tau","SR_3lep0tau","SR_3lep1tau","SR_3lep2tau",
+	 "DYCR_0tau","DYCR_1tau","DYveto_0tau","DYveto_1tau",
+	 "ee", "em", "mm", "eee", "eem", "eet", "emt", "mme", "mmm", "mmt",
+	 "tte", "ttm", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
+	 "eett", "emmt", "ttem", "ttet", "mmmt", "mmtt", "ttmt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_mme", "v_mmm", "v_mmt",
+	 "v_tte", "v_ttm", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
+	 "v_eett", "v_emmt", "v_ttem", "v_ttet", "v_mmmt", "v_mmtt", "v_ttmt"}) {
         std::string hist_name = prefix + "_" + channel;
         std::string hist_label = label + " " + channel;
         
@@ -88,14 +111,14 @@ void fillHistograms(const std::string& channel,
 
 void scaleAndWriteHistograms(std::map<std::string, TH1D*>& histograms, double xs_weight) {
     for (const std::string& channel : {"VR_0tau","VR_1tau","VR_2tau","VR_3tau","VR_3lep0tau","VR_3lep1tau","VR_3lep2tau",
- "CR_0tau","CR_1tau","CR_2tau","CR_3tau","CR_3lep0tau","CR_3lep1tau","CR_3lep2tau",
- "SR_0tau","SR_1tau","SR_2tau","SR_3tau","SR_3lep0tau","SR_3lep1tau","SR_3lep2tau",
- "DYCR_0tau","DYCR_1tau","DYveto_0tau","DYveto_1tau",
- "ee", "em", "mm", "eee", "eem", "eet", "emt", "emm", "mmm", "mmt",
- "ett", "mtt", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
- "eett", "emmt", "emtt", "ettt", "mmmt", "mmtt", "mttt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_emm", "v_mmm", "v_mmt",
-	 "v_ett", "v_mtt", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
-	 "v_eett", "v_emmt", "v_emtt", "v_ettt", "v_mmmt", "v_mmtt", "v_mttt"}) {
+	 "CR_0tau","CR_1tau","CR_2tau","CR_3tau","CR_3lep0tau","CR_3lep1tau","CR_3lep2tau",
+	 "SR_0tau","SR_1tau","SR_2tau","SR_3tau","SR_3lep0tau","SR_3lep1tau","SR_3lep2tau",
+	 "DYCR_0tau","DYCR_1tau","DYveto_0tau","DYveto_1tau",
+	 "ee", "em", "mm", "eee", "eem", "eet", "emt", "mme", "mmm", "mmt",
+	 "tte", "ttm", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
+	 "eett", "emmt", "ttem", "ttet", "mmmt", "mmtt", "ttmt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_mme", "v_mmm", "v_mmt",
+	 "v_tte", "v_ttm", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
+	 "v_eett", "v_emmt", "v_ttem", "v_ttet", "v_mmmt", "v_mmtt", "v_ttmt"}) {
         histograms[channel]->Scale(xs_weight);
         histograms[channel]->Write();
     }
@@ -127,7 +150,7 @@ public:
 		FR_hist->SetDirectory(0);
 		frFile->Close();
 
-		cout << "[FR][DATA 2D] loaded for "<< lepFlav<<"\t"<< hName <<endl;
+		//cout << "[FR][DATA 2D] loaded for "<< lepFlav<<"\t"<< hName <<endl;
 
 	}
 	/*~loadFR_Data2D() {
@@ -179,12 +202,12 @@ std::vector<std::vector<int>> generateStates(int nLoose, int maxSlots = 3, bool 
 				return states;
 }
 
-void DCH_CR_VR_test(const char* ext = "root"){
-	const char* inDir = ".";
+void DCH_CR_VR_test(const char* ext = "root", int worker =0, int nWorkers =1){
+	const char* inDir = ".";//"/eos/uscms/store/user/aahmad2/run2_files/run2_skims/MC_2018";
 	char* dir = gSystem->ExpandPathName(inDir);
 	void* dirp = gSystem->OpenDirectory(dir);
 	const char* entry;
-	const char* filename[100];
+	const char* filename[400];
 	TString str; Int_t nfiles = 0;
 	while((entry = (char*)gSystem->GetDirEntry(dirp))){
 	  	str = entry;
@@ -199,32 +222,35 @@ void DCH_CR_VR_test(const char* ext = "root"){
 	double mDCH = 500.0, mZ = 91.2, lumi_2016 = 35900, lumi_2017 = 45000, lumi_2018 = 58900.0; //139000;
 	//TCanvas *can= new TCanvas("can","can",700,500); gStyle->SetOptStat(0); 
 	for(int j = 0; j < nfiles; j++){
+		if (j % nWorkers != worker) continue;
 		cout<<filename[j]<<endl;
 		TFile *ifile = new TFile(filename[j],"READ");
 		std::string fname = filename[j];
-		
+		bool isData = (XSec(fname) == 1);
 		std::string year = "";
 		if (fname.find("_2016pre") < fname.length()) year = "2016preVFP";
 		else if (fname.find("_2016post") < fname.length()) year = "2016postVFP";
 		else if (fname.find("_2017") < fname.length()) year = "2017";
 		else if (fname.find("_2018") < fname.length()) year = "2018";
-		if (year == "2016") continue;
+		//if (fname.find("2018") > fname.length()) continue;
 		
-		//if (fname.find("WJetsToLNu_NLO_2018") > fname.length()) continue;
+		//if (fname.find("DYJetsToLLM") > fname.length()) continue;
 		//if (fname.find("HppM1000_2018") > fname.length()) continue;
 		//if (fname.find("ZZTo4L") > fname.length()) continue;
-		//if (XSec(filename[j])==1) continue; 
+		if (isData) continue; 
 		
 		//cout<<XSec(filename[j])<<endl;
 		const char* o_name;
+		TString base = gSystem->BaseName(fname.c_str());
 		if (selection =="none") o_name = "hist";
 		else if (selection =="Pre") o_name = "hist_MY";
 		else if (selection =="APre") o_name = "hist_APre";
 		else if (selection =="CR") o_name = "hist_CR";
 		else if (selection =="VR") o_name = "hist_VR";
-		else if (selection =="test") o_name = "hist_test_nopair_DY";
+		else if (selection =="test") o_name = "hist_test_nopair_FR";
 		else cout<< "SELECTION NOT DEFINED!!!"<<endl;
-		char *oname = gSystem->ConcatFileName(o_name, filename[j]);
+		gSystem->mkdir(o_name, kTRUE);
+		char *oname = gSystem->ConcatFileName(o_name, base);
 		TFile* ofile = new TFile(oname, "RECREATE"); 
 		
 		TH1D* hNWEvts;
@@ -262,8 +288,8 @@ void DCH_CR_VR_test(const char* ext = "root"){
         
         //Loading FR histograms
         loadFR_Data2D tauFR("Data_fake_rates_combined.root", year, "tau");
-        loadFR_Data2D muFR("Data_fake_rates_combined.root", year, "muon");
-        loadFR_Data2D eleFR("Data_fake_rates_combined.root", year, "electron");
+        //loadFR_Data2D muFR("Data_fake_rates_combined.root", year, "muon");
+        //loadFR_Data2D eleFR("Data_fake_rates_combined.root", year, "electron");
         
 		for (int i =0; i < tree->GetEntries(); i++){
 			tree->GetEntry(i);
@@ -293,7 +319,74 @@ void DCH_CR_VR_test(const char* ext = "root"){
 			//if (Ntau != 0) continue;
 			//if (Nlep == 0) continue;
 			//if (cat_name != "mmt") continue;
-
+			//=======ATHAR STUFF BEGIN========================
+			Long64_t nRecoilNoCandidate = 0;
+			Long64_t nRecoilInvalid = 0;
+			Long64_t nRecoilCorrected = 0;
+			bool APPLY_OFFICIAL_MET_CORRECTION = true;
+			applyTauES(cat_string);
+			//double roccorRelErr[4] = {0.0, 0.0, 0.0, 0.0};
+			//applyRoccoRCorrection(cat_string, isData, *roccor, roccorRelErr);
+			const double rawMetPx = met * std::cos(metphi);
+			const double rawMetPy = met * std::sin(metphi);
+			std::unique_ptr<OfficialMETCorrections> metCorrections;
+			if (APPLY_OFFICIAL_MET_CORRECTION) {
+				metCorrections = loadOfficialMETCorrections(year, isData);
+				if (!metCorrections) { ifile->Close(); return 4; }
+			}
+			if (APPLY_OFFICIAL_MET_CORRECTION && !applyOfficialMETCorrection(*metCorrections)) continue;
+			bool hasMetPhiVariation = false;
+			double metPhiDeltaPx = 0.0, metPhiDeltaPy = 0.0;
+			if (APPLY_OFFICIAL_MET_CORRECTION) {
+				metPhiDeltaPx = met * std::cos(metphi) - rawMetPx;
+				metPhiDeltaPy = met * std::sin(metphi) - rawMetPy;
+				hasMetPhiVariation = true;
+			}
+			RecoilSystShift recoilShift;
+			bool hasRecoilVariation = false;
+			const bool useRecoilCorrection = (fname.find("DYJet") < fname.length()) or  (fname.find("WJ") < fname.length());
+			std::unique_ptr<RecoilCorrector> recoilCorrector;
+			if (useRecoilCorrection) {
+				recoilCorrector = loadRecoilCorrector(year);
+				if (!recoilCorrector) { ifile->Close();}
+			}
+			std::shared_ptr<MEtSys> metSys;
+			if (useRecoilCorrection) {
+				metSys = getCachedMEtSys(year);
+				if (!metSys) std::cerr << "  [warn] MEtSys payload not found for " << year << "; recoil systematic variations will be skipped" << std::endl;
+			}
+			if (useRecoilCorrection) {
+				double genPx = 0.0;
+				double genPy = 0.0;
+				double visPx = 0.0;
+				double visPy = 0.0;
+				bool hasCandidate = false;
+				if (fname.find("DYJet") < fname.length()) {
+					hasCandidate = getPromptTruthDileptonXY(cat_string, genPx, genPy);
+					visPx = genPx;
+					visPy = genPy;
+				}
+				else if (fname.find("WJ") < fname.length()) {
+					hasCandidate = getPromptTruthLeptonXY(cat_string, visPx, visPy);
+					if (hasCandidate) {
+						genPx = visPx + met * std::cos(metphi);
+						genPy = visPy + met * std::sin(metphi);
+					}
+				}
+				if (!hasCandidate) ++nRecoilNoCandidate;
+				else if (!applyRecoilCorrection(*recoilCorrector, genPx, genPy, visPx, visPy)) ++nRecoilInvalid;
+				else {
+					++nRecoilCorrected;
+					if (metSys) {
+						const int recoilNJets = std::max(0, static_cast<int>(std::lround(njets)));
+						const float correctedPx = static_cast<float>(met * std::cos(metphi));
+						const float correctedPy = static_cast<float>(met * std::sin(metphi));
+						recoilShift = computeRecoilSystShift(*metSys, correctedPx, correctedPy, static_cast<float>(genPx), static_cast<float>(genPy), static_cast<float>(visPx), static_cast<float>(visPy), recoilNJets);
+						hasRecoilVariation = recoilShift.valid;
+					}
+				}
+			}
+			//=======ATHAR STUFF END========================
 			//cout<<"BEFORE"<<"\t"<<q_1<<"\t"<<q_2<<"\t"<<q_3<<"\t"<<q_4<<"\t"<<cat_name<<endl;			
 			// (strlen(cat_name) == 3 and (abs(q_1+q_2+q_3)!=1 or abs(q_1) !=1 or abs(q_2) != 1 or abs(q_3)!=1))continue;
 			// (strlen(cat_name) == 4 and (abs(q_1+q_2+q_3+q_4)!=0 or abs(q_1) !=1 or abs(q_2) != 1 or abs(q_3)!=1 or abs(q_4)!=1))continue;
@@ -360,7 +453,7 @@ void DCH_CR_VR_test(const char* ext = "root"){
 			if (XSec(filename[j])!=1){
 				evtwt_nom *= L1PreFiringWeight_Nom*weightPUtruejson;
 				
-				if(strlen(cat_name)<3){
+				/*if(strlen(cat_name)<3){
 					evtwt_nom *= IDSF_1*IDSF_2*ISOSF_1*ISOSF_2*TauVsEleIDSF_1*TauVsEleIDSF_2*TauVsMuIDSF_1*TauVsMuIDSF_2*TauVsJetIDSF_1*TauVsJetIDSF_2;
 					if (TrigSF_1 !=1)
 						evtwt_nom *= TrigSF_1;
@@ -383,33 +476,70 @@ void DCH_CR_VR_test(const char* ext = "root"){
 						evtwt_nom *= TrigSF_3;
 					else if (TrigSF_4 !=1)
 						evtwt_nom *= TrigSF_4;
+				}*/
+				for (int idx=0; idx<cat_string.size(); idx++){
+					if (idx==0) evtwt_nom *= IDSF_1*ISOSF_1;
+					else if (idx==1) evtwt_nom *= IDSF_2*ISOSF_2;
+					else if (idx==2) evtwt_nom *= IDSF_3*ISOSF_3;
+					else if (idx==3) evtwt_nom *= IDSF_4*ISOSF_4;
+					
+					if(cat_string[idx]=='e' or cat_string[idx]=='m'){
+						if(idx==0) evtwt_nom *= TrigSF_1;
+						else if(idx==1) evtwt_nom *= TrigSF_2;
+						else if(idx==2) evtwt_nom *= TrigSF_3;
+						else if(idx==3) evtwt_nom *= TrigSF_4;
+					}
+					else if (cat_string[idx]=='t'){
+						if(idx==0) evtwt_nom *= TauVsEleIDSF_1*TauVsMuIDSF_1*TauVsJetIDSF_1;
+						else if(idx==1) evtwt_nom *= TauVsEleIDSF_2*TauVsMuIDSF_2*TauVsJetIDSF_2;
+						else if(idx==2) evtwt_nom *= TauVsEleIDSF_3*TauVsMuIDSF_3*TauVsJetIDSF_3;
+						else if(idx==3) evtwt_nom *= TauVsEleIDSF_4*TauVsMuIDSF_4*TauVsJetIDSF_4;
+					}
 				}
 			}
 			
-			int nLooseObj = 0;//nLooseElectron+nLooseMuon+nLooseTau;
-			if (lpt !=nullptr) nLooseObj = lpt->size();
+			/*if (!isData && APPLY_TAU_FAKE_RATE && lpt && lflavor && gen_match) {
+	            for (size_t il = 0; il < lpt->size(); ++il) {
+		            if (std::abs(lflavor->at(il)) != 15) continue;
+		            if (lpt->at(il) <= 0) continue;
+		            if (il >= gen_match->size()) continue;
+		            int gm = gen_match->at(il);
+		            if (gm == 5) continue;
+		            bool useEtau = (gm == 1 && etauFrReader != nullptr);
+		            const TauFRReader& reader = useEtau ? *etauFrReader : *frReader;
+		            TauCand c = makeLooseTauCand(il, reader, useEtau);
+		            if (overlapsAny(c, baseObjects)) continue;
+		            if (overlapsAnyTauCand(c, tauCands)) continue;
+		            tauCands.push_back(c);
+		        }
+		    }*/
+			
+			int nLooseObj = nLooseTau;
 			//std::cout << "lpt size = " << lpt->size() << std::endl;
 			//if (cat_string.size() <2)continue;
 			//if (nLooseObj < 2) continue;
 						
 			double fr[nLooseObj];
 			int l_idx[nLooseObj]; int ilt = 0;
-			for(int il = 0; il < nLooseObj; il++){//cout<<evtwt_nom<<"\t";
+			for(int il = 0; il < nLooseElectron+nLooseMuon+nLooseTau; il++){//cout<<evtwt_nom<<"\t";
 				if (abs(lflavor->at(il)) == 15) {
 					fr[ilt] = tauFR.getFR(lpt->at(il), leta->at(il));
+					l_idx[ilt] = il;
+					ilt++;
 				}
-				else if (abs(lflavor->at(il)) == 11) {
-					fr[ilt] = eleFR.getFR(lpt->at(il), leta->at(il));
+				/*else if (abs(lflavor->at(il)) == 11) {
+					fr[ilt] = 0;//eleFR.getFR(lpt->at(il), leta->at(il));
 				}
 				else if (abs(lflavor->at(il)) == 13) {
-					fr[ilt] = muFR.getFR(lpt->at(il), leta->at(il));
+					fr[ilt] = 0;//muFR.getFR(lpt->at(il), leta->at(il));
 				}
-				l_idx[ilt] = il;
-				cout<<nLooseObj<<"\t"<<l_idx[ilt]<<"\t"<<ilt<<"\t"<<il<<endl;
-				ilt++;
+				l_idx[ilt] = il;*/
+				//cout<<nLooseObj<<"\t"<<l_idx[ilt]<<"\t"<<ilt<<"\t"<<il<<endl;
+				
 			}
-			
-			auto loose_states = generateStates(nLooseObj, 4-cat_string.size(), true);
+			std::vector<std::vector<int>> loose_states;
+			if (XSec(filename[j])!=1) loose_states = generateStates(nLooseObj, 4-cat_string.size(), true);
+			//auto loose_states = generateStates(nLooseObj, 4-cat_string.size(), true);
 			
 
 			auto fillSlot = [&](int catsize, int idx) {
@@ -481,22 +611,25 @@ void DCH_CR_VR_test(const char* ext = "root"){
 				}
 			};
 			
-			for(int istate = 0; istate < loose_states.size(); istate++){//FR application loop
+			for(int istate = 0; istate < std::max<size_t>(1, loose_states.size()); istate++){//FR application loop
+				//we run this loop atleast once and max loose_states.size() times.
 				double evtwt_fr = evtwt_nom;
 				std::string newCat = cat_string;
-				for(int jpos = 0; jpos < loose_states[istate].size(); jpos++){
-					if(loose_states[istate][jpos]==1){
-						evtwt_fr *= fr[jpos];
-						fillSlot(newCat.size(), l_idx[jpos]);
-						if (abs(lflavor->at(jpos))==11) newCat += "e";
-						else if (abs(lflavor->at(jpos))==13) newCat += "m";
-						else if (abs(lflavor->at(jpos))==15) newCat += "t";
+				if (!loose_states.empty()) {
+					for(int jpos = 0; jpos < loose_states[istate].size(); jpos++){
+						if(loose_states[istate][jpos]==1){
+							evtwt_fr *= fr[jpos];
+							fillSlot(newCat.size(), l_idx[jpos]);
+							int flav = abs(lflavor->at(jpos));
+							if (flav==15) newCat += "t";
+							//else if (flav==13) newCat += "m";
+							//else if (flav==11) newCat += "e";
+						}
+						else if(loose_states[istate][jpos]==0){
+							evtwt_fr *= 1-fr[jpos]; 
+						}
 					}
-					else if(loose_states[istate][jpos]==0){
-						evtwt_fr *= 1-fr[jpos]; 
-					}
-				}
-					
+				}						
 				cat_name = const_cast<char*>(newCat.c_str());
 				bool foundDup = false;
 				std::vector<Lepton> leptons = {
@@ -525,7 +658,7 @@ void DCH_CR_VR_test(const char* ext = "root"){
 				TLorentzVector MET;
 				MET.SetPtEtaPhiM(met, 0, metphi, 0);
 				double LT = LepV(1).Pt()+LepV(2).Pt()+LepV(3).Pt()+LepV(4).Pt();
-cout<<newCat<<"\t"<<cat_name<<"\t"<<pt_1<<"\t"<<pt_2<<"\t"<<pt_3<<"\t"<<pt_4<<"\t"<<evtwt_fr<<endl;
+//cout<<newCat<<"\t"<<cat_name<<"\t"<<pt_1<<"\t"<<pt_2<<"\t"<<pt_3<<"\t"<<pt_4<<"\t"<<evtwt_fr<<endl;
 				vector<pair<int, int>> Z_pair, Zv_pair, Ztt_pair, SS_pair;
 				processPairs(cat_name, Z_pair, Zv_pair, Ztt_pair, SS_pair, Ztt_pair);//were putiing OSDF pairs in Ztt container for now.
 				Zv_pair = removeOverlap(Zv_pair, strlen(cat_name));
@@ -567,11 +700,11 @@ cout<<newCat<<"\t"<<cat_name<<"\t"<<pt_1<<"\t"<<pt_2<<"\t"<<pt_3<<"\t"<<pt_4<<"\
 	 "CR_0tau","CR_1tau","CR_2tau","CR_3tau","CR_3lep0tau","CR_3lep1tau","CR_3lep2tau",
 	 "SR_0tau","SR_1tau","SR_2tau","SR_3tau","SR_3lep0tau","SR_3lep1tau","SR_3lep2tau",
 	 "DYCR_0tau","DYCR_1tau","DYveto_0tau","DYveto_1tau",
-	 "ee", "em", "mm", "eee", "eem", "eet", "emt", "emm", "mmm", "mmt",
-	 "ett", "mtt", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
-	 "eett", "emmt", "emtt", "ettt", "mmmt", "mmtt", "mttt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_emm", "v_mmm", "v_mmt",
-	 "v_ett", "v_mtt", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
-	 "v_eett", "v_emmt", "v_emtt", "v_ettt", "v_mmmt", "v_mmtt", "v_mttt"};//makes lookup faster!!
+	 "ee", "em", "mm", "eee", "eem", "eet", "emt", "mme", "mmm", "mmt",
+	 "tte", "ttm", "eeee", "eeem", "eemm", "mmem", "mmmm", "eeet", "eemt",
+	 "eett", "emmt", "ttem", "ttet", "mmmt", "mmtt", "ttmt", "v_ee", "v_em", "v_mm", "v_eee", "v_eem", "v_eet", "v_emt", "v_mme", "v_mmm", "v_mmt",
+	 "v_tte", "v_ttm", "v_eeee", "v_eeem", "v_eemm", "v_mmem", "v_mmmm", "v_eeet", "v_eemt",
+	 "v_eett", "v_emmt", "v_ttem", "v_ttet", "v_mmmt", "v_mmtt", "v_ttmt"};//makes lookup faster!!
 				
 				
 				std::string channel = classifyTauRegion(cat_name, LT, OS_pair);
@@ -586,9 +719,6 @@ cout<<newCat<<"\t"<<cat_name<<"\t"<<pt_1<<"\t"<<pt_2<<"\t"<<pt_3<<"\t"<<pt_4<<"\
 				
 				std::string channel1 = classifyLepRegion(cat_name, OS_pair);
 
-				//if (Z_pair.size()>1 and (LepV(Z_pair[1].first)+LepV(Z_pair[1].second)).M() > 102) {
-				//cout<<cat_name<<"\t"<<channel1<<(LepV(Z_pair[1].first)+LepV(Z_pair[1].second)).M()<<"\t"<<Z_pair.size()<<"\t"<<Zv_pair.size()<<endl;
-					//for (auto a:Z_pair) cout<<a.first<<"\t"<<a.second<<endl;}
 				if(!histCh.count(channel1)) continue;
 				
 				if (Z_pair.size() == 1){//fills DY and WZ CRs
@@ -596,13 +726,13 @@ cout<<newCat<<"\t"<<cat_name<<"\t"<<pt_1<<"\t"<<pt_2<<"\t"<<pt_3<<"\t"<<pt_4<<"\
 					if (strlen(cat_name)==3 and !(met>=40)) continue; //for WZ CR
 					fillHistograms(channel1, h_mZ1, h_mZ2, h_mH1, h_mH2, h_met, h_LT, h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4,h_dRll,h_mT, met, mT, OS_pair, SS_pair, evtwt_fr);
 				}
-				/*if(Z_pair.size() ==2){//fills ZZ CR.
-					fillHistograms(channel1, h_mZ1, h_mZ2, h_mH1, h_mH2, h_met, h_LT, h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, met, mT, OS_pair, SS_pair, evtwt_fr);
+				if(Z_pair.size() ==2){//fills ZZ CR.
+					fillHistograms(channel1, h_mZ1, h_mZ2, h_mH1, h_mH2, h_met, h_LT, h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4,h_dRll,h_mT, met, 0, OS_pair, SS_pair, evtwt_fr);
 				}
 				else if (Zv_pair.size() > 0 and Z_pair.size()==0){//fills Veto Regions
 					channel1 = "v_"+channel1;
-					fillHistograms(channel1, h_mZ1, h_mZ2, h_mH1, h_mH2, h_met, h_LT, h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4, met,mT, OS_pair, SS_pair, evtwt_fr);
-				}*/
+					fillHistograms(channel1, h_mZ1, h_mZ2, h_mH1, h_mH2, h_met, h_LT, h_pt1, h_pt2, h_pt3, h_pt4, h_eta1, h_eta2, h_eta3, h_eta4, h_phi1, h_phi2, h_phi3, h_phi4,h_dRll,h_mT, met, 0, OS_pair, SS_pair, evtwt_fr);
+				}
 			}//FR application loop
 		}//evt loop 
 		ofile->cd();
