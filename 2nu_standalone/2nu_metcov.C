@@ -49,6 +49,7 @@ inline mat2 mat2_transpose(const mat2 &A){
 inline vec2 vec2_add(const vec2 &a, const vec2 &b){ return vec2{a[0]+b[0], a[1]+b[1]}; }
 inline vec2 vec2_sub(const vec2 &a, const vec2 &b){ return vec2{a[0]-b[0], a[1]-b[1]}; }
 inline vec2 scalar_vec(double s, const vec2 &v){ return vec2{ s*v[0], s*v[1] }; }
+
 inline mat2 outer(const vec2 &a, const vec2 &b){
     mat2 M; M[0][0]=a[0]*b[0]; M[0][1]=a[0]*b[1]; M[1][0]=a[1]*b[0]; M[1][1]=a[1]*b[1]; return M;
 }
@@ -66,10 +67,6 @@ inline double quad(TVector3 &a, const mat2 &M, TVector3 &b) {
     return a.X()*(M[0][0]*b.X() + M[0][1]*b.Y()) +
            a.Y()*(M[1][0]*b.X() + M[1][1]*b.Y());
 }
-
-inline vec2 add(const vec2 &a,const vec2 &b){ return vec2{a[0]+b[0], a[1]+b[1]}; }
-inline vec2 subv(const vec2 &a,const vec2 &b){ return vec2{a[0]-b[0], a[1]-b[1]}; }
-inline vec2 scalev(double s,const vec2 &v){ return vec2{s*v[0], s*v[1]}; }
 
 // Solve H x = b for 2x2 H using inv2
 inline bool solve2(const mat2 &H, const vec2 &b, vec2 &x) {
@@ -367,10 +364,10 @@ bool FitAlphasMultiplicativeGN(
         vec2 J = { dMA_da1, dMA_da2 }; // row vector
 
         // Build gradient: g = W*(alpha - alpha_hat) + lambda * J^T * f
-        vec2 alpha_diff = subv(alpha, alpha_hat);
+        vec2 alpha_diff = vec2_sub(alpha, alpha_hat);
         vec2 Wad = mat2_vec(W, alpha_diff); // W*(alpha - alpha_hat)
-        vec2 JT_f = scalev(f, J);          // J^T * f (componentwise)
-        vec2 grad = add(Wad, scalev(lambda, JT_f)); // 2-vector
+        vec2 JT_f = scalar_vec(f, J);          // J^T * f (componentwise)
+        vec2 grad = vec2_add(Wad, scalar_vec(lambda, JT_f)); // 2-vector
 
         // Build approximate Hessian: H = W + lambda * J^T J  (2x2)
         mat2 JTJ = outer(J, J); // 2x2
@@ -379,7 +376,7 @@ bool FitAlphasMultiplicativeGN(
             H[a][b] += lambda * JTJ[a][b];
 
         // Solve H * delta = -grad
-        vec2 rhs = scalev(-1.0, grad);
+        vec2 rhs = scalar_vec(-1.0, grad);
         vec2 delta;
         if (!solve2(H, rhs, delta)) {
             // ill-conditioned Hessian
@@ -388,7 +385,7 @@ bool FitAlphasMultiplicativeGN(
         }
 
         // update
-        alpha = add(alpha, delta);
+        alpha = vec2_add(alpha, delta);
 
         // convergence check
         double dn = std::sqrt(delta[0]*delta[0] + delta[1]*delta[1]);
@@ -465,7 +462,21 @@ std::tuple<int, double, double, double, double, bool> get_legs_comb(std::string 
 	//for 2 alphas
 	float dmH = 99999;//abs(mll_1 - mll_2) ;
 	bool isOpp = true;
-
+	//======================new=========
+		double min1 = 999;
+		double min2 = 999;
+		int idx1 = -9, idx2 = -9;
+		for (int i=0;i<4;i++) {
+			double dPhi1 = deltaPhi(MET_lab, Lep_lab[i]);
+		    if (dPhi1 < min1) {
+		        min2 = min1; idx2 = idx1;
+		        min1 = dPhi1; idx1 = i;
+		    } 
+		    else if (dPhi1 < min2){
+		    	min2 = dPhi1; idx2 = i;
+		    }
+		}
+	//=======================================
     for (int i=0;i<4;i++){
     	for (int j=i+1;j<4;j++){
     		
@@ -474,6 +485,9 @@ std::tuple<int, double, double, double, double, bool> get_legs_comb(std::string 
             //the below if-else is to assign scan only if the leg has a tau
             //if (ileg.size()==1 and !(i_in or j_in)) continue;
 			//else if (ileg.size()>1 and !(i_in and j_in)) continue;
+    		
+    		if (idx1 != i and idx1 != j) continue; 
+			if (idx2 != i and idx2 != j) continue;
     		
     		//below is just initialization. I chose to use the analystic solutions for the initial values. Just a choice, could even be 0.
 			double alpha1 = MET_ref.Cross(Lxy[j].Unit())*Lxy[i].Unit().Cross(Lxy[j].Unit())/Lxy[i].Unit().Cross(Lxy[j].Unit()).Mag2();

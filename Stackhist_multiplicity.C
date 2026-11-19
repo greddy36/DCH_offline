@@ -20,8 +20,8 @@
 static bool DRAW_BANDS = true;
 static bool USE_LOG_Y = false;
 static bool EVENTS_PER_BIN_WIDTH = false;
-static std::string INPUT_DIR = "hists/run2_hists_noFR_roccor/";
-static std::string OUTPUT_DIR = "multiplicity_plots/run2_plots_noFR_roccor/";
+static std::string INPUT_DIR = "run2_noFR_metphi_zpt_recoil_roccor_toppt_syst_signal_updated/";
+static std::string OUTPUT_DIR = "stack_plots";
 
 #include "Stack_modules/Labels.h"
 #include "Stack_modules/HistCache.h"
@@ -31,7 +31,7 @@ static std::string OUTPUT_DIR = "multiplicity_plots/run2_plots_noFR_roccor/";
 #include "Stack_modules/FileDiscovery.h"
 #include "Stack_modules/StackDraw.h"
 
-void Stackhist_multiplicity(std::string inYear = "2018", int firstVariable = 0, int nVariablesToRun = -1) {
+void Stackhist_multiplicity(std::string inYear = "Run2", int firstVariable = 0, int nVariablesToRun = -1) {
     year = inYear;
 
     gROOT->SetBatch(kTRUE);

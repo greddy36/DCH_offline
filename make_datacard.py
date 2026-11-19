@@ -8,17 +8,51 @@ import sys
 
 if len(sys.argv) != 2:
     print("Usage: python make_datacard.py MASS")
-    print("Example: python make_datacard.py 500")
+    print("Example: python make_datacard.py 1500")
     sys.exit(1)
 
 SIGNAL_MASS = sys.argv[1]
 SIGNAL = "M" + SIGNAL_MASS
 
-INPUT_FILE = "combined_hist.root"
-OUTPUT_FILE = f"datacard_{SIGNAL}_mll.txt"
+INPUT_FILE = "combined_hist_onlyTau.root"
+OUTPUT_FILE = f"datacard_{SIGNAL}_onlyTau.txt"
 
-VARIABLE = "mll1"
-#REGION = "SR"
+# ============================================================
+# DISCRIMINATING VARIABLE FOR EACH CHANNEL
+# ============================================================
+'''CHANNEL_VARIABLES = {
+    "tau0N":     "LTmet",
+    "tau0Y":     "LT",
+    "tau1":		"LT",
+    "tau2N":     "LT",
+    "tau2Y":     "mH1",
+    "tau3":		"LT",
+    "lep3tau0": "LT",
+    "lep3tau1": "LT",
+    "lep3tau2": "LT"
+}
+
+CHANNELS = [
+    "tau0N",
+    "tau0Y",
+    "tau1",
+    "tau2N",
+    "tau2Y",
+    "tau3",
+    "lep3tau0",
+    "lep3tau1",
+    "lep3tau2",
+]
+'''
+CHANNEL_VARIABLES = {
+    "tau0":     "LTmet",
+    "tau1":     "LTmet",
+    "tau2":     "LTmet",
+    "tau3":     "LTmet",
+    "lep3tau0": "LTmet",
+    "lep3tau1": "LTmet",
+    "lep3tau2": "LTmet",
+}
 
 CHANNELS = [
     "tau0",
@@ -62,10 +96,15 @@ SHAPE_SYSTEMATICS = [
 		"muIso",
 		"muTrig",
 		"pu",
-		"tauES", #this aren't filled!
+		"tauES", 
 		"tauVsEle",
 		"tauVsJet",
-		"tauVsMu"
+		"tauVsMu",
+		"roccor",
+		"zpt",
+		"chargeFlip",
+		"xsec"
+		
 ]
 
 # Normalization systematics
@@ -93,6 +132,21 @@ LNN_SYSTEMATICS = {
     #     "DY": 1.20,
     #     "TT": 1.20,
     # },
+}
+
+FLAT_FAKES = {
+	"3lep":{
+        "DY":      1.3,
+        "WJ":      1.424,
+        "ST":      1.424,
+        "TTbar":   1.3,
+	},
+	"4lep":{
+        "DY":      1.424,
+        "VV":      1.3,
+        "TTbar":   1.424,
+	},
+	
 }
 
 # ============================================================
@@ -134,16 +188,20 @@ for sample in SAMPLES:
 # ============================================================
 
 def hist_name(channel, sample):
-    return f"h_{VARIABLE}_{channel}_{sample}"
+
+    variable = CHANNEL_VARIABLES[channel]
+
+    return f"h_{variable}_{channel}_{sample}"
 
 
 def shape_hist_name(channel, systematic, direction, sample):
+
+    variable = CHANNEL_VARIABLES[channel]
+
     return (
-        f"h_{VARIABLE}_{channel}_"
+        f"h_{variable}_{channel}_"
         f"{systematic}{direction}_{sample}"
     )
-
-
 # ============================================================
 # CHECK HISTOGRAM
 # ============================================================
@@ -180,16 +238,13 @@ with open(OUTPUT_FILE, "w") as card:
     # --------------------------------------------------------
 
     for channel in CHANNELS:
+    
+        variable = CHANNEL_VARIABLES[channel]
+    
+        nominal = f"h_{variable}_{channel}_$PROCESS"
 
-        nominal = (
-            f"h_{VARIABLE}_{channel}_$PROCESS"
-        )
-
-        systematic = (
-            f"h_{VARIABLE}_{channel}_"
-            f"$SYSTEMATIC_$PROCESS"
-        )
-
+        systematic = f"h_{variable}_{channel}_$SYSTEMATIC_$PROCESS"
+    
         card.write(
             f"shapes * {channel} {INPUT_FILE} "
             f"{nominal} {systematic}\n"
@@ -284,7 +339,15 @@ with open(OUTPUT_FILE, "w") as card:
                     card.write(f"{'-':<15}")
 
         card.write("\n")
-
+    #=================
+    # Flat fake-rate normalization uncertainties
+    card.write(f"{'fake':<15} lnN     ")
+    for channel in CHANNELS:
+        for sample in SAMPLES:
+            category = "3lep" if channel.startswith("lep3tau") else "4lep"
+            value = FLAT_FAKES[category].get(sample, "-")
+            card.write(f"{str(value):<15}")
+    card.write("\n")
     # ========================================================
     # SHAPE SYSTEMATICS
     # ========================================================
@@ -313,12 +376,12 @@ with open(OUTPUT_FILE, "w") as card:
 
                 up = f.Get(up_name)
                 down = f.Get(down_name)
+                nominal = get_hist(hist_name(channel, sample))
 
-                if up and down:
+                if (nominal.Integral() > 0.0 and up and down and up.Integral() > 0.0 and down.Integral() > 0.0):
                     card.write(f"{'1':<15}")
                 else:
                     card.write(f"{'-':<15}")
-
         card.write("\n")
 
     # ========================================================

@@ -1,428 +1,600 @@
 #include <TFile.h>
+#include <TH1.h>
 #include <TH1D.h>
-#include <TCanvas.h>
-#include <TStyle.h>
 #include <THStack.h>
+#include <TCanvas.h>
 #include <TPad.h>
 #include <TLegend.h>
+#include <TLine.h>
+#include <TStyle.h>
+#include <TSystem.h>
+#include <TROOT.h>
+#include <TString.h>
+#include <cmath>
+#include <limits>
+#include <algorithm>
+#include <iostream>
+#include <map>
 #include <vector>
 #include <string>
-#include <map>
+#include <set>
+#include <TGraphAsymmErrors.h>
 #include "include/Xsections.C"
 #include "include/cms_plots.h"
+#include "include/FileMap.h"
+
+using namespace std;
+
+// ========================== USER SETTINGS ==========================
+const string INPUT_DIR = "run2_tauFR_all_corrections_hist";
+const string OUTPUT_DIR = "stack_plots";
+const string YEAR = "Run2";
+const string SUMMARY_TYPE = "tau_ch";   // "lep_ch" = inclusive lepch
+const vector<string> VARIABLES = {"LT", "mZ1","met","mH1",//"mZ2", "mH2",
+								/*"pt1","pt2", "pt3", "pt4",
+								"eta1","eta2", "eta3", "eta4",
+								"phi1","phi2", "phi3", "phi4",
+								"iso1","iso2", "iso3", "iso4",
+								"dxy1","dxy2", "dxy3", "dxy4",
+								"dZ1","dZ2", "dZ3", "dZ4",*/};
+const vector<string> SYSTEMATICS = {""};  //systematic to plot e.g. {"", "eIdIsoUp", "eIdIsoDown"}
+const vector<string> fullSystList = {//systematic to use in the band
+    "eIdIso",
+    "eReco",
+    "eTrig",
+    "l1Prefire",
+    "muId",
+    "muIso",
+    "muTrig",
+    "roccor",
+    "tauES",
+    "tauVsEle",
+    "tauVsJet",
+    "tauVsMu",
+    //"xsec"//already in xsec file
+};
+
+const vector<string> LEP_CHANNELS = {
+        "eeee", "eeem", "eeet", "eemm", "eemt", "eett",
+                "emem", "emet", "emmm", "emmt", "emtt",
+                        "etet", "etmm", "etmt", "ettt",
+                                "mmmm", "mmmt", "mmtt",
+                                        "mtmt", "mttt",
+                                                "tttt",
+          "eee", "eem", "eet",
+          "eme", "emm", "emt",
+          "ete", "etm", "ett",
+          "mme", "mmm", "mmt",
+          "mte", "mtm", "mtt",
+          "tte", "ttm", "ttt",
+          "ee","em","et","mm","mt","tt","e","m","t"};
+const vector<string> REGIONS = {"VR"};//,"DYCR", "SR", "SS_incl","SS_Zwin","SS_Zveto","OS_incl","OS_Zwin","OS_Zveto"};
+const vector<string> CHANNELS = {"0tau","1tau","2tau"};
+const bool LOG_Y = true;
+const double SIGNAL_SCALE = 1;
+const bool DRAW_SIGNAL = false;
+const bool APPLY_XSEC_SCALE = false; // Set true only if input histograms are NOT normalized
+const bool APPLY_OLD_NORM_FACTORS = true; // VV * 1.033462, ZZ * 1.284495
+const bool INCLUDE_FAKE_UNCERT = true; // legacy fake-rate variance already included in nominal errors
+const bool DRAW_SYST_BAND = true; // nominal plots only
+const int REBIN_FACTOR = 1; // common rebin factor for ALL histograms, 1 = none
+
+map<string, pair<double, double>> X_RANGES = {
+    {"mZ1",   {70, 110}},
+	{"mZ2",   {0, 250}},
+    {"mH1", {0, 500}},
+    {"mH2", {0, 500}},
+    {"met",   {0, 200}},
+    {"LT",    {0, 1000}}
+};
+// ==================================================================
+
+const vector<string> BKGS = {"DY","VV","VVV","ttV","WJ","ZZ","ST","TTbar","other"};
+const map<string,int> COLORS = {
+    {"DY",7},{"VV",8},{"VVV",6},{"ttV",4},{"WJ",9},
+    {"ZZ",5},{"ST",30},{"TTbar",46},{"other",28}
+};
+
+
+
+string histName(const string& var, const string& lepch, const string& region,
+                const string& ch, const string& syst) {
+    string n = "h_" + var + "_" + lepch;
+    if (!region.empty()) n += "_" + region;
+    if (!ch.empty()) n += "_" + ch;
+    if (!syst.empty()) n += "_" + syst;
+    return n;
+}
+
+// SUMMARY_TYPE == "tau_ch": sum over lepch at fixed (var, region, ch, syst).
+// Otherwise: sum over ch at fixed (var, lepch, region, syst).
+vector<string> selectedNames(const string& var, const string& region,
+                             const string& category, const string& syst) {
+    vector<string> out;
+    if (SUMMARY_TYPE == "tau_ch") {
+        for (const auto& lepch : LEP_CHANNELS)
+            out.push_back(histName(var, lepch, region, category, syst));
+    } else {
+        for (const auto& ch : CHANNELS)
+            out.push_back(histName(var, category, region, ch, syst));
+    }
+    return out;
+}
+void MergeOverflowInRange(TH1* h, double xmin, double xmax)
+{
+    if (!h || !(xmin < xmax)) return;
+    const int nb = h->GetNbinsX();
+    const int first = std::max(1, std::min(nb, h->GetXaxis()->FindFixBin(xmin)));
+    const int last = std::max(1, std::min(nb,
+        h->GetXaxis()->FindFixBin(std::nextafter(xmax, -std::numeric_limits<double>::infinity()))));
+    if (first > last) return;
+
+    // Handle one-bin ranges without double counting.
+    if (first == last) {
+        double content = 0, err2 = 0;
+        for (int i = 0; i <= nb + 1; ++i) {
+            content += h->GetBinContent(i);
+            err2 += std::pow(h->GetBinError(i), 2);
+            h->SetBinContent(i, 0);
+            h->SetBinError(i, 0);
+        }
+        h->SetBinContent(first, content);
+        h->SetBinError(first, std::sqrt(err2));
+        return;
+    }
+
+    double low = 0, lowErr2 = 0, high = 0, highErr2 = 0;
+    for (int i = 0; i <= first; ++i) {
+        low += h->GetBinContent(i);
+        lowErr2 += std::pow(h->GetBinError(i), 2);
+    }
+    for (int i = last; i <= nb + 1; ++i) {
+        high += h->GetBinContent(i);
+        highErr2 += std::pow(h->GetBinError(i), 2);
+    }
+    for (int i = 0; i <= nb + 1; ++i) {
+        if (i < first || i > last) {
+            h->SetBinContent(i, 0);
+            h->SetBinError(i, 0);
+        }
+    }
+    h->SetBinContent(first, low);
+    h->SetBinError(first, std::sqrt(lowErr2));
+    h->SetBinContent(last, high);
+    h->SetBinError(last, std::sqrt(highErr2));
+}
+double NBINS = 10;//total number of bins you'd see in the plot
+// Apply exactly the same binning and custom range to nominal and variations.
+void prepareForPlot(TH1D* h, double xmin, double xmax) {
+    if (!h) return;
+    const double fullWidth = h->GetXaxis()->GetXmax() - h->GetXaxis()->GetXmin();
+    if (fullWidth > 0 && xmax > xmin) {
+        int factor = static_cast<int>(std::round((xmax-xmin) / fullWidth * h->GetNbinsX() / NBINS));//total number of bins you'd see in the plot
+        factor = std::max(1, factor);
+        // ROOT requires a compatible integer factor; avoid truncated remainder bins.
+        while (factor > 1 && h->GetNbinsX() % factor != 0) --factor;
+        if (factor > 1) h->Rebin(factor);
+    }
+    MergeOverflowInRange(h, xmin, xmax);
+}
+
+string axisTitle(const string& var) {
+    const map<string,string> labels = {
+        {"mH1","Leading SS pair invariant mass [GeV]"},
+        {"mH2","Sub-leading SS pair invariant mass [GeV]"},
+        {"met","E_{T}^{miss} [GeV]"},
+        {"LT","L_{T} [GeV]"},
+        {"mZ1","Leading OSSF pair invariant mass [GeV]"},
+        {"mZ2","Sub-leading OSSF pair invariant mass [GeV]"},
+        {"WMt","W transverse mass [GeV]"}
+    };
+    auto it = labels.find(var);
+    return it == labels.end() ? var : it->second;
+}
+
+// Returns a detached copy; never rebin or modify the original TFile histogram.
+TH1D* copyHistogram(TFile* f, const string& name) {
+    auto* src = dynamic_cast<TH1D*>(f->Get(name.c_str()));
+    if (!src) return nullptr;
+    static unsigned long serial = 0;
+    auto* h = (TH1D*)src->Clone(Form("tmp_%lu", ++serial));
+    h->SetDirectory(nullptr);
+    h->Sumw2();
+    if (REBIN_FACTOR > 1) h->Rebin(REBIN_FACTOR);
+    return h;
+}
+
+bool compatible(const TH1D* a, const TH1D* b) {
+    if (a->GetNbinsX() != b->GetNbinsX()) return false;
+    for (int i=1; i<=a->GetNbinsX()+1; ++i)
+        if (std::abs(a->GetXaxis()->GetBinLowEdge(i)-b->GetXaxis()->GetBinLowEdge(i)) > 1e-7)
+            return false;
+    return true;
+}
+
+// Apply per-file normalization/systematic error BEFORE adding to the process total.
+void prepareSample(TH1D* h, TFile* f, const string& process, const string& name) {
+    if (process == "data") return;
+    if (APPLY_XSEC_SCALE) h->Scale(applyXSec(f));
+    for (int b=1; b<=h->GetNbinsX(); ++b) {
+        const double y = h->GetBinContent(b);
+        const double stat = h->GetBinError(b);
+        const double xsec = y * XSec_Uncert(f->GetName()) / 100.;
+        double variance = stat*stat + xsec*xsec;
+        if (INCLUDE_FAKE_UNCERT) {
+            double fake = 0.;
+            if (SUMMARY_TYPE == "tau_ch") {
+                fake = fake_uncert_squared(name.find("3lep") != string::npos ? "3lep" : "4lep", f->GetName());
+            } else if (name.find("h_met_ee") == string::npos &&
+                       name.find("h_met_mm") == string::npos &&
+                       name.find("h_metv_ee") == string::npos &&
+                       name.find("h_metv_mm") == string::npos) {
+                fake = fake_uncert_squared(SUMMARY_TYPE, f->GetName());
+            }
+            variance += fake*y*y; // fake_uncert_squared returns a squared fractional uncertainty
+        }
+        h->SetBinError(b, std::sqrt(std::max(0.,variance)));
+//	if(variance>0.0001) cout<<h->GetName()<<" fake rate uncert is: "<<variance<<endl;
+    }
+}
+
+TGraphAsymmErrors* MakeRatioUncertaintyBand(
+    TH1D* nominal,
+    const map<string, pair<TH1D*, TH1D*>>& systematics
+)
+{
+    int nbins = nominal->GetNbinsX();
+
+    TGraphAsymmErrors* band = new TGraphAsymmErrors(nbins);
+
+    for (int i = 1; i <= nbins; i++)
+    {
+        double B = nominal->GetBinContent(i);
+        double stat = nominal->GetBinError(i);
+
+        double errUp2 = stat * stat;
+        double errDown2 = stat * stat;
+
+        for (const auto& kv : systematics)
+        {
+            TH1D* hUp = kv.second.first;
+            TH1D* hDown = kv.second.second;
+
+            if (!hUp || !hDown)
+                continue;
+
+            double up = hUp->GetBinContent(i) - B;
+            double down = hDown->GetBinContent(i) - B;
+
+            double deltaPlus = std::max({0.0, up, down});
+            double deltaMinus = std::max({0.0, -up, -down});
+
+            errUp2 += deltaPlus * deltaPlus;
+            errDown2 += deltaMinus * deltaMinus;
+        }
+
+        double x = nominal->GetBinCenter(i);
+        double ex = nominal->GetBinWidth(i) / 2.0;
+
+        double eyUp = 0;
+        double eyDown = 0;
+
+        if (B > 0)
+        {
+            eyUp = sqrt(errUp2) / B;
+            eyDown = sqrt(errDown2) / B;
+        }
+
+        band->SetPoint(i - 1, x, 1.0);
+        band->SetPointError(
+            i - 1,
+            ex, ex,
+            eyDown, eyUp
+        );
+    }
+
+    band->SetFillColor(kGray + 2);
+    band->SetFillStyle(3001);
+    band->SetLineColor(kGray + 2);
+
+    return band;
+}
+
+TH1D* combineProcess(const vector<TFile*>& input, const vector<string>& names,
+                     const string& process, const string& outputName) {
+    TH1D* sum = nullptr;
+    size_t found = 0;
+    for (TFile* f : input) {
+        if (!f || f->IsZombie()) continue;
+        for (const auto& name : names) {
+            TH1D* h = copyHistogram(f,name);
+            if (!h) continue;
+            prepareSample(h,f,process,name);
+            if (!sum) {
+                sum = (TH1D*)h->Clone(outputName.c_str());
+                sum->SetDirectory(nullptr);
+            } else if (compatible(sum,h)) {
+                sum->Add(h);
+            } else {
+                cerr << "WARNING: incompatible bins in " << f->GetName() << ":" << name << endl;
+            }
+            ++found;
+            delete h;
+        }
+    }
+    cout << "  " << process << ": " << found << " histograms found\n";
+    return sum;
+}
+
+// Sum the same exclusive categories/files as the nominal process histogram.
+// Missing variation for a particular file/category uses its nominal shape.
+// A completely absent nuisance therefore gives zero shift, not a missing process.
+TH1D* combineProcessVariation(
+    const vector<TFile*>& input,
+    const vector<string>& nominalNames,
+    const string& process,
+    const string& systSuffix,
+    const string& outputName,
+    double xmin, double xmax,
+    size_t& variedCount,
+    size_t& fallbackCount)
+{
+    TH1D* sum = nullptr;
+    variedCount = fallbackCount = 0;
+    for (TFile* f : input) {
+        if (!f || f->IsZombie()) continue;
+        for (const string& nominalName : nominalNames) {
+            // Only include entries present in nominal selection.
+            if (!f->Get(nominalName.c_str())) continue;
+            const string variedName = nominalName + "_" + systSuffix;
+            TH1D* h = copyHistogram(f, variedName);
+            if (h) ++variedCount;
+            else {
+                h = copyHistogram(f, nominalName);
+                ++fallbackCount;
+            }
+            if (!h) continue;
+            prepareSample(h, f, process, nominalName);
+            if (!sum) {
+                sum = (TH1D*)h->Clone(outputName.c_str());
+                sum->SetDirectory(nullptr);
+            } else if (compatible(sum, h)) {
+                sum->Add(h);
+            } else {
+                cerr << "WARNING: incompatible bins in " << f->GetName()
+                     << ":" << variedName << endl;
+            }
+            delete h;
+        }
+    }
+    if (sum) {
+        if (APPLY_OLD_NORM_FACTORS) {
+            if (process == "VV") sum->Scale(1.033462);
+            if (process == "ZZ") sum->Scale(1.284495);
+        }
+        prepareForPlot(sum, xmin, xmax);
+    }
+    return sum;
+}
 
 void StackHist_test() {
-	std::string summary_type = "tau_ch", year = "Run2";
-    // Define histograms to retrieve
-    const char *hist_list[] = 
-    {
-    //"h_pt1_ee","h_pt1_mm","h_pt2_ee","h_pt2_mm","h_pt1_v_ee","h_pt1_v_mm","h_pt2_v_ee","h_pt2_v_mm",
-//"h_mZ1_ee","h_mZ1_mm",
-//"h_LT_ee","h_LT_mm","h_LT_v_ee","h_LT_v_mm",
-//"h_met_ee","h_met_mm","h_met_v_ee","h_met_v_mm",
-//"h_mZ1_v_ee","h_mZ1_v_mm",
-"h_mZ1_VR_0tau", "h_mZ1_VR_1tau", "h_mZ1_VR_2tau", "h_mZ1_VR_3tau", "h_mZ1_VR_3lep0tau", "h_mZ1_VR_3lep1tau", "h_mZ1_VR_3lep2tau", "h_mZ1_CR_0tau", "h_mZ1_CR_1tau", "h_mZ1_CR_2tau", "h_mZ1_CR_3tau", "h_mZ1_CR_3lep0tau", "h_mZ1_CR_3lep1tau", "h_mZ1_CR_3lep2tau", "h_mZ1_SR_0tau", "h_mZ1_SR_1tau", "h_mZ1_SR_2tau", "h_mZ1_SR_3tau", "h_mZ1_SR_3lep0tau", "h_mZ1_SR_3lep1tau", "h_mZ1_SR_3lep2tau", "h_mZ1_DYCR_0tau", "h_mZ1_DYCR_1tau", "h_mZ1_DYveto_0tau", "h_mZ1_DYveto_1tau", "h_mZ1_ee", "h_mZ1_em", "h_mZ1_mm", "h_mZ1_eee", "h_mZ1_eem", "h_mZ1_eet", "h_mZ1_emt", "h_mZ1_mme", "h_mZ1_mmm", "h_mZ1_mmt", "h_mZ1_ett", "h_mZ1_mtt", "h_mZ1_eeee", "h_mZ1_eeem", "h_mZ1_eemm", "h_mZ1_mmem", "h_mZ1_mmmm", "h_mZ1_eeet", "h_mZ1_eemt", "h_mZ1_eett", "h_mZ1_mmet", "h_mZ1_ttem", "h_mZ1_ttet", "h_mZ1_mmmt", "h_mZ1_mmtt", "h_mZ1_ttmt", /*"h_mZ1_v_ee", "h_mZ1_v_em", "h_mZ1_v_mm", "h_mZ1_v_eee", "h_mZ1_v_eem", "h_mZ1_v_eet", "h_mZ1_v_emt", "h_mZ1_v_mme", "h_mZ1_v_mmm", "h_mZ1_v_mmt", "h_mZ1_v_ett", "h_mZ1_v_mtt", "h_mZ1_v_eeee", "h_mZ1_v_eeem", "h_mZ1_v_eemm", "h_mZ1_v_mmem", "h_mZ1_v_mmmm", "h_mZ1_v_eeet", "h_mZ1_v_eemt", "h_mZ1_v_eett", "h_mZ1_v_mmet", "h_mZ1_v_ttem", "h_mZ1_v_ttet", "h_mZ1_v_mmmt", "h_mZ1_v_mmtt", "h_mZ1_v_ttmt",*/
- "h_mZ2_VR_0tau", "h_mZ2_VR_1tau", "h_mZ2_VR_2tau", "h_mZ2_VR_3tau", "h_mZ2_VR_3lep0tau", "h_mZ2_VR_3lep1tau", "h_mZ2_VR_3lep2tau", "h_mZ2_CR_0tau", "h_mZ2_CR_1tau", "h_mZ2_CR_2tau", "h_mZ2_CR_3tau", "h_mZ2_CR_3lep0tau", "h_mZ2_CR_3lep1tau", "h_mZ2_CR_3lep2tau", "h_mZ2_SR_0tau", "h_mZ2_SR_1tau", "h_mZ2_SR_2tau", "h_mZ2_SR_3tau", "h_mZ2_SR_3lep0tau", "h_mZ2_SR_3lep1tau", "h_mZ2_SR_3lep2tau", "h_mZ2_DYCR_0tau", "h_mZ2_DYCR_1tau", "h_mZ2_DYveto_0tau", "h_mZ2_DYveto_1tau", "h_mZ2_ee", "h_mZ2_em", "h_mZ2_mm", "h_mZ2_eee", "h_mZ2_eem", "h_mZ2_eet", "h_mZ2_emt", "h_mZ2_mme", "h_mZ2_mmm", "h_mZ2_mmt", "h_mZ2_ett", "h_mZ2_mtt", "h_mZ2_eeee", "h_mZ2_eeem", "h_mZ2_eemm", "h_mZ2_mmem", "h_mZ2_mmmm", "h_mZ2_eeet", "h_mZ2_eemt", "h_mZ2_eett", "h_mZ2_mmet", "h_mZ2_ttem", "h_mZ2_ttet", "h_mZ2_mmmt", "h_mZ2_mmtt", "h_mZ2_ttmt", /*"h_mZ2_v_ee", "h_mZ2_v_em", "h_mZ2_v_mm", "h_mZ2_v_eee", "h_mZ2_v_eem", "h_mZ2_v_eet", "h_mZ2_v_emt", "h_mZ2_v_mme", "h_mZ2_v_mmm", "h_mZ2_v_mmt", "h_mZ2_v_ett", "h_mZ2_v_mtt", "h_mZ2_v_eeee", "h_mZ2_v_eeem", "h_mZ2_v_eemm", "h_mZ2_v_mmem", "h_mZ2_v_mmmm", "h_mZ2_v_eeet", "h_mZ2_v_eemt", "h_mZ2_v_eett", "h_mZ2_v_mmet", "h_mZ2_v_ttem", "h_mZ2_v_ttet", "h_mZ2_v_mmmt", "h_mZ2_v_mmtt", "h_mZ2_v_ttmt",*/
- "h_mH1_VR_0tau", "h_mH1_VR_1tau", "h_mH1_VR_2tau", "h_mH1_VR_3tau", "h_mH1_VR_3lep0tau", "h_mH1_VR_3lep1tau", "h_mH1_VR_3lep2tau", "h_mH1_CR_0tau", "h_mH1_CR_1tau", "h_mH1_CR_2tau", "h_mH1_CR_3tau", "h_mH1_CR_3lep0tau", "h_mH1_CR_3lep1tau", "h_mH1_CR_3lep2tau", "h_mH1_SR_0tau", "h_mH1_SR_1tau", "h_mH1_SR_2tau", "h_mH1_SR_3tau", "h_mH1_SR_3lep0tau", "h_mH1_SR_3lep1tau", "h_mH1_SR_3lep2tau", "h_mH1_DYCR_0tau", "h_mH1_DYCR_1tau", "h_mH1_DYveto_0tau", "h_mH1_DYveto_1tau", "h_mH1_ee", "h_mH1_em", "h_mH1_mm", "h_mH1_eee", "h_mH1_eem", "h_mH1_eet", "h_mH1_emt", "h_mH1_mme", "h_mH1_mmm", "h_mH1_mmt", "h_mH1_ett", "h_mH1_mtt", "h_mH1_eeee", "h_mH1_eeem", "h_mH1_eemm", "h_mH1_mmem", "h_mH1_mmmm", "h_mH1_eeet", "h_mH1_eemt", "h_mH1_eett", "h_mH1_mmet", "h_mH1_ttem", "h_mH1_ttet", "h_mH1_mmmt", "h_mH1_mmtt", "h_mH1_ttmt", /*"h_mH1_v_ee", "h_mH1_v_em", "h_mH1_v_mm", "h_mH1_v_eee", "h_mH1_v_eem", "h_mH1_v_eet", "h_mH1_v_emt", "h_mH1_v_mme", "h_mH1_v_mmm", "h_mH1_v_mmt", "h_mH1_v_ett", "h_mH1_v_mtt", "h_mH1_v_eeee", "h_mH1_v_eeem", "h_mH1_v_eemm", "h_mH1_v_mmem", "h_mH1_v_mmmm", "h_mH1_v_eeet", "h_mH1_v_eemt", "h_mH1_v_eett", "h_mH1_v_mmet", "h_mH1_v_ttem", "h_mH1_v_ttet", "h_mH1_v_mmmt", "h_mH1_v_mmtt", "h_mH1_v_ttmt",*/
- "h_mH2_VR_0tau", "h_mH2_VR_1tau", "h_mH2_VR_2tau", "h_mH2_VR_3tau", "h_mH2_VR_3lep0tau", "h_mH2_VR_3lep1tau", "h_mH2_VR_3lep2tau", "h_mH2_CR_0tau", "h_mH2_CR_1tau", "h_mH2_CR_2tau", "h_mH2_CR_3tau", "h_mH2_CR_3lep0tau", "h_mH2_CR_3lep1tau", "h_mH2_CR_3lep2tau", "h_mH2_SR_0tau", "h_mH2_SR_1tau", "h_mH2_SR_2tau", "h_mH2_SR_3tau", "h_mH2_SR_3lep0tau", "h_mH2_SR_3lep1tau", "h_mH2_SR_3lep2tau", "h_mH2_DYCR_0tau", "h_mH2_DYCR_1tau", "h_mH2_DYveto_0tau", "h_mH2_DYveto_1tau", "h_mH2_ee", "h_mH2_em", "h_mH2_mm", "h_mH2_eee", "h_mH2_eem", "h_mH2_eet", "h_mH2_emt", "h_mH2_mme", "h_mH2_mmm", "h_mH2_mmt", "h_mH2_ett", "h_mH2_mtt", "h_mH2_eeee", "h_mH2_eeem", "h_mH2_eemm", "h_mH2_mmem", "h_mH2_mmmm", "h_mH2_eeet", "h_mH2_eemt", "h_mH2_eett", "h_mH2_mmet", "h_mH2_ttem", "h_mH2_ttet", "h_mH2_mmmt", "h_mH2_mmtt", "h_mH2_ttmt", /*"h_mH2_v_ee", "h_mH2_v_em", "h_mH2_v_mm", "h_mH2_v_eee", "h_mH2_v_eem", "h_mH2_v_eet", "h_mH2_v_emt", "h_mH2_v_mme", "h_mH2_v_mmm", "h_mH2_v_mmt", "h_mH2_v_ett", "h_mH2_v_mtt", "h_mH2_v_eeee", "h_mH2_v_eeem", "h_mH2_v_eemm", "h_mH2_v_mmem", "h_mH2_v_mmmm", "h_mH2_v_eeet", "h_mH2_v_eemt", "h_mH2_v_eett", "h_mH2_v_mmet", "h_mH2_v_ttem", "h_mH2_v_ttet", "h_mH2_v_mmmt", "h_mH2_v_mmtt", "h_mH2_v_ttmt",*/
- "h_met_VR_0tau", "h_met_VR_1tau", "h_met_VR_2tau", "h_met_VR_3tau", "h_met_VR_3lep0tau", "h_met_VR_3lep1tau", "h_met_VR_3lep2tau", "h_met_CR_0tau", "h_met_CR_1tau", "h_met_CR_2tau", "h_met_CR_3tau", "h_met_CR_3lep0tau", "h_met_CR_3lep1tau", "h_met_CR_3lep2tau", "h_met_SR_0tau", "h_met_SR_1tau", "h_met_SR_2tau", "h_met_SR_3tau", "h_met_SR_3lep0tau", "h_met_SR_3lep1tau", "h_met_SR_3lep2tau", "h_met_DYCR_0tau", "h_met_DYCR_1tau", "h_met_DYveto_0tau", "h_met_DYveto_1tau", "h_met_ee", "h_met_em", "h_met_mm", "h_met_eee", "h_met_eem", "h_met_eet", "h_met_emt", "h_met_mme", "h_met_mmm", "h_met_mmt", "h_met_ett", "h_met_mtt", "h_met_eeee", "h_met_eeem", "h_met_eemm", "h_met_mmem", "h_met_mmmm", "h_met_eeet", "h_met_eemt", "h_met_eett", "h_met_mmet", "h_met_ttem", "h_met_ttet", "h_met_mmmt", "h_met_mmtt", "h_met_ttmt",/* "h_met_v_ee", "h_met_v_em", "h_met_v_mm", "h_met_v_eee", "h_met_v_eem", "h_met_v_eet", "h_met_v_emt", "h_met_v_mme", "h_met_v_mmm", "h_met_v_mmt", "h_met_v_ett", "h_met_v_mtt", "h_met_v_eeee", "h_met_v_eeem", "h_met_v_eemm", "h_met_v_mmem", "h_met_v_mmmm", "h_met_v_eeet", "h_met_v_eemt", "h_met_v_eett", "h_met_v_mmet", "h_met_v_ttem", "h_met_v_ttet", "h_met_v_mmmt", "h_met_v_mmtt", "h_met_v_ttmt",
-"h_mT_ee", "h_mT_mm", "h_dRll_ee","h_dRll_mm",*/
-"h_LT_VR_0tau", "h_LT_VR_1tau", "h_LT_VR_2tau", "h_LT_VR_3tau", "h_LT_VR_3lep0tau", "h_LT_VR_3lep1tau", "h_LT_VR_3lep2tau", "h_LT_CR_0tau", "h_LT_CR_1tau", "h_LT_CR_2tau", "h_LT_CR_3tau", "h_LT_CR_3lep0tau", "h_LT_CR_3lep1tau", "h_LT_CR_3lep2tau", "h_LT_SR_0tau", "h_LT_SR_1tau", "h_LT_SR_2tau", "h_LT_SR_3tau", "h_LT_SR_3lep0tau", "h_LT_SR_3lep1tau", "h_LT_SR_3lep2tau", "h_LT_DYCR_0tau", "h_LT_DYCR_1tau", "h_LT_DYveto_0tau", "h_LT_DYveto_1tau", "h_LT_ee", "h_LT_em", "h_LT_mm", "h_LT_eee", "h_LT_eem", "h_LT_eet", "h_LT_emt", "h_LT_mme", "h_LT_mmm", "h_LT_mmt", "h_LT_ett", "h_LT_mtt", "h_LT_eeee", "h_LT_eeem", "h_LT_eemm", "h_LT_mmem", "h_LT_mmmm", "h_LT_eeet", "h_LT_eemt", "h_LT_eett", "h_LT_mmet", "h_LT_ttem", "h_LT_ttet", "h_LT_mmmt", "h_LT_mmtt", "h_LT_ttmt", /*"h_LT_v_ee", "h_LT_v_em", "h_LT_v_mm", "h_LT_v_eee", "h_LT_v_eem", "h_LT_v_eet", "h_LT_v_emt", "h_LT_v_mme", "h_LT_v_mmm", "h_LT_v_mmt", "h_LT_v_ett", "h_LT_v_mtt", "h_LT_v_eeee", "h_LT_v_eeem", "h_LT_v_eemm", "h_LT_v_mmem", "h_LT_v_mmmm", "h_LT_v_eeet", "h_LT_v_eemt", "h_LT_v_eett", "h_LT_v_mmet", "h_LT_v_ttem", "h_LT_v_ttet", "h_LT_v_mmmt", "h_LT_v_mmtt", "h_LT_v_ttmt",*/
-//"h_pt1_VR_0tau", "h_pt1_VR_1tau", "h_pt1_VR_2tau", "h_pt1_VR_3tau", "h_pt1_VR_3lep0tau", "h_pt1_VR_3lep1tau", "h_pt1_VR_3lep2tau", "h_pt1_CR_0tau", "h_pt1_CR_1tau", "h_pt1_CR_2tau", "h_pt1_CR_3tau", "h_pt1_CR_3lep0tau", "h_pt1_CR_3lep1tau", "h_pt1_CR_3lep2tau", "h_pt1_SR_0tau", "h_pt1_SR_1tau", "h_pt1_SR_2tau", "h_pt1_SR_3tau", "h_pt1_SR_3lep0tau", "h_pt1_SR_3lep1tau", "h_pt1_SR_3lep2tau", "h_pt1_DYCR_0tau", "h_pt1_DYCR_1tau", "h_pt1_DYveto_0tau", "h_pt1_DYveto_1tau", "h_pt1_ee", "h_pt1_em", "h_pt1_mm", "h_pt1_eee", "h_pt1_eem", "h_pt1_eet", "h_pt1_emt", "h_pt1_mme", "h_pt1_mmm", "h_pt1_mmt", "h_pt1_ett", "h_pt1_mtt", "h_pt1_eeee", "h_pt1_eeem", "h_pt1_eemm", "h_pt1_mmem", "h_pt1_mmmm", "h_pt1_eeet", "h_pt1_eemt", "h_pt1_eett", "h_pt1_mmet", "h_pt1_ttem", "h_pt1_ttet", "h_pt1_mmmt", "h_pt1_mmtt", "h_pt1_ttmt", "h_pt1_v_ee", "h_pt1_v_em", "h_pt1_v_mm", "h_pt1_v_eee", "h_pt1_v_eem", "h_pt1_v_eet", "h_pt1_v_emt", "h_pt1_v_mme", "h_pt1_v_mmm", "h_pt1_v_mmt", "h_pt1_v_ett", "h_pt1_v_mtt", "h_pt1_v_eeee", "h_pt1_v_eeem", "h_pt1_v_eemm", "h_pt1_v_mmem", "h_pt1_v_mmmm", "h_pt1_v_eeet", "h_pt1_v_eemt", "h_pt1_v_eett", "h_pt1_v_mmet", "h_pt1_v_ttem", "h_pt1_v_ttet", "h_pt1_v_mmmt", "h_pt1_v_mmtt", "h_pt1_v_ttmt",
-// "h_pt2_VR_0tau", "h_pt2_VR_1tau", "h_pt2_VR_2tau", "h_pt2_VR_3tau", "h_pt2_VR_3lep0tau", "h_pt2_VR_3lep1tau", "h_pt2_VR_3lep2tau", "h_pt2_CR_0tau", "h_pt2_CR_1tau", "h_pt2_CR_2tau", "h_pt2_CR_3tau", "h_pt2_CR_3lep0tau", "h_pt2_CR_3lep1tau", "h_pt2_CR_3lep2tau", "h_pt2_SR_0tau", "h_pt2_SR_1tau", "h_pt2_SR_2tau", "h_pt2_SR_3tau", "h_pt2_SR_3lep0tau", "h_pt2_SR_3lep1tau", "h_pt2_SR_3lep2tau", "h_pt2_DYCR_0tau", "h_pt2_DYCR_1tau", "h_pt2_DYveto_0tau", "h_pt2_DYveto_1tau", "h_pt2_ee", "h_pt2_em", "h_pt2_mm", "h_pt2_eee", "h_pt2_eem", "h_pt2_eet", "h_pt2_emt", "h_pt2_mme", "h_pt2_mmm", "h_pt2_mmt", "h_pt2_ett", "h_pt2_mtt", "h_pt2_eeee", "h_pt2_eeem", "h_pt2_eemm", "h_pt2_mmem", "h_pt2_mmmm", "h_pt2_eeet", "h_pt2_eemt", "h_pt2_eett", "h_pt2_mmet", "h_pt2_ttem", "h_pt2_ttet", "h_pt2_mmmt", "h_pt2_mmtt", "h_pt2_ttmt", "h_pt2_v_ee", "h_pt2_v_em", "h_pt2_v_mm", "h_pt2_v_eee", "h_pt2_v_eem", "h_pt2_v_eet", "h_pt2_v_emt", "h_pt2_v_mme", "h_pt2_v_mmm", "h_pt2_v_mmt", "h_pt2_v_ett", "h_pt2_v_mtt", "h_pt2_v_eeee", "h_pt2_v_eeem", "h_pt2_v_eemm", "h_pt2_v_mmem", "h_pt2_v_mmmm", "h_pt2_v_eeet", "h_pt2_v_eemt", "h_pt2_v_eett", "h_pt2_v_mmet", "h_pt2_v_ttem", "h_pt2_v_ttet", "h_pt2_v_mmmt", "h_pt2_v_mmtt", "h_pt2_v_ttmt",
- //"h_pt3_VR_0tau", "h_pt3_VR_1tau", "h_pt3_VR_2tau", "h_pt3_VR_3tau", "h_pt3_VR_3lep0tau", "h_pt3_VR_3lep1tau", "h_pt3_VR_3lep2tau", "h_pt3_CR_0tau", "h_pt3_CR_1tau", "h_pt3_CR_2tau", "h_pt3_CR_3tau", "h_pt3_CR_3lep0tau", "h_pt3_CR_3lep1tau", "h_pt3_CR_3lep2tau", "h_pt3_SR_0tau", "h_pt3_SR_1tau", "h_pt3_SR_2tau", "h_pt3_SR_3tau", "h_pt3_SR_3lep0tau", "h_pt3_SR_3lep1tau", "h_pt3_SR_3lep2tau", "h_pt3_DYCR_0tau", "h_pt3_DYCR_1tau", "h_pt3_DYveto_0tau", "h_pt3_DYveto_1tau", "h_pt3_ee", "h_pt3_em", "h_pt3_mm", "h_pt3_eee", "h_pt3_eem", "h_pt3_eet", "h_pt3_emt", "h_pt3_mme", "h_pt3_mmm", "h_pt3_mmt", "h_pt3_ett", "h_pt3_mtt", "h_pt3_eeee", "h_pt3_eeem", "h_pt3_eemm", "h_pt3_mmem", "h_pt3_mmmm", "h_pt3_eeet", "h_pt3_eemt", "h_pt3_eett", "h_pt3_mmet", "h_pt3_ttem", "h_pt3_ttet", "h_pt3_mmmt", "h_pt3_mmtt", "h_pt3_ttmt", "h_pt3_v_ee", "h_pt3_v_em", "h_pt3_v_mm", "h_pt3_v_eee", "h_pt3_v_eem", "h_pt3_v_eet", "h_pt3_v_emt", "h_pt3_v_mme", "h_pt3_v_mmm", "h_pt3_v_mmt", "h_pt3_v_ett", "h_pt3_v_mtt", "h_pt3_v_eeee", "h_pt3_v_eeem", "h_pt3_v_eemm", "h_pt3_v_mmem", "h_pt3_v_mmmm", "h_pt3_v_eeet", "h_pt3_v_eemt", "h_pt3_v_eett", "h_pt3_v_mmet", "h_pt3_v_ttem", "h_pt3_v_ttet", "h_pt3_v_mmmt", "h_pt3_v_mmtt", "h_pt3_v_ttmt",
- //"h_pt4_VR_0tau", "h_pt4_VR_1tau", "h_pt4_VR_2tau", "h_pt4_VR_3tau", "h_pt4_VR_3lep0tau", "h_pt4_VR_3lep1tau", "h_pt4_VR_3lep2tau", "h_pt4_CR_0tau", "h_pt4_CR_1tau", "h_pt4_CR_2tau", "h_pt4_CR_3tau", "h_pt4_CR_3lep0tau", "h_pt4_CR_3lep1tau", "h_pt4_CR_3lep2tau", "h_pt4_SR_0tau", "h_pt4_SR_1tau", "h_pt4_SR_2tau", "h_pt4_SR_3tau", "h_pt4_SR_3lep0tau", "h_pt4_SR_3lep1tau", "h_pt4_SR_3lep2tau", "h_pt4_DYCR_0tau", "h_pt4_DYCR_1tau", "h_pt4_DYveto_0tau", "h_pt4_DYveto_1tau", "h_pt4_ee", "h_pt4_em", "h_pt4_mm", "h_pt4_eee", "h_pt4_eem", "h_pt4_eet", "h_pt4_emt", "h_pt4_mme", "h_pt4_mmm", "h_pt4_mmt", "h_pt4_ett", "h_pt4_mtt", "h_pt4_eeee", "h_pt4_eeem", "h_pt4_eemm", "h_pt4_mmem", "h_pt4_mmmm", "h_pt4_eeet", "h_pt4_eemt", "h_pt4_eett", "h_pt4_mmet", "h_pt4_ttem", "h_pt4_ttet", "h_pt4_mmmt", "h_pt4_mmtt", "h_pt4_ttmt", "h_pt4_v_ee", "h_pt4_v_em", "h_pt4_v_mm", "h_pt4_v_eee", "h_pt4_v_eem", "h_pt4_v_eet", "h_pt4_v_emt", "h_pt4_v_mme", "h_pt4_v_mmm", "h_pt4_v_mmt", "h_pt4_v_ett", "h_pt4_v_mtt", "h_pt4_v_eeee", "h_pt4_v_eeem", "h_pt4_v_eemm", "h_pt4_v_mmem", "h_pt4_v_mmmm", "h_pt4_v_eeet", "h_pt4_v_eemt", "h_pt4_v_eett", "h_pt4_v_mmet", "h_pt4_v_ttem", "h_pt4_v_ttet", "h_pt4_v_mmmt", "h_pt4_v_mmtt", "h_pt4_v_ttmt",
- //"h_eta1_VR_0tau", "h_eta1_VR_1tau", "h_eta1_VR_2tau", "h_eta1_VR_3tau", "h_eta1_VR_3lep0tau", "h_eta1_VR_3lep1tau", "h_eta1_VR_3lep2tau", "h_eta1_CR_0tau", "h_eta1_CR_1tau", "h_eta1_CR_2tau", "h_eta1_CR_3tau", "h_eta1_CR_3lep0tau", "h_eta1_CR_3lep1tau", "h_eta1_CR_3lep2tau", "h_eta1_SR_0tau", "h_eta1_SR_1tau", "h_eta1_SR_2tau", "h_eta1_SR_3tau", "h_eta1_SR_3lep0tau", "h_eta1_SR_3lep1tau", "h_eta1_SR_3lep2tau", "h_eta1_DYCR_0tau", "h_eta1_DYCR_1tau", "h_eta1_DYveto_0tau", "h_eta1_DYveto_1tau", "h_eta1_ee", "h_eta1_em", "h_eta1_mm", "h_eta1_eee", "h_eta1_eem", "h_eta1_eet", "h_eta1_emt", "h_eta1_mme", "h_eta1_mmm", "h_eta1_mmt", "h_eta1_ett", "h_eta1_mtt", "h_eta1_eeee", "h_eta1_eeem", "h_eta1_eemm", "h_eta1_mmem", "h_eta1_mmmm", "h_eta1_eeet", "h_eta1_eemt", "h_eta1_eett", "h_eta1_mmet", "h_eta1_ttem", "h_eta1_ttet", "h_eta1_mmmt", "h_eta1_mmtt", "h_eta1_ttmt", "h_eta1_v_ee", "h_eta1_v_em", "h_eta1_v_mm", "h_eta1_v_eee", "h_eta1_v_eem", "h_eta1_v_eet", "h_eta1_v_emt", "h_eta1_v_mme", "h_eta1_v_mmm", "h_eta1_v_mmt", "h_eta1_v_ett", "h_eta1_v_mtt", "h_eta1_v_eeee", "h_eta1_v_eeem", "h_eta1_v_eemm", "h_eta1_v_mmem", "h_eta1_v_mmmm", "h_eta1_v_eeet", "h_eta1_v_eemt", "h_eta1_v_eett", "h_eta1_v_mmet", "h_eta1_v_ttem", "h_eta1_v_ttet", "h_eta1_v_mmmt", "h_eta1_v_mmtt", "h_eta1_v_ttmt",
-// "h_eta2_VR_0tau", "h_eta2_VR_1tau", "h_eta2_VR_2tau", "h_eta2_VR_3tau", "h_eta2_VR_3lep0tau", "h_eta2_VR_3lep1tau", "h_eta2_VR_3lep2tau", "h_eta2_CR_0tau", "h_eta2_CR_1tau", "h_eta2_CR_2tau", "h_eta2_CR_3tau", "h_eta2_CR_3lep0tau", "h_eta2_CR_3lep1tau", "h_eta2_CR_3lep2tau", "h_eta2_SR_0tau", "h_eta2_SR_1tau", "h_eta2_SR_2tau", "h_eta2_SR_3tau", "h_eta2_SR_3lep0tau", "h_eta2_SR_3lep1tau", "h_eta2_SR_3lep2tau", "h_eta2_DYCR_0tau", "h_eta2_DYCR_1tau", "h_eta2_DYveto_0tau", "h_eta2_DYveto_1tau", "h_eta2_ee", "h_eta2_em", "h_eta2_mm", "h_eta2_eee", "h_eta2_eem", "h_eta2_eet", "h_eta2_emt", "h_eta2_mme", "h_eta2_mmm", "h_eta2_mmt", "h_eta2_ett", "h_eta2_mtt", "h_eta2_eeee", "h_eta2_eeem", "h_eta2_eemm", "h_eta2_mmem", "h_eta2_mmmm", "h_eta2_eeet", "h_eta2_eemt", "h_eta2_eett", "h_eta2_mmet", "h_eta2_ttem", "h_eta2_ttet", "h_eta2_mmmt", "h_eta2_mmtt", "h_eta2_ttmt", "h_eta2_v_ee", "h_eta2_v_em", "h_eta2_v_mm", "h_eta2_v_eee", "h_eta2_v_eem", "h_eta2_v_eet", "h_eta2_v_emt", "h_eta2_v_mme", "h_eta2_v_mmm", "h_eta2_v_mmt", "h_eta2_v_ett", "h_eta2_v_mtt", "h_eta2_v_eeee", "h_eta2_v_eeem", "h_eta2_v_eemm", "h_eta2_v_mmem", "h_eta2_v_mmmm", "h_eta2_v_eeet", "h_eta2_v_eemt", "h_eta2_v_eett", "h_eta2_v_mmet", "h_eta2_v_ttem", "h_eta2_v_ttet", "h_eta2_v_mmmt", "h_eta2_v_mmtt", "h_eta2_v_ttmt",
-// "h_eta3_VR_0tau", "h_eta3_VR_1tau", "h_eta3_VR_2tau", "h_eta3_VR_3tau", "h_eta3_VR_3lep0tau", "h_eta3_VR_3lep1tau", "h_eta3_VR_3lep2tau", "h_eta3_CR_0tau", "h_eta3_CR_1tau", "h_eta3_CR_2tau", "h_eta3_CR_3tau", "h_eta3_CR_3lep0tau", "h_eta3_CR_3lep1tau", "h_eta3_CR_3lep2tau", "h_eta3_SR_0tau", "h_eta3_SR_1tau", "h_eta3_SR_2tau", "h_eta3_SR_3tau", "h_eta3_SR_3lep0tau", "h_eta3_SR_3lep1tau", "h_eta3_SR_3lep2tau", "h_eta3_DYCR_0tau", "h_eta3_DYCR_1tau", "h_eta3_DYveto_0tau", "h_eta3_DYveto_1tau", "h_eta3_ee", "h_eta3_em", "h_eta3_mm", "h_eta3_eee", "h_eta3_eem", "h_eta3_eet", "h_eta3_emt", "h_eta3_mme", "h_eta3_mmm", "h_eta3_mmt", "h_eta3_ett", "h_eta3_mtt", "h_eta3_eeee", "h_eta3_eeem", "h_eta3_eemm", "h_eta3_mmem", "h_eta3_mmmm", "h_eta3_eeet", "h_eta3_eemt", "h_eta3_eett", "h_eta3_mmet", "h_eta3_ttem", "h_eta3_ttet", "h_eta3_mmmt", "h_eta3_mmtt", "h_eta3_ttmt", "h_eta3_v_ee", "h_eta3_v_em", "h_eta3_v_mm", "h_eta3_v_eee", "h_eta3_v_eem", "h_eta3_v_eet", "h_eta3_v_emt", "h_eta3_v_mme", "h_eta3_v_mmm", "h_eta3_v_mmt", "h_eta3_v_ett", "h_eta3_v_mtt", "h_eta3_v_eeee", "h_eta3_v_eeem", "h_eta3_v_eemm", "h_eta3_v_mmem", "h_eta3_v_mmmm", "h_eta3_v_eeet", "h_eta3_v_eemt", "h_eta3_v_eett", "h_eta3_v_mmet", "h_eta3_v_ttem", "h_eta3_v_ttet", "h_eta3_v_mmmt", "h_eta3_v_mmtt", "h_eta3_v_ttmt",
- //"h_eta4_VR_0tau", "h_eta4_VR_1tau", "h_eta4_VR_2tau", "h_eta4_VR_3tau", "h_eta4_VR_3lep0tau", "h_eta4_VR_3lep1tau", "h_eta4_VR_3lep2tau", "h_eta4_CR_0tau", "h_eta4_CR_1tau", "h_eta4_CR_2tau", "h_eta4_CR_3tau", "h_eta4_CR_3lep0tau", "h_eta4_CR_3lep1tau", "h_eta4_CR_3lep2tau", "h_eta4_SR_0tau", "h_eta4_SR_1tau", "h_eta4_SR_2tau", "h_eta4_SR_3tau", "h_eta4_SR_3lep0tau", "h_eta4_SR_3lep1tau", "h_eta4_SR_3lep2tau", "h_eta4_DYCR_0tau", "h_eta4_DYCR_1tau", "h_eta4_DYveto_0tau", "h_eta4_DYveto_1tau", "h_eta4_ee", "h_eta4_em", "h_eta4_mm", "h_eta4_eee", "h_eta4_eem", "h_eta4_eet", "h_eta4_emt", "h_eta4_mme", "h_eta4_mmm", "h_eta4_mmt", "h_eta4_ett", "h_eta4_mtt", "h_eta4_eeee", "h_eta4_eeem", "h_eta4_eemm", "h_eta4_mmem", "h_eta4_mmmm", "h_eta4_eeet", "h_eta4_eemt", "h_eta4_eett", "h_eta4_mmet", "h_eta4_ttem", "h_eta4_ttet", "h_eta4_mmmt", "h_eta4_mmtt", "h_eta4_ttmt", "h_eta4_v_ee", "h_eta4_v_em", "h_eta4_v_mm", "h_eta4_v_eee", "h_eta4_v_eem", "h_eta4_v_eet", "h_eta4_v_emt", "h_eta4_v_mme", "h_eta4_v_mmm", "h_eta4_v_mmt", "h_eta4_v_ett", "h_eta4_v_mtt", "h_eta4_v_eeee", "h_eta4_v_eeem", "h_eta4_v_eemm", "h_eta4_v_mmem", "h_eta4_v_mmmm", "h_eta4_v_eeet", "h_eta4_v_eemt", "h_eta4_v_eett", "h_eta4_v_mmet", "h_eta4_v_ttem", "h_eta4_v_ttet", "h_eta4_v_mmmt", "h_eta4_v_mmtt", "h_eta4_v_ttmt",
- //"h_phi1_VR_0tau", "h_phi1_VR_1tau", "h_phi1_VR_2tau", "h_phi1_VR_3tau", "h_phi1_VR_3lep0tau", "h_phi1_VR_3lep1tau", "h_phi1_VR_3lep2tau", "h_phi1_CR_0tau", "h_phi1_CR_1tau", "h_phi1_CR_2tau", "h_phi1_CR_3tau", "h_phi1_CR_3lep0tau", "h_phi1_CR_3lep1tau", "h_phi1_CR_3lep2tau", "h_phi1_SR_0tau", "h_phi1_SR_1tau", "h_phi1_SR_2tau", "h_phi1_SR_3tau", "h_phi1_SR_3lep0tau", "h_phi1_SR_3lep1tau", "h_phi1_SR_3lep2tau", "h_phi1_DYCR_0tau", "h_phi1_DYCR_1tau", "h_phi1_DYveto_0tau", "h_phi1_DYveto_1tau", "h_phi1_ee", "h_phi1_em", "h_phi1_mm", "h_phi1_eee", "h_phi1_eem", "h_phi1_eet", "h_phi1_emt", "h_phi1_mme", "h_phi1_mmm", "h_phi1_mmt", "h_phi1_ett", "h_phi1_mtt", "h_phi1_eeee", "h_phi1_eeem", "h_phi1_eemm", "h_phi1_mmem", "h_phi1_mmmm", "h_phi1_eeet", "h_phi1_eemt", "h_phi1_eett", "h_phi1_mmet", "h_phi1_ttem", "h_phi1_ttet", "h_phi1_mmmt", "h_phi1_mmtt", "h_phi1_ttmt", "h_phi1_v_ee", "h_phi1_v_em", "h_phi1_v_mm", "h_phi1_v_eee", "h_phi1_v_eem", "h_phi1_v_eet", "h_phi1_v_emt", "h_phi1_v_mme", "h_phi1_v_mmm", "h_phi1_v_mmt", "h_phi1_v_ett", "h_phi1_v_mtt", "h_phi1_v_eeee", "h_phi1_v_eeem", "h_phi1_v_eemm", "h_phi1_v_mmem", "h_phi1_v_mmmm", "h_phi1_v_eeet", "h_phi1_v_eemt", "h_phi1_v_eett", "h_phi1_v_mmet", "h_phi1_v_ttem", "h_phi1_v_ttet", "h_phi1_v_mmmt", "h_phi1_v_mmtt", "h_phi1_v_ttmt",
- //"h_phi2_VR_0tau", "h_phi2_VR_1tau", "h_phi2_VR_2tau", "h_phi2_VR_3tau", "h_phi2_VR_3lep0tau", "h_phi2_VR_3lep1tau", "h_phi2_VR_3lep2tau", "h_phi2_CR_0tau", "h_phi2_CR_1tau", "h_phi2_CR_2tau", "h_phi2_CR_3tau", "h_phi2_CR_3lep0tau", "h_phi2_CR_3lep1tau", "h_phi2_CR_3lep2tau", "h_phi2_SR_0tau", "h_phi2_SR_1tau", "h_phi2_SR_2tau", "h_phi2_SR_3tau", "h_phi2_SR_3lep0tau", "h_phi2_SR_3lep1tau", "h_phi2_SR_3lep2tau", "h_phi2_DYCR_0tau", "h_phi2_DYCR_1tau", "h_phi2_DYveto_0tau", "h_phi2_DYveto_1tau", "h_phi2_ee", "h_phi2_em", "h_phi2_mm", "h_phi2_eee", "h_phi2_eem", "h_phi2_eet", "h_phi2_emt", "h_phi2_mme", "h_phi2_mmm", "h_phi2_mmt", "h_phi2_ett", "h_phi2_mtt", "h_phi2_eeee", "h_phi2_eeem", "h_phi2_eemm", "h_phi2_mmem", "h_phi2_mmmm", "h_phi2_eeet", "h_phi2_eemt", "h_phi2_eett", "h_phi2_mmet", "h_phi2_ttem", "h_phi2_ttet", "h_phi2_mmmt", "h_phi2_mmtt", "h_phi2_ttmt", "h_phi2_v_ee", "h_phi2_v_em", "h_phi2_v_mm", "h_phi2_v_eee", "h_phi2_v_eem", "h_phi2_v_eet", "h_phi2_v_emt", "h_phi2_v_mme", "h_phi2_v_mmm", "h_phi2_v_mmt", "h_phi2_v_ett", "h_phi2_v_mtt", "h_phi2_v_eeee", "h_phi2_v_eeem", "h_phi2_v_eemm", "h_phi2_v_mmem", "h_phi2_v_mmmm", "h_phi2_v_eeet", "h_phi2_v_eemt", "h_phi2_v_eett", "h_phi2_v_mmet", "h_phi2_v_ttem", "h_phi2_v_ttet", "h_phi2_v_mmmt", "h_phi2_v_mmtt", "h_phi2_v_ttmt",
-// "h_phi3_VR_0tau", "h_phi3_VR_1tau", "h_phi3_VR_2tau", "h_phi3_VR_3tau", "h_phi3_VR_3lep0tau", "h_phi3_VR_3lep1tau", "h_phi3_VR_3lep2tau", "h_phi3_CR_0tau", "h_phi3_CR_1tau", "h_phi3_CR_2tau", "h_phi3_CR_3tau", "h_phi3_CR_3lep0tau", "h_phi3_CR_3lep1tau", "h_phi3_CR_3lep2tau", "h_phi3_SR_0tau", "h_phi3_SR_1tau", "h_phi3_SR_2tau", "h_phi3_SR_3tau", "h_phi3_SR_3lep0tau", "h_phi3_SR_3lep1tau", "h_phi3_SR_3lep2tau", "h_phi3_DYCR_0tau", "h_phi3_DYCR_1tau", "h_phi3_DYveto_0tau", "h_phi3_DYveto_1tau", "h_phi3_ee", "h_phi3_em", "h_phi3_mm", "h_phi3_eee", "h_phi3_eem", "h_phi3_eet", "h_phi3_emt", "h_phi3_mme", "h_phi3_mmm", "h_phi3_mmt", "h_phi3_ett", "h_phi3_mtt", "h_phi3_eeee", "h_phi3_eeem", "h_phi3_eemm", "h_phi3_mmem", "h_phi3_mmmm", "h_phi3_eeet", "h_phi3_eemt", "h_phi3_eett", "h_phi3_mmet", "h_phi3_ttem", "h_phi3_ttet", "h_phi3_mmmt", "h_phi3_mmtt", "h_phi3_ttmt", "h_phi3_v_ee", "h_phi3_v_em", "h_phi3_v_mm", "h_phi3_v_eee", "h_phi3_v_eem", "h_phi3_v_eet", "h_phi3_v_emt", "h_phi3_v_mme", "h_phi3_v_mmm", "h_phi3_v_mmt", "h_phi3_v_ett", "h_phi3_v_mtt", "h_phi3_v_eeee", "h_phi3_v_eeem", "h_phi3_v_eemm", "h_phi3_v_mmem", "h_phi3_v_mmmm", "h_phi3_v_eeet", "h_phi3_v_eemt", "h_phi3_v_eett", "h_phi3_v_mmet", "h_phi3_v_ttem", "h_phi3_v_ttet", "h_phi3_v_mmmt", "h_phi3_v_mmtt", "h_phi3_v_ttmt",
-// "h_phi4_VR_0tau", "h_phi4_VR_1tau", "h_phi4_VR_2tau", "h_phi4_VR_3tau", "h_phi4_VR_3lep0tau", "h_phi4_VR_3lep1tau", "h_phi4_VR_3lep2tau", "h_phi4_CR_0tau", "h_phi4_CR_1tau", "h_phi4_CR_2tau", "h_phi4_CR_3tau", "h_phi4_CR_3lep0tau", "h_phi4_CR_3lep1tau", "h_phi4_CR_3lep2tau", "h_phi4_SR_0tau", "h_phi4_SR_1tau", "h_phi4_SR_2tau", "h_phi4_SR_3tau", "h_phi4_SR_3lep0tau", "h_phi4_SR_3lep1tau", "h_phi4_SR_3lep2tau", "h_phi4_DYCR_0tau", "h_phi4_DYCR_1tau", "h_phi4_DYveto_0tau", "h_phi4_DYveto_1tau", "h_phi4_ee", "h_phi4_em", "h_phi4_mm", "h_phi4_eee", "h_phi4_eem", "h_phi4_eet", "h_phi4_emt", "h_phi4_mme", "h_phi4_mmm", "h_phi4_mmt", "h_phi4_ett", "h_phi4_mtt", "h_phi4_eeee", "h_phi4_eeem", "h_phi4_eemm", "h_phi4_mmem", "h_phi4_mmmm", "h_phi4_eeet", "h_phi4_eemt", "h_phi4_eett", "h_phi4_mmet", "h_phi4_ttem", "h_phi4_ttet", "h_phi4_mmmt", "h_phi4_mmtt", "h_phi4_ttmt", "h_phi4_v_ee", "h_phi4_v_em", "h_phi4_v_mm", "h_phi4_v_eee", "h_phi4_v_eem", "h_phi4_v_eet", "h_phi4_v_emt", "h_phi4_v_mme", "h_phi4_v_mmm", "h_phi4_v_mmt", "h_phi4_v_ett", "h_phi4_v_mtt", "h_phi4_v_eeee", "h_phi4_v_eeem", "h_phi4_v_eemm", "h_phi4_v_mmem", "h_phi4_v_mmmm", "h_phi4_v_eeet", "h_phi4_v_eemt", "h_phi4_v_eett", "h_phi4_v_mmet", "h_phi4_v_ttem", "h_phi4_v_ttet", "h_phi4_v_mmmt", "h_phi4_v_mmtt", "h_phi4_v_ttmt" 
+    gStyle->SetOptStat(0);
+    gSystem->mkdir(OUTPUT_DIR.c_str(),true);
+    map<string,vector<string>> files;
+    string year = YEAR;
+    files = getFileMap(YEAR);
+    map<string,vector<TFile*>> open_files;
+    for (const auto& kv : files) {
+        for (const auto& fname : kv.second) {
+            string path = INPUT_DIR + "/hist_" + fname;
+            TFile* f = TFile::Open(path.c_str(),"READ");
+            if (!f || f->IsZombie()) {
+                cerr << "WARNING: cannot open " << path << endl;
+                if (f) {f->Close(); delete f;}
+                continue;
+            }
+            open_files[kv.first].push_back(f);
+        }
+    }
 
-	};
+    unsigned plotNumber = 0;
+    const vector<string>& plotCategories =
+        (SUMMARY_TYPE == "tau_ch") ? CHANNELS : LEP_CHANNELS;
 
-	const char *hist_list2[] = {
-		"0tau/h_ST","1tau/h_ST","2tau/h_ST","3tau/h_ST","3lep0tau/h_ST","3lep1tau/h_ST","3lep2tau/h_ST",
-		"0tau/h_mZ1","1tau/h_mZ1","2tau/h_mZ1","3tau/h_mZ1","3lep0tau/h_mZ1","3lep1tau/h_mZ1","3lep2tau/h_mZ1",
-		"0tau/h_mZ2","1tau/h_mZ2","2tau/h_mZ2","3tau/h_mZ2","3lep0tau/h_mZ2","3lep1tau/h_mZ2","3lep2tau/h_mZ2",
-		"0tau/h_mZ3","1tau/h_mZ3","2tau/h_mZ3","3tau/h_mZ3","3lep0tau/h_mZ3","3lep1tau/h_mZ3","3lep2tau/h_mZ3",
-		"0tau/h_mZ4","1tau/h_mZ4","2tau/h_mZ4","3tau/h_mZ4","3lep0tau/h_mZ4","3lep1tau/h_mZ4","3lep2tau/h_mZ4",
-		"0tau/h_mTtot1","1tau/h_mTtot1","2tau/h_mTtot1","3tau/h_mTtot1","3lep0tau/h_mTtot1","3lep1tau/h_mTtot1","3lep2tau/h_mTtot1",
-		"0tau/h_mTtot2","1tau/h_mTtot2","2tau/h_mTtot2","3tau/h_mTtot2","3lep0tau/h_mTtot2","3lep1tau/h_mTtot2","3lep2tau/h_mTtot2",
-		"0tau/h_mll1","1tau/h_mll1","2tau/h_mll1","3tau/h_mll1","3lep0tau/h_mll1","3lep1tau/h_mll1","3lep2tau/h_mll1",
-		"0tau/h_mll2","1tau/h_mll2","2tau/h_mll2","3tau/h_mll2","3lep0tau/h_mll2","3lep1tau/h_mll2","3lep2tau/h_mll2",
-		"0tau/h_met","1tau/h_met","2tau/h_met","3tau/h_met","3lep0tau/h_met","3lep1tau/h_met","3lep2tau/h_met"
-	};
-	const char *hist_list1[] = {
-		"0tau/h_mT1","1tau/h_mT1","2tau/h_mT1","3tau/h_mT1","3lep0tau/h_mT1","3lep1tau/h_mT1","3lep2tau/h_mT1",
-		"0tau/h_mT2","1tau/h_mT2","2tau/h_mT2","3tau/h_mT2","3lep0tau/h_mT2","3lep1tau/h_mT2","3lep2tau/h_mT2",
-		
-	};
-	
-    // Categories with input files
-    std::map<std::string, std::vector<std::string>> files;
-    if (year == "2016") files = {
-    	{"signal",    {"HppM1000_2016.root"}},
-        {"DY",    {"DYJetsToLLM10to50_2016.root", "DYJetsToLLM50_2016.root"}},
-        {"VV",    {"WW_2016.root", "WWTo2L2Nu_2016.root", "WZTo2Q2L_2016.root", "WZTo3LNu_2016.root"}},
-        {"VVV",   {"WWW_2016.root", "WZZ_2016.root", "ZZZ_2016.root"}},
-        {"ttV",   {"ttWJets_2016.root", "ttZJets_2016.root"}},
-        {"WJ",    {"WJetsToLNu_NLO_2016.root", "WJetsToLNu_HT-70To100_2016.root", "WJetsToLNu_HT-100To200_2016.root", 
-                   "WJetsToLNu_HT-200To400_2016.root", "WJetsToLNu_HT-400To600_2016.root", 
-                   "WJetsToLNu_HT-600To800_2016.root", "WJetsToLNu_HT-800To1200_2016.root", "WJetsToLNu_HT-1200To2500_2016.root", "WJetsToLNu_HT-2500ToInf_2016.root"}},
-        {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo4L_2016.root"}},
-        {"ST",    {"ST_s-channel_2016.root", "ST_t-channel_antitop_2016.root", "ST_t-channel_top_2016.root", 
-                   "ST_tW_antitop_2016.root", "ST_tW_top_2016.root"}},
-        {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root"}},
-        {"other", {"ttHToTauTau_2016.root", "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root","ttHToEE_2016.root","ttHTo2L2Nu_2016.root"}},
-        {"data",  {"SingleElectronB_2016.root","SingleElectronC_2016.root","SingleElectronD_2016.root","SingleElectronE_2016.root","SingleElectronF_2016.root","SingleElectronG_2016.root","SingleElectronH_2016.root", "SingleMuonB_2016.root","SingleMuonC_2016.root","SingleMuonD_2016.root","SingleMuonE_2016.root","SingleMuonF_2016.root","SingleMuonG_2016.root","SingleMuonH_2016.root"}}
-    };
-    else if (year == "2017") files = {
-    	{"signal",    {"HppM1000_2017.root"}},
-        {"DY",    {"DYJetsToLLM10to50_2017.root", "DYJetsToLLM50_2017.root"}},
-        {"VV",    {"WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root"}},
-        {"VVV",   {"WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root"}},
-        {"ttV",   {"ttWJets_2017.root", "ttZJets_2017.root"}},
-        {"WJ",    {"WJetsToLNu_NLO_2017.root", "WJetsToLNu_HT-70To100_2017.root", "WJetsToLNu_HT-100To200_2017.root", 
-                   "WJetsToLNu_HT-200To400_2017.root", "WJetsToLNu_HT-400To600_2017.root", 
-                   "WJetsToLNu_HT-600To800_2017.root", "WJetsToLNu_HT-800To1200_2017.root", "WJetsToLNu_HT-1200To2500_2017.root", "WJetsToLNu_HT-2500ToInf_2017.root"}},
-        {"ZZ",    {"ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root"}},
-        {"ST",    {"ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", 
-                   "ST_tW_antitop_2017.root", "ST_tW_top_2017.root"}},
-        {"TTbar", {"TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root"}},
-        {"other", {"ttHToTauTau_2017.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root","ttHToEE_2017.root", "ttHTo2L2Nu_2017.root"}},
-        {"data",  {"SingleElectronB_2017.root","SingleElectronC_2017.root","SingleElectronD_2017.root","SingleElectronE_2017.root","SingleElectronF_2017.root", "SingleMuonB_2017.root","SingleMuonC_2017.root","SingleMuonD_2017.root","SingleMuonE_2017.root","SingleMuonF_2017.root"}}
-    };
-    else if (year == "2018") files = {
-    	{"signal",    {"HppM1000_2018.root"}},
-        {"DY",    {"DYJetsToLLM10to50_2018.root", "DYJetsToLLM50_2018.root"}},
-        {"VV",    {"WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
-        {"VVV",   {"WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
-        {"ttV",   {"ttWJets_2018.root", "ttZJets_2018.root"}},
-        {"WJ",    {"WJetsToLNu_NLO_2018.root", "WJetsToLNu_HT-70To100_2018.root", "WJetsToLNu_HT-100To200_2018.root", 
-                   "WJetsToLNu_HT-200To400_2018.root", "WJetsToLNu_HT-400To600_2018.root", 
-                   "WJetsToLNu_HT-600To800_2018.root", "WJetsToLNu_HT-800To1200_2018.root", "WJetsToLNu_HT-1200To2500_2018.root", "WJetsToLNu_HT-2500ToInf_2018.root"}},
-        {"ZZ",    {"ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
-        {"ST",    {"ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", 
-                   "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
-        {"TTbar", {"TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
-        {"other", {"ttHToTauTau_2018.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root", "ttHToEE_2018.root", "ttHTo2L2Nu_2018.root"}},
-        {"data",  {"EGammaA_2018.root","EGammaB_2018.root","EGammaC_2018.root","EGammaD_2018.root", "SingleMuonA_2018.root","SingleMuonB_2018.root","SingleMuonC_2018.root","SingleMuonD_2018.root"}}
-    };
-    else if (year == "Run2") files = {
-    	{"signal",    {"HppM1000_2016.root", "HppM1000_2017.root", "HppM1000_2018.root"}},
-        {"DY",    {"DYJetsToLLM10to50_2016.root", "DYJetsToLLM50_2016.root","DYJetsToLLM10to50_2017.root", "DYJetsToLLM50_2017.root","DYJetsToLLM10to50_2018.root", "DYJetsToLLM50_2018.root"}},
-        {"VV",    {"WW_2016.root", "WWTo2L2Nu_2016.root", "WZTo2Q2L_2016.root", "WZTo3LNu_2016.root","WW_2017.root", "WWTo2L2Nu_2017.root", "WZTo2Q2L_2017.root", "WZTo3LNu_2017.root","WW_2018.root", "WWTo2L2Nu_2018.root", "WZTo2Q2L_2018.root", "WZTo3LNu_2018.root"}},
-        {"VVV",   {"WWW_2016.root", "WZZ_2016.root", "ZZZ_2016.root","WWW_2017.root", "WZZ_2017.root", "ZZZ_2017.root","WWW_2018.root", "WZZ_2018.root", "ZZZ_2018.root"}},
-        {"ttV",   {"ttWJets_2016.root", "ttZJets_2016.root","ttWJets_2017.root", "ttZJets_2017.root","ttWJets_2018.root", "ttZJets_2018.root"}},
-        {"WJ",    {"WJetsToLNu_NLO_2016.root", "WJetsToLNu_HT-70To100_2016.root", "WJetsToLNu_HT-100To200_2016.root", 
-                   "WJetsToLNu_HT-200To400_2016.root", "WJetsToLNu_HT-400To600_2016.root", 
-                   "WJetsToLNu_HT-600To800_2016.root", "WJetsToLNu_HT-800To1200_2016.root", "WJetsToLNu_HT-1200To2500_2016.root", "WJetsToLNu_HT-2500ToInf_2016.root","WJetsToLNu_NLO_2017.root", "WJetsToLNu_HT-70To100_2017.root", "WJetsToLNu_HT-100To200_2017.root", 
-                   "WJetsToLNu_HT-200To400_2017.root", "WJetsToLNu_HT-400To600_2017.root", 
-                   "WJetsToLNu_HT-600To800_2017.root", "WJetsToLNu_HT-800To1200_2017.root", "WJetsToLNu_HT-1200To2500_2017.root", "WJetsToLNu_HT-2500ToInf_2017.root","WJetsToLNu_NLO_2018.root", "WJetsToLNu_HT-70To100_2018.root", "WJetsToLNu_HT-100To200_2018.root", 
-                   "WJetsToLNu_HT-200To400_2018.root", "WJetsToLNu_HT-400To600_2018.root", 
-                   "WJetsToLNu_HT-600To800_2018.root", "WJetsToLNu_HT-800To1200_2018.root", "WJetsToLNu_HT-1200To2500_2018.root", "WJetsToLNu_HT-2500ToInf_2018.root"}},
-        {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo4L_2016.root","ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo4L_2017.root","ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root", "ZZTo4L_2018.root"}},
-      /*  {"ZZ",    {"ZZTo2L2Nu_2016.root", "ZZTo2Q2L_2016.root", "ZZTo2L2Nu_2017.root", "ZZTo2Q2L_2017.root", "ZZTo2L2Nu_2018.root", "ZZTo2Q2L_2018.root"}},
-        {"ZZto4L",    {"ZZTo4L_2016.root","ZZTo4L_2017.root","ZZTo4L_2018.root"}},*/
-        {"ST",    {"ST_s-channel_2016.root", "ST_t-channel_antitop_2016.root", "ST_t-channel_top_2016.root", 
-                   "ST_tW_antitop_2016.root", "ST_tW_top_2016.root","ST_s-channel_2017.root", "ST_t-channel_antitop_2017.root", "ST_t-channel_top_2017.root", 
-                   "ST_tW_antitop_2017.root", "ST_tW_top_2017.root","ST_s-channel_2018.root", "ST_t-channel_antitop_2018.root", "ST_t-channel_top_2018.root", 
-                   "ST_tW_antitop_2018.root", "ST_tW_top_2018.root"}},
-        {"TTbar", {"TTTo2L2Nu_2016.root", "TTToSemiLeptonic_2016.root", "TTToHadronic_2016.root","TTTo2L2Nu_2017.root", "TTToSemiLeptonic_2017.root", "TTToHadronic_2017.root","TTTo2L2Nu_2018.root", "TTToSemiLeptonic_2018.root", "TTToHadronic_2018.root"}},
-        {"other", {"ttHToTauTau_2016.root", "ZHToMuMu_2016.root","ZHToTauTau_2016.root", "GluGluZH_2016.root","ttHToTauTau_2017.root", "ZHToMuMu_2017.root","ZHToTauTau_2017.root", "GluGluZH_2017.root","ttHToTauTau_2018.root", "ZHToMuMu_2018.root","ZHToTauTau_2018.root", "GluGluZH_2018.root","ttHToEE_2016.root","ttHToEE_2017.root", "ttHToEE_2018.root","ttHTo2L2Nu_2016.root","ttHTo2L2Nu_2017.root", "ttHTo2L2Nu_2018.root","ttHJetToNonbb_2016.root","ttHJetToNonbb_2017.root","ttHJetToNonbb_2018.root","TWZToLL_2016.root","TWZToLL_2017.root","TWZToLL_2018.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016.root","HZJ_HToWWTo2L2Nu_ZTo2L_2017.root","HZJ_HToWWTo2L2Nu_ZTo2L_2018.root"}},
-        {"data",  {"SingleElectronB_2016.root","SingleElectronC_2016.root","SingleElectronD_2016.root","SingleElectronE_2016.root","SingleElectronF_2016.root","SingleElectronG_2016.root","SingleElectronH_2016.root", "SingleMuonB_2016.root","SingleMuonC_2016.root","SingleMuonD_2016.root","SingleMuonE_2016.root","SingleMuonF_2016.root","SingleMuonG_2016.root","SingleMuonH_2016.root","SingleElectronB_2017.root","SingleElectronC_2017.root","SingleElectronD_2017.root","SingleElectronE_2017.root","SingleElectronF_2017.root", "SingleMuonB_2017.root","SingleMuonC_2017.root","SingleMuonD_2017.root","SingleMuonE_2017.root","SingleMuonF_2017.root","EGammaA_2018.root","EGammaB_2018.root","EGammaC_2018.root","EGammaD_2018.root", "SingleMuonA_2018.root","SingleMuonB_2018.root","SingleMuonC_2018.root","SingleMuonD_2018.root"}}
-    };
-    std::map<std::string, std::vector<TFile*>> open_files;
-    for (auto& kv : files) {
-		for (const auto& fname : kv.second) {
-		    TFile* file = new TFile(("hist_test_nopair/" + fname).c_str(), "READ");
-		    if (!file || file->IsZombie()) continue;
-	        open_files[kv.first].push_back(file);
-	    }
-	}
-	TFile *ifile_D1 = new TFile("hist_test_nopair/EGammaB_2018.root","READ");
+    for (const auto& var : VARIABLES)
+    for (const auto& region : REGIONS)
+    for (const auto& category : plotCategories)
+    for (const auto& syst : SYSTEMATICS) {
+        vector<string> names = selectedNames(var, region, category, syst);
+        if (names.empty()) continue;
 
-	for (int i = 0; i < sizeof(hist_list)/sizeof(hist_list[0]); i++) {
+        // tau_ch: h_<var>_<region>_<ch>_<systematic>
+        // other : h_<var>_<lepch>_<region>_<systematic>
+        string mergedName = "h_" + var + "_" +
+            (SUMMARY_TYPE == "tau_ch" ? region + "_" + category
+                                       : category + "_" + region) +
+            (syst.empty() ? "" : "_" + syst);
 
-		gStyle->SetOptStat(0);
-		TCanvas* canvas = new TCanvas("canvas", "Stacked histograms", 800, 700);
-		
-		// Split canvas for main plot and ratio plot
-		TPad* pad1 = new TPad("pad1", "Top pad", 0.0, 0.3, 1.0, 1.0);
-		TPad* pad2 = new TPad("pad2", "Bottom pad", 0.0, 0.0, 1.0, 0.3);
-		pad1->SetBottomMargin(0.01);
-		pad2->SetTopMargin(0.01);
-		pad2->SetBottomMargin(0.3);
-		pad1->Draw();
-		pad2->Draw();
-
-		std::string name = hist_list[i];
-		std::string hist_string;
-
-		size_t pos = name.rfind('_');// find last underscore
-		std::string channel = (pos != std::string::npos) ? name.substr(pos + 1) : "";
-		hist_string = makeHistString(channel);//make hist title
-		hist_string += " channel";
-		
-		/*if (name.find("3lep") < name.length()) hist_string += "3l, ";
-		else hist_string += "4l, ";
-		if (name.find("0tau") < name.length()) hist_string += "0#tau channel";
-		else if (name.find("1tau") < name.length()) hist_string += "1#tau channel";
-		else if (name.find("2tau") < name.length()) hist_string += "2#tau channel";
-		else if (name.find("3tau") < name.length()) hist_string += "3#tau channel";*/
-		    
-		char *hist_name = const_cast<char*>(hist_string.c_str());
-
-		THStack* bkg_stack = new THStack("bkg_stack", "");//empty title
-		std::map<std::string, TH1D*> hist;
-		std::map<std::string, int> fill_colors = {
-		    {"DY",7},{"VV",8},{"VVV",6},{"ttV",4},{"WJ",9},{"ZZ",5},
-		    {"ST",30},{"TTbar",46},{"other",28},{"data",1}
-		};
-
-		std::string X_string; int xmin = 0; int xmax = 250;
-		if (name.find("_WMt") < name.length()) X_string += "W transverse mass ";
-		else if (name.find("_mZ1") < name.length()){
-			X_string += "Leading OSSF pair invariant mass";
-			xmin = 70; xmax = 110;
-		}		
-		else if (name.find("_mZ2") < name.length()){
-			X_string += "Sub-leading OSSF pair invariant mass";
-			xmin = 0; xmax = 250;
+        cout << "\nCombining "
+             << (SUMMARY_TYPE == "tau_ch" ? "lepton flavors" : "tau channels")
+             << " into " << mergedName
+             << " (" << names.size() << " categories)" << endl;
+        
+        double xmin = 0, xmax = 2000;
+        if (X_RANGES.count(var)) {
+			xmin = X_RANGES.at(var).first;
+			xmax = X_RANGES.at(var).second;
 		}
-		else if (name.find("_mll") < name.length()){
-			X_string += "M(ll) of heaviest SS pair";
-			xmin = 0; xmax = 500;
-		}
-		else if (name.find("_mH1") < name.length()){
-			X_string += "Leading SS pair invariant mass";
-			xmin = 0; xmax = 500;
-		}
-		else if (name.find("_mH2") < name.length()){
-			X_string += "Sub-leading SS pair invariant mass";
-			xmin = 0; xmax = 500;
-		}
-		else if (name.find("_met") < name.length()){
-			X_string += "E_{T}^{miss}";
-			xmin = 0; xmax = 200;
-		}
-		else if (name.find("_LT") < name.length()){
-			X_string += "L_{T}";
-			xmin = 50; xmax = 1000;
-		}
-		else if (name.find("_mT1") < name.length()){
-			X_string += "Leading DCH mass";
-			xmin = 0; xmax = 1500;
-		}
-		else if (name.find("_mT2") < name.length()){
-			X_string += "Sub-leading DCH mass";
-			xmin = 0; xmax = 1500;
-		}
-		else if (name.find("_dRll") < name.length()){
-			X_string += "dR_ll";
-			xmin = 0; xmax = 5;
-		}
-		else if (name.find("_pt1") < name.length()) X_string += "pT-1 ";
-		else if (name.find("_pt2") < name.length()) X_string += "pT-2 ";
-		else if (name.find("_pt3") < name.length()) X_string += "pT-3 ";
-		else if (name.find("_pt4") < name.length()) X_string += "Eta-4 ";
-		else if (name.find("_eta1") < name.length()) X_string += "Eta-1";
-		else if (name.find("_eta2") < name.length()) X_string += "Eta-2";
-		else if (name.find("_eta3") < name.length()) X_string += "Eta-3";
-		else if (name.find("_eta4") < name.length()) X_string += "Eta-4";
-		else if (name.find("_phi1") < name.length()) X_string += "Phi-1";
-		else if (name.find("_phi2") < name.length()) X_string += "Phi-2";
-		else if (name.find("_phi3") < name.length()) X_string += "Phi-3";
-		else if (name.find("_phi4") < name.length()) X_string += "Phi-4";
-		else if (name.find("_iso1") < name.length()) X_string += "ISO-1";
-		else if (name.find("_iso2") < name.length()) X_string += "ISO-2";
-		else if (name.find("_iso3") < name.length()) X_string += "ISO-3";
-		else if (name.find("_iso4") < name.length()) X_string += "ISO-4";
-		else if (name.find("_dxy1") < name.length()) X_string += "dXY-1";
-		else if (name.find("_dxy2") < name.length()) X_string += "dXY-2";
-		else if (name.find("_dxy3") < name.length()) X_string += "dXY-3";
-		else if (name.find("_dxy4") < name.length()) X_string += "dXY-4";
-		else if (name.find("_dZ1") < name.length()) X_string += "dZ-1";
-		else if (name.find("_dZ2") < name.length()) X_string += "dZ-2";
-		else if (name.find("_dZ3") < name.length()) X_string += "dZ-3";
-		else if (name.find("_dZ4") < name.length()) X_string += "dZ-4";
-
-
-		int bins = 0;
-		for (auto& kv : open_files) {
-			cout<<ifile_D1->GetName();
-		    TH1D* tmp = (TH1D*)ifile_D1->Get(hist_list[i]);
-		    hist[kv.first] = (TH1D*)tmp->Clone();
-		    hist[kv.first]->Sumw2();
-		    hist[kv.first]->Reset();
-
-		    for (auto* f : kv.second) {
-		        TH1D* h = dynamic_cast<TH1D*>(f->Get(hist_list[i]));
-		        if (!h) continue;
-		        h->Sumw2();
-		        h->Scale(applyXSec(f));
 		        
-		        int rebin = (xmax-xmin)/(h->GetXaxis()->GetXmax()-h->GetXaxis()->GetXmin())*h->GetNbinsX()/50;//always has 50 bins
-		        h->Rebin(rebin);
+        map<string,TH1D*> hist;
+        for (const auto& kv : open_files) {
+            hist[kv.first] = combineProcess(kv.second,names,kv.first,
+                Form("%s_%s",kv.first.c_str(),mergedName.c_str()));
+        }
+        if (APPLY_OLD_NORM_FACTORS) {
+            if (hist["VV"]) hist["VV"]->Scale(1.033462);
+            if (hist["ZZ"]) hist["ZZ"]->Scale(1.284495);
+        }
+        for (auto& kv : hist)
+            if (kv.second) prepareForPlot(kv.second, xmin, xmax);
 
-		       //========== merge overflow ==========
-				int firstBin = h->GetXaxis()->FindBin(xmin);
-				int lastBin  = h->GetXaxis()->FindBin(xmax);
+        TH1D* total = nullptr;
+        THStack* stack = new THStack(Form("stack_%u",plotNumber),"");
+        for (const auto& proc : BKGS) {
+            TH1D* h = hist[proc];
+            if (!h) continue;
+            h->SetFillColor(COLORS.at(proc));
+            h->SetLineColor(kBlack);
+            stack->Add(h);
+            if (!total) {
+                total = (TH1D*)h->Clone(Form("total_%u",plotNumber));
+                total->SetDirectory(nullptr);
+            } else total->Add(h);
+        }
+        if (!total) {
+            cerr << "No backgrounds for " << var << "; skipping\n";
+            for (auto& kv:hist) delete kv.second;
+            delete stack;
+            ++plotNumber;
+            continue;
+        }
+        TH1D* data = hist["data"];
+        TH1D* signal = hist["signal"];
+        TCanvas* c = new TCanvas(Form("c_%u",plotNumber),"Stack",800,700);
+        TPad* pad1 = new TPad(Form("pad1_%u",plotNumber),"",0,0.3,1,1);
+        TPad* pad2 = new TPad(Form("pad2_%u",plotNumber),"",0,0,1,0.3);
+        pad1->SetBottomMargin(0.01);
+		pad2->SetTopMargin(0.01); pad2->SetBottomMargin(0.3);
+		pad1->Draw(); pad2->Draw();
+        pad1->cd();
+        if (LOG_Y) pad1->SetLogy();
+        stack->Draw("HIST");
+        stack->GetXaxis()->SetRangeUser(xmin, xmax);
+	const double binwidth = total->GetXaxis()->GetBinWidth(1);
+	stack->GetYaxis()->SetTitle(Form("Events / %.6g GeV", binwidth));
+        stack->GetYaxis()->SetTitleOffset(1.2);
+        double ymax = std::max(total->GetMaximum(),data ? data->GetMaximum() : 0.);
+        if (DRAW_SIGNAL && signal && SIGNAL_SCALE > 0)
+            ymax = std::max(ymax, SIGNAL_SCALE*signal->GetMaximum());
+        stack->SetMaximum((LOG_Y ? 15. : 1.4) * std::max(ymax,1.));
+        if (LOG_Y) stack->SetMinimum(0.1);
+        if (data) {
+            data->SetMarkerStyle(20); data->SetMarkerSize(0.8);
+            data->SetLineColor(kBlack);
+            data->Draw("E1 SAME");
+        }
+        if (DRAW_SIGNAL && signal) {
+            signal->Scale(SIGNAL_SCALE);
+            signal->SetFillStyle(0); signal->SetLineColor(kRed);
+            signal->SetLineWidth(3); signal->Draw("HIST SAME");
+        }
+        DrawCMSLabel();
+        string description = makeHistString(category)+" channel";
+        if (!syst.empty()) description += " / " + syst;
+        PlotDescription(const_cast<char*>(description.c_str()));
+        TLegend* leg = new TLegend(0.7, 0.6, 0.9, 0.88);
+        leg->SetBorderSize(0); //leg->SetTextSize(0.027);
+        for (const auto& proc : BKGS)
+            if (hist[proc]) leg->AddEntry(hist[proc],proc.c_str(),"f");
+        if (data) leg->AddEntry(data,"Data","lep");
+        if (DRAW_SIGNAL && signal)
+            leg->AddEntry(signal,Form("Signal #times %.0f",SIGNAL_SCALE),"l");
+        leg->Draw();
 
-				int nb = h->GetNbinsX();
-
-				double content = h->GetBinContent(lastBin);
-				double error   = h->GetBinError(lastBin);
-
-				// add everything above xmax including overflow
-				for(int b = lastBin+1; b <= nb+1; b++){
-					content += h->GetBinContent(b);
-					error = sqrt(error*error + pow(h->GetBinError(b),2));
-				}
-
-				// set new last bin
-				h->SetBinContent(lastBin-1,content);
-				h->SetBinError(lastBin-1,error);
-		        //=======================================
-		        
-		        if (kv.first != "data") {
-					for (int ib = 1; ib <= h->GetNbinsX(); ib++) {
-						double stat_err = h->GetBinError(ib);
-						double sys_err = h->GetBinContent(ib) * XSec_Uncert(f->GetName()) / 100.0;
-		          		double tot_uncert_quadr = (stat_err*stat_err + sys_err*sys_err);
-		          		if(summary_type == "tau_ch"){
-		            		if (name.find("3lep") < name.length())
-		                        tot_uncert_quadr += fake_uncert_squared("3lep", f->GetName())*pow(h->GetBinContent(ib),2);
-		            		else tot_uncert_quadr += fake_uncert_squared("4lep", f->GetName())*pow(h->GetBinContent(ib),2);
-		            	}
-		            	else if(name != "h_met_ee" and name != "h_met_mm" and name != "h_metv_ee" and name != "h_metv_mm") tot_uncert_quadr += fake_uncert_squared(summary_type, f->GetName())*pow(h->GetBinContent(ib),2);
-		            	//cout<<tot_uncert_quadr[ib]<<endl;
-		            	h->SetBinError(ib,sqrt(tot_uncert_quadr));
-					}
-				}
-				hist[kv.first]->Add(h);
-			}
-			if (hist[kv.first]) {
-				hist[kv.first]->SetFillColor(fill_colors[kv.first]);
-				bins = hist[kv.first]->GetNbinsX();//since we rebinned and changed range
-				
-			}
-		}
-		
-		/*hist["VV"]->Scale(1.12631);
-		hist["ZZ"]->Scale(1.31366);*/
-		hist["VV"]->Scale(1.033462);
-		hist["ZZ"]->Scale(1.284495);
-		// Stack backgrounds
-		//THStack* bkg_stack = new THStack("bkg_stack", "2l and 3l channel summary in Z-window;;Events");
-		TH1D* h_bkg_total = (TH1D*)hist["DY"]->Clone("h_bkg_total");
-		h_bkg_total->Sumw2();
-		h_bkg_total->Reset();
-		for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttV", "WJ", "ZZ", "ST", "TTbar", "other"}) {
-		    bkg_stack->Add(hist[bkg_group]);
-		    h_bkg_total->Add(hist[bkg_group]);
-		}
-		
-		TH1D* h_mc_uncert_band = (TH1D*) h_bkg_total->Clone("h_mc_uncert_band");
-		h_mc_uncert_band->Sumw2();
-		h_mc_uncert_band->Reset(); // we'll fill the error by hand
-		for (int j = 1; j <= bins; j++) {
-			h_mc_uncert_band->SetBinContent(j, 1.0);  // center at ratio = 1
-			if (h_bkg_total->GetBinContent(j) > 0) h_mc_uncert_band->SetBinError(j, h_bkg_total->GetBinError(j)/h_bkg_total->GetBinContent(j));//scaling error with bin content
-			else h_mc_uncert_band->SetBinError(j,0);
-			//cout<<h_bkg_total->GetBinError(j)<<"\t"<<h_bkg_total->GetBinContent(j)<<endl;
-		}
-		
-		// Draw main plot
-		pad1->cd();
-		gPad->SetLogy();
-
-		bkg_stack->Draw("hist");
-		bkg_stack->GetXaxis()->SetRangeUser(xmin,xmax);
-
-		double pad_max = std::max(bkg_stack->GetMaximum(),hist["data"]->GetMaximum());
-		//double pad_max = std::max(bkg_stack->GetMaximum(),1000*hist["signal"]->GetMaximum());
-		bkg_stack->SetMaximum(1.1*pad_max);
-		hist["data"]->SetMarkerStyle(20);
-		hist["data"]->SetMarkerColor(kBlack);
-		bkg_stack->GetYaxis()->SetTitle("Events / bin");
-		hist["data"]->Draw("E SAME");
-
-		//Signal
-		//hist["signal"]->SetLineStyle(5); 
-		hist["signal"]->SetLineColor(2);
-		hist["signal"]->SetFillStyle(3003);
-		hist["signal"]->SetFillColor(2);
-		hist["signal"]->Scale(1000);
-		//hist["signal"]->Scale(h_bkg_total->Integral()/hist["signal"]->Integral());
-		hist["signal"]->SetBinContent(bins, hist["signal"]->GetBinContent(bins)+hist["signal"]->GetBinContent(bins+1));
-		//hist["signal"]->Draw("SAME HIST ");
-		//hist["signal"]->GetXaxis()->SetRangeUser(xmin,xmax);
-		
-		// Create a TLatex object
-		DrawCMSLabel();
-		PlotDescription(hist_name);
-		
-		auto legend = new TLegend(0.7, 0.5, 0.88, 0.88);
-		//auto legend = new TLegend(0.12, 0.6, 0.3, 0.88);
-		for (const std::string& bkg_group : {"DY", "VV", "VVV", "ttV", "WJ", "ZZ", "ST", "TTbar", "other"}) {
-		    legend->AddEntry(hist[bkg_group], bkg_group.c_str(), "f");
-		}
-		legend->AddEntry(hist["data"], "Data", "lep");
-		//legend->AddEntry(hist["signal"], "H^{++} 500 GeV", "lep");
-		legend->SetBorderSize(0);
-		legend->Draw();
-
-		// Ratio histogram: data / MC
-		TH1D* h_ratio = (TH1D*)hist["data"]->Clone("h_ratio");
-		h_ratio->Sumw2();
-		h_ratio->SetTitle(""); // Remove the title for the ratio plot
-		h_ratio->Divide(h_bkg_total);
-		
-		h_ratio->SetLineColor(kBlack);
-		h_ratio->SetMarkerStyle(20);
-		h_ratio->GetYaxis()->SetTitle("Data / Background");
-		h_ratio->GetYaxis()->SetNdivisions(505);
-		h_ratio->GetYaxis()->SetTitleSize(0.09);
-		h_ratio->GetYaxis()->SetTitleOffset(0.4);
-		h_ratio->GetYaxis()->SetLabelSize(0.07);
-		h_ratio->GetXaxis()->SetTitleSize(0.1);	
-		h_ratio->GetXaxis()->SetLabelSize(0.1);
-		h_ratio->GetXaxis()->SetTitle(const_cast<char*>(X_string.c_str()));
-		h_ratio->SetMinimum(0); // Set the minimum y-value for the ratio plot
-		h_ratio->SetMaximum(2); // Set the maximum y-value for the ratio plot
-		
-		// Draw ratio plot
-		pad2->cd();
-		h_ratio->SetMinimum(0.0);
-		h_ratio->SetMaximum(2.0);
-		h_ratio->Draw("E");
-		h_ratio->GetXaxis()->SetRangeUser(xmin,xmax);
-
-		h_mc_uncert_band->SetFillColor(kGray+2);
-		h_mc_uncert_band->SetFillStyle(3001); // hatched
-		h_mc_uncert_band->SetLineColor(0);
-		h_mc_uncert_band->Draw("E2 same"); // as a filled error band
-		h_mc_uncert_band->GetXaxis()->SetRangeUser(xmin,xmax);
-		
-		// Draw lines for reference
+        pad2->cd();
+        TH1D* ratio = (TH1D*)total->Clone(Form("ratio_%u",plotNumber));
+        ratio->SetDirectory(nullptr); ratio->Reset();
+        ratio->GetXaxis()->SetRangeUser(xmin, xmax);
+        ratio->SetTitle("");
+        ratio->GetYaxis()->SetTitle("Data / Background");
+        ratio->GetXaxis()->SetTitle(axisTitle(var).c_str());
+        ratio->GetYaxis()->SetNdivisions(505);
+        ratio->GetYaxis()->SetTitleSize(0.09);
+        ratio->GetYaxis()->SetTitleOffset(0.4);
+        ratio->GetYaxis()->SetLabelSize(0.07);
+        ratio->GetXaxis()->SetTitleSize(0.1);
+        ratio->GetXaxis()->SetLabelSize(0.1);
+        ratio->SetMinimum(0); ratio->SetMaximum(2);
+        ratio->SetMarkerStyle(20);
+        if (data) {
+            for (int b=1;b<=ratio->GetNbinsX();++b) {
+                double mc = total->GetBinContent(b);
+                if (mc <= 0) continue;
+                ratio->SetBinContent(b,data->GetBinContent(b)/mc);
+                ratio->SetBinError(b,data->GetBinError(b)/mc);
+            }
+        }
+        ratio->Draw(data ? "E1" : "AXIS");
+        TGraphAsymmErrors* systBand = nullptr;
+        if (DRAW_SYST_BAND && syst.empty()) {
+            map<string, pair<TH1D*, TH1D*>> systTotals;
+            for (const string& nuisance : fullSystList) {
+                TH1D* totalUp = (TH1D*)total->Clone(Form("up_%s_%u", nuisance.c_str(), plotNumber));
+                TH1D* totalDown = (TH1D*)total->Clone(Form("down_%s_%u", nuisance.c_str(), plotNumber));
+                totalUp->SetDirectory(nullptr); totalDown->SetDirectory(nullptr);
+                totalUp->Reset(); totalDown->Reset();
+                size_t upFound = 0, downFound = 0, upFallback = 0, downFallback = 0;
+                for (const string& process : BKGS) {
+                    if (!hist[process]) continue;
+                    auto it = open_files.find(process);
+                    if (it == open_files.end()) continue;
+                    size_t nf = 0, nb = 0;
+                    TH1D* hUp = combineProcessVariation(it->second, names, process,
+                        nuisance + "Up", Form("%s_%s_up_%u", process.c_str(), nuisance.c_str(), plotNumber),
+                        xmin, xmax, nf, nb);
+                    upFound += nf; upFallback += nb;
+                    nf = nb = 0;
+                    TH1D* hDown = combineProcessVariation(it->second, names, process,
+                        nuisance + "Down", Form("%s_%s_down_%u", process.c_str(), nuisance.c_str(), plotNumber),
+                        xmin, xmax, nf, nb);
+                    downFound += nf; downFallback += nb;
+                    if (hUp && compatible(totalUp, hUp)) totalUp->Add(hUp);
+                    else if (hUp) cerr << "WARNING: Up binning mismatch for " << process << endl;
+                    if (hDown && compatible(totalDown, hDown)) totalDown->Add(hDown);
+                    else if (hDown) cerr << "WARNING: Down binning mismatch for " << process << endl;
+                    delete hUp; delete hDown;
+                }
+                cout << "  nuisance " << nuisance << ": Up=" << upFound
+                     << " Down=" << downFound << " nominal fallbacks="
+                     << upFallback << "/" << downFallback << endl;
+                if (upFound == 0 && downFound == 0) {
+                    delete totalUp; delete totalDown;
+                    continue;
+                }
+                systTotals[nuisance] = {totalUp, totalDown};
+            }
+            systBand = MakeRatioUncertaintyBand(total, systTotals);
+            systBand->Draw("E2 SAME");
+            for (auto& kv : systTotals) {
+                delete kv.second.first;
+                delete kv.second.second;
+            }
+        } else {
+            // For nonnominal plots show statistical/legacy normalization errors only.
+            systBand = MakeRatioUncertaintyBand(total, {});
+            systBand->Draw("E2 SAME");
+        }
+        if (data) ratio->Draw("E1 SAME");
+      
+        // Draw lines for reference
 		TLine *line1 = new TLine(xmin, 1, xmax, 1);
 		TLine *line2 = new TLine(xmin, 0.5, xmax, 0.5);
 		TLine *line3 = new TLine(xmin, 1.5, xmax, 1.5);
 		line1->SetLineStyle(2);line2->SetLineStyle(2);line3->SetLineStyle(2);
 		line1->Draw(); line2->Draw(); line3->Draw();
-
-		// Output
-		std::string s =  "hist_test_nopair/", s1, s2;
-		s1 = s + hist_list[i]+".pdf";
-		//s2 = s + hist_list[i]+".png";
-		char* title1 = const_cast<char*>(s1.c_str());//converting string to char
-		char* title2 = const_cast<char*>(s2.c_str());//converting string to char
-		canvas->SaveAs(title1);
-		canvas->SaveAs(title2);
-		canvas->Clear();
-	}
+		
+        c->cd();
+        string base = OUTPUT_DIR + "/h_" + mergedName.substr(2);
+	if (year!="Run2") base+="_"+year;
+        c->SaveAs((base+".pdf").c_str());
+        c->SaveAs((base+".png").c_str());
+        // Cleanup after canvas has finished rendering/saving.
+        delete c;
+        delete ratio; delete systBand; delete total;
+        delete stack;
+        for (auto& kv:hist) delete kv.second;
+        ++plotNumber;
+    }
+    for (auto& kv : open_files)
+        for (TFile* f : kv.second) {f->Close(); delete f;}
 }

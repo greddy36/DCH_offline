@@ -10,15 +10,14 @@ import re
 # Configuration
 # ============================================================
 
-INPUT_FILE = "limits_mDCH1.txt"
+INPUT_FILE = "limits_mll1_noTau.txt"
 
-OUTPUT_PNG  = "limit_mDCH1.png"
-OUTPUT_PDF  = "limit_mDCH1.pdf"
-OUTPUT_ROOT = "limit_mDCH1.root"
+OUTPUT_PNG  = "limit_mll1_noTau.png"
+OUTPUT_PDF  = "limit_mll1_noTau.pdf"
 
 LUMI = "138 fb^{-1} (13 TeV)"
 
-SHOW_GRID = True
+SHOW_GRID = False
 # ============================================================
 # Read limits.txt
 #
@@ -305,6 +304,25 @@ exp2g = TGraph(
 exp2g.SetFillColor(kYellow)
 exp2g.SetLineColor(kYellow)
 
+# ============================================================
+# Theory cross section [fb]
+# ============================================================
+
+theory_mass = array.array('d', [
+    500, 600, 700, 800, 900, 1000,
+    1100, 1200, 1300, 1400, 1500
+])
+
+theory_xsec = array.array('d', [
+    1.93, 8.30e-1, 3.75e-1, 1.80e-1, 9.35e-2,
+    4.94e-2, 2.74e-2, 1.50e-2, 8.49e-3,
+    4.91e-3, 2.80e-3
+])
+
+theoryg = TGraph(len(theory_mass), theory_mass, theory_xsec)
+theoryg.SetLineColor(kRed + 1)
+theoryg.SetLineWidth(3)
+theoryg.SetLineStyle(1)
 
 # ============================================================
 # Canvas
@@ -323,6 +341,7 @@ c1.SetBottomMargin(0.12)
 c1.SetTopMargin(0.08)
 
 c1.SetLogy()
+c1.SetTicky(1)
 
 
 # ============================================================
@@ -333,7 +352,7 @@ exp2g.SetTitle("")
 
 xaxis = exp2g.GetXaxis()
 
-xaxis.SetTitle("m_{ll^{#pm#pm}} [GeV]")
+xaxis.SetTitle("m_{H^{#pm#pm}} [GeV]")
 xaxis.SetTitleSize(0.045)
 xaxis.SetLabelSize(0.040)
 
@@ -368,8 +387,8 @@ yaxis.SetRangeUser(
     ymin * 0.6,
     ymax * 2.0
 )
-
-
+yaxis.SetRangeUser(0.003,1)
+yaxis.SetRangeUser(0.001, 5)#for theory curve
 # ============================================================
 # Draw
 # ============================================================
@@ -379,8 +398,8 @@ exp2g.Draw("AF")
 exp1g.Draw("F SAME")
 
 expg.Draw("L SAME")
-
-obsg.Draw("LP SAME")
+theoryg.Draw("L SAME")
+#obsg.Draw("LP SAME")
 
 
 gPad.RedrawAxis()
@@ -409,12 +428,12 @@ leg.SetFillStyle(0)
 leg.SetTextFont(42)
 leg.SetTextSize(0.035)
 
-leg.AddEntry(
+'''leg.AddEntry(
     obsg,
     "Observed",
     "lp"
 )
-
+'''
 leg.AddEntry(
     expg,
     "Median expected",
@@ -433,6 +452,8 @@ leg.AddEntry(
     "f"
 )
 
+leg.AddEntry(theoryg, "Theory", "l")
+
 leg.Draw()
 
 
@@ -440,24 +461,10 @@ leg.Draw()
 # CMS
 # ============================================================
 
-tex1 = TLatex(
-    0.13,
-    0.92,
-    "CMS"
-)
-
-tex1.SetNDC()
-tex1.SetTextFont(62)
-tex1.SetTextSize(0.055)
-tex1.Draw()
-
-
-tex2 = TLatex(
-    0.22,
-    0.92,
-    "Preliminary"
-)
-
+tex1 =TLatex(0.13, 0.85, 'CMS')
+tex1.SetNDC(); tex1.SetTextFont(62); tex1.SetTextSize(0.055); tex1.Draw()
+tex2 =TLatex(0.22, 0.85, 'Preliminary')
+tex2.SetNDC(); tex2.SetTextFont(52); tex2.SetTextSize(0.045); tex2.Draw()
 tex2.SetNDC()
 tex2.SetTextFont(52)
 tex2.SetTextSize(0.045)
@@ -502,10 +509,8 @@ tex4.SetTextSize(0.035)
 
 c1.SaveAs(OUTPUT_PNG)
 c1.SaveAs(OUTPUT_PDF)
-c1.SaveAs(OUTPUT_ROOT)
 
 print("")
 print("Saved:")
 print("  ", OUTPUT_PNG)
 print("  ", OUTPUT_PDF)
-print("  ", OUTPUT_ROOT)

@@ -7,17 +7,17 @@ void DrawCMSLabel() {
 
     // Luminosity text (top right)
     latex.SetTextAlign(31);
-    latex.DrawLatex(0.92, 0.95, "138 fb^{-1} (13 TeV)");
+    latex.DrawLatex(0.95, 0.925, "138 fb^{-1} (13 TeV)");
 
     // CMS text (top left)
     latex.SetTextFont(62); // bold
     latex.SetTextAlign(11);
-    latex.DrawLatex(0.09, 0.95, "CMS");
+    latex.DrawLatex(0.125, 0.88, "CMS");
 
     // Preliminary text
     latex.SetTextFont(52); // italic
     latex.SetTextSize(0.035);
-    latex.DrawLatex(0.16, 0.95, "Preliminary");
+    latex.DrawLatex(0.195, 0.88, "Preliminary");
 }
 
 void PlotDescription(const char* description) {
@@ -26,7 +26,7 @@ void PlotDescription(const char* description) {
     latex.SetNDC(); // use normalized coordinates
     latex.SetTextFont(52);
     latex.SetTextSize(0.04);
-    latex.DrawLatex(0.45, 0.85, description);
+    latex.DrawLatex(0.5, 0.88, description);
 }
 
 std::string makeHistString(const std::string& channel)
@@ -36,18 +36,18 @@ std::string makeHistString(const std::string& channel)
     // ----- Tau category channels -----
     if (channel.find("tau") != std::string::npos) {
 
-        if (channel.find("3lep") != std::string::npos)
+        if (channel.find("3lep") != std::string::npos || channel.find("lep3") != std::string::npos)
             hist_string += "#it{3l,}";
         else
             hist_string += "#it{4l,}";
 
-        if (channel.find("0tau") != std::string::npos)
+        if (channel.find("0tau") != std::string::npos || channel.find("tau0") != std::string::npos)
             hist_string += "#it{0#tau}";
-        else if (channel.find("1tau") != std::string::npos)
+        else if (channel.find("1tau") != std::string::npos || channel.find("tau1") != std::string::npos)
             hist_string += "#it{1#tau}";
-        else if (channel.find("2tau") != std::string::npos)
+        else if (channel.find("2tau") != std::string::npos || channel.find("tau2") != std::string::npos)
             hist_string += "#it{2#tau}";
-        else if (channel.find("3tau") != std::string::npos)
+        else if (channel.find("3tau") != std::string::npos || channel.find("tau3") != std::string::npos)
             hist_string += "#it{3#tau}";
     }
 

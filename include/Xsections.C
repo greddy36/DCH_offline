@@ -114,20 +114,19 @@ double XSec_Uncert(std::string fname){//in %
 }
 
 double fake_uncert_squared(std::string lep_ch, std::string fname){//in relative value
-	double uncert = 0, uncert_square = 0;//needs more bkgs
+	double uncert_square = 0;//needs more bkgs
 	if(lep_ch == "3lep"){
-		if(fname.find("DYJetsToLL") < fname.length()) uncert = 0.03;
-		else if(fname.find("TTTo2L2Nu") < fname.length()) uncert = 0.03;
-		else if(fname.find("TTToSemi") < fname.length()) uncert = 0.03*0.03;
-		else if(fname.find("TTToHadro") < fname.length()) uncert = 0.03*0.03*0.03;
+		if(fname.find("DYJetsToLL") < fname.length()) uncert_square = 0.3*0.3;
+		else if(fname.find("TTTo2L2Nu") < fname.length()) uncert_square = 0.3*0.3;
+		else if(fname.find("TTToSemi") < fname.length()) uncert_square = 2*0.3*0.3;
+		else if(fname.find("TTToHadro") < fname.length()) uncert_square = 3*0.3*0.3;
 	}
 	else if(lep_ch == "4lep"){
-		if(fname.find("DYJetsToLL") < fname.length()) uncert = 0.03*0.03;
-		else if(fname.find("WZ") < fname.length() and fname.find("TWZ") > fname.length() and fname.find("WZZ") > fname.length()) uncert = 0.03;
-		else if(fname.find("TTTo2L2Nu") < fname.length()) uncert = 0.03*.03;
-		else if(fname.find("TTToSemi") < fname.length()) uncert = 0.03*0.03*0.3;
-		else if(fname.find("TTToHadro") < fname.length()) uncert = 0.03*0.03*0.03*0.3;
+		if(fname.find("DYJetsToLL") < fname.length()) uncert_square = 0.3*0.3;
+		else if(fname.find("WZ") < fname.length() and fname.find("TWZ") > fname.length() and fname.find("WZZ") > fname.length()) uncert_square = 0.3*0.3;
+		else if(fname.find("TTTo2L2Nu") < fname.length()) uncert_square = 2*0.3*0.3;
+		else if(fname.find("TTToSemi") < fname.length()) uncert_square = 3*0.3*0.3;
+		else if(fname.find("TTToHadro") < fname.length()) uncert_square = 4*0.3*0.3;
 	}
-	uncert_square = uncert*uncert;
 	return uncert_square;
 }

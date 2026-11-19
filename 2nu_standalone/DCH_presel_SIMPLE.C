@@ -8,26 +8,10 @@
 #include "include/MyBranch.C"//branch definitons
 #include "include/Kinematics.C"//Kinematic fns
 #include "include/Xsections.C"//crossections and their uncertainties
-#include "2nu_metcov.C"
-
-void processPairs( const char* cat_name, vector<pair<int, int>>& Z_pair, vector<pair<int, int>>& Zv_pair, vector<pair<int, int>>& H_pair, vector<pair<int,int>>& opp_pair) {//global function to process pairs
-	int len = strlen(cat_name);
-	for (int m = 1; m <= len; ++m) {
-		for (int n = m + 1; n <= len; ++n) {
-			string pair_name = pairFunc(m, n, cat_name, 20); //check Kinemactics.C for the definition
-			if (pair_name == "Zwindow") Z_pair.push_back({m,n}); //gives the pair indices that falls in Z-window
-			else if (pair_name == "Zv") Zv_pair.push_back({m,n});//gives the pair indices that falls in Z-veto
-			else if (pair_name == "ZttPair") Zv_pair.push_back({m,n});//Z->tt pair 
-			else if (pair_name == "oppPair") opp_pair.push_back({m,n});//Opp charged, mixed flavor pair
-			else if (pair_name == "DCH") H_pair.push_back({m,n});//same sign pair
-			else continue;
-		}
-	}
-}
-
+#include "2nu_metcov_new.C"
 
 void FillHists(TDirectory* rootDir, std::map<std::string, TTree*> trim_tree, std::map< std::string, double > hist_variable_map, double evtwt_nom, 
-				std::map<std::string, TH1D*> cutflow, std::map<std::string, TH1D*> h_mll1, std::map<std::string, TH1D*> h_mll2, std::map<std::string, TH1D*> h_mDCH1, std::map<std::string, TH1D*> h_mDCH2, std::map<std::string, TH1D*> h_ll1_pt, std::map<std::string, TH1D*> h_ST, std::map<std::string, TH1D*> h_mZ1, std::map<std::string, TH1D*> h_mZ2, std::map<std::string, TH1D*> h_mZ3, std::map<std::string, TH1D*> h_mZ4, std::map<std::string, TH1D*> h_mT1, std::map<std::string, TH1D*> h_mT2, std::map<std::string, TH1D*> h_mTtot1, std::map<std::string, TH1D*> h_mTtot2, std::map<std::string, TH1D*> h_mll1_nu, std::map<std::string, TH1D*> h_mll2_nu, std::map<std::string, TH1D*> h_met, std::map<std::string, TH1D*> h_pT1, std::map<std::string, TH1D*> h_pT2, std::map<std::string, TH1D*> h_pT3, std::map<std::string, TH1D*> h_pT4, std::map<std::string, TH1D*> h_dR1, std::map<std::string, TH1D*> h_dR2, std::map<std::string, TH1D*> h_dR3, std::map<std::string, TH1D*> h_dR4, std::map<std::string, TH1D*> h_dRll, std::map<std::string, TH1D*> h_dRll2, std::map<std::string, TH1D*> h_dR1_met, std::map<std::string, TH1D*> h_dR2_met, std::map<std::string, TH1D*> h_max_dR_lplm, std::map<std::string, TH1D*> h_max_dR_ll,  std::map<std::string, TH1D*> h_dPhiW_met, std::map<std::string, TH1D*> h_W_mt, std::map<std::string, TH1D*> h_cat, std::map<std::string, TH1D*> h_gencat){
+				std::map<std::string, TH1D*> cutflow, std::map<std::string, TH1D*> h_mll1, std::map<std::string, TH1D*> h_mll2, std::map<std::string, TH1D*> h_mDCH1, std::map<std::string, TH1D*> h_mDCH2, std::map<std::string, TH1D*> h_ll1_pt, std::map<std::string, TH1D*> h_ST, std::map<std::string, TH1D*> h_mZ1, std::map<std::string, TH1D*> h_mZ2, std::map<std::string, TH1D*> h_mZ3, std::map<std::string, TH1D*> h_mZ4, std::map<std::string, TH1D*> h_mT1, std::map<std::string, TH1D*> h_mT2, std::map<std::string, TH1D*> h_mTtot1, std::map<std::string, TH1D*> h_mTtot2, std::map<std::string, TH1D*> h_mll1_nu, std::map<std::string, TH1D*> h_mll2_nu, std::map<std::string, TH1D*> h_met, std::map<std::string, TH1D*> h_pT1, std::map<std::string, TH1D*> h_pT2, std::map<std::string, TH1D*> h_pT3, std::map<std::string, TH1D*> h_pT4, std::map<std::string, TH1D*> h_dR1, std::map<std::string, TH1D*> h_dR2, std::map<std::string, TH1D*> h_dR3, std::map<std::string, TH1D*> h_dR4, std::map<std::string, TH1D*> h_dRll, std::map<std::string, TH1D*> h_dRll2, std::map<std::string, TH1D*> h_dR1_met, std::map<std::string, TH1D*> h_dR2_met, std::map<std::string, TH1D*> h_max_dR_lplm, std::map<std::string, TH1D*> h_max_dR_ll,  std::map<std::string, TH1D*> h_dPhiW_met, std::map<std::string, TH1D*> h_dmll, std::map<std::string, TH1D*> h_cat, std::map<std::string, TH1D*> h_gencat){
 	rootDir->cd();
 	const char* dirName = rootDir->GetName();
 	trim_tree[dirName]->Fill();
@@ -64,12 +48,12 @@ void FillHists(TDirectory* rootDir, std::map<std::string, TTree*> trim_tree, std
 	h_max_dR_lplm[dirName]->Fill(hist_variable_map["max_dR_lplm"], evtwt_nom);
 	h_max_dR_ll[dirName]->Fill(hist_variable_map["max_dR_ll"], evtwt_nom);
 	h_dPhiW_met[dirName]->Fill(hist_variable_map["dPhiW_met"], evtwt_nom);
-	h_W_mt[dirName]->Fill(hist_variable_map["W_mt"], evtwt_nom);
+	h_dmll[dirName]->Fill(hist_variable_map["dmll"], evtwt_nom);
 	h_cat[dirName]->Fill(hist_variable_map["cat"],evtwt_nom);
 	h_gencat[dirName]->Fill(hist_variable_map["gen_cat"], evtwt_nom);
 }
 
-void WriteHists(TDirectory* rootDir, std::map<std::string, TTree*> trim_tree, std::map<std::string, TH1D*> cutflow, std::map<std::string, TH1D*> h_mll1, std::map<std::string, TH1D*> h_mll2, std::map<std::string, TH1D*> h_mDCH1, std::map<std::string, TH1D*> h_mDCH2, std::map<std::string, TH1D*> h_ll1_pt, std::map<std::string, TH1D*> h_ST, std::map<std::string, TH1D*> h_mZ1, std::map<std::string, TH1D*> h_mZ2, std::map<std::string, TH1D*> h_mZ3, std::map<std::string, TH1D*> h_mZ4, std::map<std::string, TH1D*> h_mT1, std::map<std::string, TH1D*> h_mT2, std::map<std::string, TH1D*> h_mTtot1, std::map<std::string, TH1D*> h_mTtot2, std::map<std::string, TH1D*> h_mll1_nu, std::map<std::string, TH1D*> h_mll2_nu, std::map<std::string, TH1D*> h_met, std::map<std::string, TH1D*> h_pT1, std::map<std::string, TH1D*> h_pT2, std::map<std::string, TH1D*> h_pT3, std::map<std::string, TH1D*> h_pT4, std::map<std::string, TH1D*> h_dR1, std::map<std::string, TH1D*> h_dR2, std::map<std::string, TH1D*> h_dR3, std::map<std::string, TH1D*> h_dR4, std::map<std::string, TH1D*> h_dRll, std::map<std::string, TH1D*> h_dRll2, std::map<std::string, TH1D*> h_dR1_met, std::map<std::string, TH1D*> h_dR2_met, std::map<std::string, TH1D*> h_max_dR_lplm, std::map<std::string, TH1D*> h_max_dR_ll, std::map<std::string, TH1D*> h_dPhiW_met, std::map<std::string, TH1D*> h_W_mt, std::map<std::string, TH1D*> h_cat, std::map<std::string, TH1D*> h_gencat){
+void WriteHists(TDirectory* rootDir, std::map<std::string, TTree*> trim_tree, std::map<std::string, TH1D*> cutflow, std::map<std::string, TH1D*> h_mll1, std::map<std::string, TH1D*> h_mll2, std::map<std::string, TH1D*> h_mDCH1, std::map<std::string, TH1D*> h_mDCH2, std::map<std::string, TH1D*> h_ll1_pt, std::map<std::string, TH1D*> h_ST, std::map<std::string, TH1D*> h_mZ1, std::map<std::string, TH1D*> h_mZ2, std::map<std::string, TH1D*> h_mZ3, std::map<std::string, TH1D*> h_mZ4, std::map<std::string, TH1D*> h_mT1, std::map<std::string, TH1D*> h_mT2, std::map<std::string, TH1D*> h_mTtot1, std::map<std::string, TH1D*> h_mTtot2, std::map<std::string, TH1D*> h_mll1_nu, std::map<std::string, TH1D*> h_mll2_nu, std::map<std::string, TH1D*> h_met, std::map<std::string, TH1D*> h_pT1, std::map<std::string, TH1D*> h_pT2, std::map<std::string, TH1D*> h_pT3, std::map<std::string, TH1D*> h_pT4, std::map<std::string, TH1D*> h_dR1, std::map<std::string, TH1D*> h_dR2, std::map<std::string, TH1D*> h_dR3, std::map<std::string, TH1D*> h_dR4, std::map<std::string, TH1D*> h_dRll, std::map<std::string, TH1D*> h_dRll2, std::map<std::string, TH1D*> h_dR1_met, std::map<std::string, TH1D*> h_dR2_met, std::map<std::string, TH1D*> h_max_dR_lplm, std::map<std::string, TH1D*> h_max_dR_ll, std::map<std::string, TH1D*> h_dPhiW_met, std::map<std::string, TH1D*> h_dmll, std::map<std::string, TH1D*> h_cat, std::map<std::string, TH1D*> h_gencat){
 	rootDir->cd();
 	const char* dirName = rootDir->GetName();
 	trim_tree[dirName]->Write();
@@ -106,7 +90,7 @@ void WriteHists(TDirectory* rootDir, std::map<std::string, TTree*> trim_tree, st
 	h_max_dR_lplm[dirName]->Write();
 	h_max_dR_ll[dirName]->Write();
 	h_dPhiW_met[dirName]->Write();
-	h_W_mt[dirName]->Write();
+	h_dmll[dirName]->Write();
 	h_cat[dirName]->Write();
 	h_gencat[dirName]->Write();
 }
@@ -131,7 +115,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 	for(int j = 0; j < nfiles; j++){
 		TFile *ifile = new TFile(filename[j],"READ");
 		std::string fname = filename[j];
-		if (fname.find("skim_500_test") > fname.length()) continue;
+		//if (fname.find("skim_500_test") > fname.length()) continue;
 		if (XSec(filename[j])==1) continue; 
 		cout<<filename[j]<<endl;
 		
@@ -147,14 +131,13 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 		TDirectory* lep3tau1Dir = ofile->mkdir("3lep1tau");
 		TDirectory* lep3tau2Dir = ofile->mkdir("3lep2tau");
 
-
 		TH1D* hNWEvts;
 		if(XSec(fname)!=1){
 			hNWEvts = (TH1D*)ifile->Get("hNWEvts")->Clone("hNWEvts");
 			if (!hNWEvts) hNWEvts = (TH1D*)ifile->Get("hNEvts")->Clone("hNWEvts");
 		}
 		hNWEvts->Write();
-		
+
 		TTree *tree = (TTree*)ifile->Get("Events");
 		MyBranch(tree);
 		
@@ -162,7 +145,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
     
 		double xmin = 0, xmax = mDCH+1000; int binw = 10; int nbins = (xmax-xmin)/binw;
 		
-		std::map<std::string, TH1D*> cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat;
+		std::map<std::string, TH1D*> cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat;
 		double mll_1, mll_2, dR_1, dR_2, evtwt;
 		for(auto rootDirName: {"0tau","1tau","2tau","3tau","3lep0tau","3lep1tau","3lep2tau"}){
 			trimmed_tree[rootDirName] = new TTree("Events", "trees");
@@ -241,8 +224,8 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 			h_max_dR_ll[rootDirName]->Sumw2();
 			h_dPhiW_met[rootDirName] = new TH1D("h_dPhiW_met", "dPhi between 3rd lepton and MET ", 50, -4, 4);				
 			h_dPhiW_met[rootDirName]->Sumw2();
-			h_W_mt[rootDirName] = new TH1D("h_W_mt", "W transverse mass", nbins, xmin, 2*xmax);				
-			h_W_mt[rootDirName]->Sumw2();
+			h_dmll[rootDirName] = new TH1D("h_dmll", "|mll1 - mll2|", nbins, xmin, 2*xmax);				
+			h_dmll[rootDirName]->Sumw2();
 			h_cat[rootDirName] = new TH1D("h_cat", "cat", 46,0,46);
 			h_cat[rootDirName]->Sumw2();
 			h_gencat[rootDirName] = new TH1D("h_gencat", "gen cat", 22,0,22);
@@ -251,26 +234,22 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 		
 		TCanvas *c1 = new TCanvas("c1","",900,800);
     	c1->Divide(1,2);
-		TH1D* h_dR_Lnu = new TH1D("h_dR_Lnu", "dR(l,#nu)", 50, 0, 0.5);
-		TH1D* h_Xmass_0t = new TH1D("h_Xmass_0t", "mDCH1", nbins, xmin, xmax);
-		TH1D* h_Xmass_1t = new TH1D("h_Xmass_1t", "mDCH1", nbins, xmin, xmax);
-		TH1D* h_Xmass_2t = new TH1D("h_Xmass_2t", "mDCH1", nbins, xmin, xmax);
-		TH1D* h_Xmass_3t = new TH1D("h_Xmass_3t", "mDCH1", nbins, xmin, xmax);
-		TH1D* h_Xmass_0t3l = new TH1D("h_Xmass_0t3l", "mDCH1", nbins, xmin, xmax);
-		TH1D* h_Xmass_1t3l = new TH1D("h_Xmass_1t3l", "mDCH1", nbins, xmin, xmax);
-		TH1D* h_Xmass_2t3l = new TH1D("h_Xmass_2t3l", "mDCH1", nbins, xmin, xmax);
+		TH2D* h_metvsdmll = new TH2D("h_metvsdmll", "met vs dmll", 100, 0, 500,100,0,500);
+		TH2D* h_mll1vsdmll = new TH2D("h_mll1vsdmll", "|mll1-mll2| vs mll1", 100, 0, 1400,100,0,800);
+				
 		for (int ievt=0; ievt< tree->GetEntries(); ievt++){
 			tree->GetEntry(ievt);
-
 			string cat_string = numberToCat(cat);
+			
 			char* cat_name = const_cast<char*>(cat_string.c_str());
 			int Nlep = cat_lepCount(cat_name,'e','m'); 
 			int Ntau = strlen(cat_name)-Nlep; 	
 			if (cat <= 21  and q_1+q_2+q_3+q_4 != 0) continue; 
 			if (cat > 21  and abs(q_1+q_2+q_3) != 1) continue;
 			if (strlen(cat_name)<=2) continue; 
-			
+
 			double evtwt_nom = brWeight*Generator_weight;//to compensate for the non-democratic decays in Signal
+								
 			if (fname.find("_2018.") < fname.length()){//HEM veto
 				if (XSec(filename[j])==1 and run >= 319077 and applyHEMveto(cat_string) == "yes") continue;
 				if (XSec(filename[j])!=1 and applyHEMveto(cat_string) == "yes") evtwt_nom *= 0.35;
@@ -346,7 +325,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 			TLorentzVector MET; MET.SetPtEtaPhiM(met, 0, metphi, 0);
 //======================================EDIT FROM HERE ========================================	
 			vector<pair<int, int>> SFopp_pair, opp_pair, H_pair;
-			processPairs(cat_name, SFopp_pair, SFopp_pair, H_pair, opp_pair);
+			processPairs(cat_name, SFopp_pair, SFopp_pair, opp_pair, H_pair, opp_pair);
 			if (SFopp_pair.size() < 1) continue; 
 			
 			//cout<< SFopp_pair.size()<<endl;
@@ -359,8 +338,8 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 			}
 			double mll1 = (LepV(H1_idx1)+LepV(H1_idx2)).M();//inv mass of 1st SS lepton pair
 			double mll2 = (LepV(H2_idx1)+LepV(H2_idx2)).M();//inv mass of 2nd SS lepton pair
-			double mll1_nu = (LepV(H1_idx1)+LepV(H1_idx2)+NuV(H1_idx1)+NuV(H1_idx2)).M();
-			double mll2_nu = (LepV(H2_idx1)+LepV(H2_idx2)+NuV(H2_idx1)+NuV(H2_idx2)).M();
+			double mll1_nu = 0;//(LepV(H1_idx1)+LepV(H1_idx2)+NuV(H1_idx1)+NuV(H1_idx2)).M();
+			double mll2_nu = 0;//(LepV(H2_idx1)+LepV(H2_idx2)+NuV(H2_idx1)+NuV(H2_idx2)).M();
 			double mZ1 = (LepV(SFopp_pair[0].first)+LepV(SFopp_pair[0].second)).M();
 			double mZ2 = (LepV(SFopp_pair[1].first)+LepV(SFopp_pair[1].second)).M();
 			double dRll = deltaR(LepV(H1_idx1),LepV(H1_idx2));
@@ -403,9 +382,12 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 
 			if (cat > 21) continue;
 			std::string Gencat_str = numberToCat(gen_cat);
-			if (cat_lepCount(Gencat_str,'t','g')!=3) continue;//'g' is just to look for a non empty character. only e,m,t are valid characters in cat/gen_cat strings.
-			//if (Ntau !=2 ) continue;
-			
+			if (cat_lepCount(Gencat_str,'t','g')!=2) continue;//'g' is just to look for a non empty character. only e,m,t are valid characters in cat/gen_cat strings.
+			//if (Ntau > 2 ) continue;
+
+				h_metvsdmll->Fill(met,abs(mll1-mll2));
+				/*if (6*(mll_1-300)/7 > abs(mll_1-mll_2)) */h_mll1vsdmll->Fill(mll1,abs(mll1-mll2));
+								
 			std::array<TLorentzVector,4> L;
 			L[0] = LepV(H1_idx1);
 			L[1] = LepV(H1_idx2);
@@ -425,6 +407,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 			realcat.push_back(cat_string[H2_idx2-1]);
 			//auto [nlegs0, Mdch01, Mdch02] = get_legs(L, MET);
 			
+			auto[mass1, mass2] = getDCHmass(L,MET,metcov);
 			auto [nlegs0, Mdch01, Mdch02, bestdPhi, bestChi2, isOpp] = get_legs_comb(realcat, L, MET, metcov,true);
 			
 			//if (!isOpp) continue; 
@@ -434,16 +417,15 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 			//get_legs_comb(realcat, L, MET, metcov,true);//this is running again to print out alphas etc
 
 			//double boost = (LepV(1)+LepV(2)+LepV(3)+LepV(4)).Pz()/(LepV(1)+LepV(2)+LepV(3)+LepV(4)).E();
-			double min_dPhi_nuMET = 999;
+			/*double min_dPhi_nuMET = 999;
 			TLorentzVector numer;
 			for(int i : {H1_idx1, H1_idx2, H2_idx1, H2_idx2}){numer += LepV(i);
 				if(NuV(i).Pt()){
-					h_dR_Lnu->Fill(deltaR(LepV(i), NuV(i)));
 					//cout<<"Lep: ";print4Vec(LepV(i));
-					cout<<"Nu: ";print4Vec(NuV(i));
+					//cout<<"Nu: ";print4Vec(NuV(i));
 					if (min_dPhi_nuMET > deltaPhi(NuV(i),MET)) min_dPhi_nuMET = deltaPhi(NuV(i),MET);
 				}
-			}
+			}*/
 			print4Vec(MET);
 			
 			std::map< std::string, double > hist_variable_map = {
@@ -459,8 +441,8 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 															{"mll2", mll2},
 															{"mDCH1", Mdch01},
 															{"mDCH2", Mdch02},
-															{"mT1",Mdch01},//change to fill with something else if you wish.
-															{"mT2",Mdch02},//change to fill with something else if you wish.
+															{"mT1",mass1},//change to fill with something else if you wish.
+															{"mT2",mass2},//change to fill with something else if you wish.
 															{"mTtot1", Mdch01},//change to fill with something else if you wish.
 															{"mTtot2", Mdch02},//change to fill with something else if you wish.
 															{"mll1_nu", mll1_nu},
@@ -482,7 +464,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 															{"max_dR_lplm", max(dR1,dR2)},
 															{"max_dR_ll", max_dR_ll},
 															{"dPhiW_met", deltaPhi(LepV(W_lep_idx), MET)},
-															{"W_mt", calculateMT(LepV(W_lep_idx), MET)},
+															{"dmll", abs(mll1-mll2)},
 															{"cat", catToNumber(realcat)},
 															{"gen_cat", gen_cat}
 				};
@@ -504,7 +486,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 					}
 					if (!pass) continue;
 					//trimmed_tree->Fill();
- 					FillHists(tau0Dir, trimmed_tree, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+ 					FillHists(tau0Dir, trimmed_tree, hist_variable_map, evtwt_nom, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
 					
 				}	
 				else if (Ntau == 1){
@@ -524,7 +506,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 					if (!pass) continue;
 					
 					
-					FillHists(tau1Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					FillHists(tau1Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
 				}
 				else if (Ntau == 2){
 					if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10 or abs(mZ3-mZ) < 10 or abs(mZ4-mZ) < 10) continue;
@@ -543,7 +525,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 					if (!pass) continue;
 					
 					
-					FillHists(tau2Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					FillHists(tau2Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
 				}
 				else if (Ntau == 3){
 					std::map<std::string, bool> cutbools = {
@@ -561,7 +543,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 					if (!pass) continue;
 					
 					
-					FillHists(tau3Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					FillHists(tau3Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
 				}
 				
 			}//4-lep	
@@ -583,7 +565,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 					if (!pass) continue;
 					
 		
-					FillHists(lep3tau0Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					FillHists(lep3tau0Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
 				}
 				else if(Ntau == 1){
 					if (abs(mZ1-mZ) < 10 or abs(mZ2-mZ) < 10) continue;
@@ -601,7 +583,7 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 					}
 					if (!pass) continue;
 					
-					FillHists(lep3tau1Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					FillHists(lep3tau1Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
 				}
 				else if(Ntau == 2){
 					std::map<std::string, bool> cutbools = {
@@ -619,18 +601,18 @@ void DCH_presel_SIMPLE(const char* ext = ".root"){
 					if (!pass) continue;
 					
 					
-					FillHists(lep3tau2Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+					FillHists(lep3tau2Dir, trimmed_tree, hist_variable_map, evtwt_nom,cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
 				}			
 		}//MY SLECTIONS
 		}//ievtloop
-		h_dR_Lnu->Write();
-		WriteHists(tau0Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
-		WriteHists(tau1Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
-		WriteHists(tau2Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
-		WriteHists(tau3Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
-		WriteHists(lep3tau0Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
-		WriteHists(lep3tau1Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
-		WriteHists(lep3tau2Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_W_mt, h_cat, h_gencat );
+		h_metvsdmll->Write();h_mll1vsdmll->Write();
+		WriteHists(tau0Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
+		WriteHists(tau1Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,  h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
+		WriteHists(tau2Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
+		WriteHists(tau3Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
+		WriteHists(lep3tau0Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
+		WriteHists(lep3tau1Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
+		WriteHists(lep3tau2Dir, trimmed_tree, cutflow, h_mll1, h_mll2, h_mDCH1, h_mDCH2, h_ll1_pt, h_ST, h_mZ1, h_mZ2, h_mZ3, h_mZ4, h_mT1, h_mT2, h_mTtot1, h_mTtot2,h_mll1_nu, h_mll2_nu,   h_met, h_pT1, h_pT2, h_pT3, h_pT4, h_dR1, h_dR2, h_dR3, h_dR4, h_dRll, h_dRll2, h_dR1_met, h_dR2_met, h_max_dR_lplm, h_max_dR_ll,  h_dPhiW_met, h_dmll, h_cat, h_gencat );
 	}
 	gSystem->FreeDirectory(dirp);
 }

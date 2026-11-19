@@ -52,7 +52,14 @@ map<string, vector<string>> samples = {
     {"TTbar", {"TTTo2L2Nu_2016postVFP.root","TTToSemiLeptonic_2016postVFP.root","TTToHadronic_2016postVFP.root","TTTo2L2Nu_2016preVFP.root","TTToSemiLeptonic_2016preVFP.root","TTToHadronic_2016preVFP.root","TTTo2L2Nu_2017.root","TTToSemiLeptonic_2017.root","TTToHadronic_2017.root","TTTo2L2Nu_2018.root","TTToSemiLeptonic_2018.root","TTToHadronic_2018.root"
     }},
 
-    {"QCD", {"QCD_HT50to100_2016postVFP.root","QCD_HT100to200_2016postVFP.root","QCD_HT200to300_2016postVFP.root","QCD_HT300to500_2016postVFP.root","QCD_HT500to700_2016postVFP.root","QCD_HT700to1000_2016postVFP.root","QCD_HT1000to1500_2016postVFP.root","QCD_HT1500to2000_2016postVFP.root","QCD_HT2000toInf_2016postVFP.root","QCD_HT50to100_2016preVFP.root","QCD_HT100to200_2016preVFP.root","QCD_HT200to300_2016preVFP.root","QCD_HT300to500_2016preVFP.root","QCD_HT500to700_2016preVFP.root","QCD_HT700to1000_2016preVFP.root","QCD_HT1000to1500_2016preVFP.root","QCD_HT1500to2000_2016preVFP.root","QCD_HT2000toInf_2016preVFP.root","QCD_HT50to100_2017.root","QCD_HT100to200_2017.root","QCD_HT200to300_2017.root","QCD_HT300to500_2017.root","QCD_HT500to700_2017.root","QCD_HT700to1000_2017.root","QCD_HT1000to1500_2017.root","QCD_HT1500to2000_2017.root","QCD_HT2000toInf_2017.root","QCD_HT50to100_2018.root","QCD_HT100to200_2018.root","QCD_HT200to300_2018.root","QCD_HT300to500_2018.root","QCD_HT500to700_2018.root","QCD_HT700to1000_2018.root","QCD_HT1000to1500_2018.root","QCD_HT1500to2000_2018.root","QCD_HT2000toInf_2018.root"
+    {"other", {
+"ttHToTauTau_2016postVFP.root","ttHToEE_2016postVFP.root","ttHTo2L2Nu_2016postVFP.root",
+"ttHToTauTau_2016preVFP.root","ttHToEE_2016preVFP.root","ttHTo2L2Nu_2016preVFP.root","ttHJetToNonbb_2016preVFP.root","TWZToLL_2016preVFP.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016preVFP.root","ttHToTauTau_2017.root","ttHToEE_2017.root","ttHTo2L2Nu_2017.root","ttHJetToNonbb_2017.root","TWZToLL_2017.root","HZJ_HToWWTo2L2Nu_ZTo2L_2017.root","ttHToTauTau_2018.root","ttHToEE_2018.root","ttHTo2L2Nu_2018.root","ttHJetToNonbb_2018.root","TWZToLL_2018.root","HZJ_HToWWTo2L2Nu_ZTo2L_2018.root","ttHJetToNonbb_2016postVFP.root","TWZToLL_2016postVFP.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016postVFP.root",
+"ZHToMuMu_2016postVFP.root","ZHToTauTau_2016postVFP.root","GluGluZH_2016postVFP.root","ZHToMuMu_2016preVFP.root","ZHToTauTau_2016preVFP.root","GluGluZH_2016preVFP.root","ZHToMuMu_2017.root","ZHToTauTau_2017.root","GluGluZH_2017.root","ZHToMuMu_2018.root","ZHToTauTau_2018.root","GluGluZH_2018.root",
+"QCD_HT50to100_2016postVFP.root","QCD_HT100to200_2016postVFP.root","QCD_HT200to300_2016postVFP.root","QCD_HT300to500_2016postVFP.root","QCD_HT500to700_2016postVFP.root","QCD_HT700to1000_2016postVFP.root","QCD_HT1000to1500_2016postVFP.root","QCD_HT1500to2000_2016postVFP.root","QCD_HT2000toInf_2016postVFP.root","QCD_HT50to100_2016preVFP.root","QCD_HT100to200_2016preVFP.root","QCD_HT200to300_2016preVFP.root","QCD_HT300to500_2016preVFP.root","QCD_HT500to700_2016preVFP.root","QCD_HT700to1000_2016preVFP.root","QCD_HT1000to1500_2016preVFP.root","QCD_HT1500to2000_2016preVFP.root","QCD_HT2000toInf_2016preVFP.root","QCD_HT50to100_2017.root","QCD_HT100to200_2017.root","QCD_HT200to300_2017.root","QCD_HT300to500_2017.root","QCD_HT500to700_2017.root","QCD_HT700to1000_2017.root","QCD_HT1000to1500_2017.root","QCD_HT1500to2000_2017.root","QCD_HT2000toInf_2017.root","QCD_HT50to100_2018.root","QCD_HT100to200_2018.root","QCD_HT200to300_2018.root","QCD_HT300to500_2018.root","QCD_HT500to700_2018.root","QCD_HT700to1000_2018.root","QCD_HT1000to1500_2018.root","QCD_HT1500to2000_2018.root","QCD_HT2000toInf_2018.root"
+
+    }},
+   /* {"QCD", {"QCD_HT50to100_2016postVFP.root","QCD_HT100to200_2016postVFP.root","QCD_HT200to300_2016postVFP.root","QCD_HT300to500_2016postVFP.root","QCD_HT500to700_2016postVFP.root","QCD_HT700to1000_2016postVFP.root","QCD_HT1000to1500_2016postVFP.root","QCD_HT1500to2000_2016postVFP.root","QCD_HT2000toInf_2016postVFP.root","QCD_HT50to100_2016preVFP.root","QCD_HT100to200_2016preVFP.root","QCD_HT200to300_2016preVFP.root","QCD_HT300to500_2016preVFP.root","QCD_HT500to700_2016preVFP.root","QCD_HT700to1000_2016preVFP.root","QCD_HT1000to1500_2016preVFP.root","QCD_HT1500to2000_2016preVFP.root","QCD_HT2000toInf_2016preVFP.root","QCD_HT50to100_2017.root","QCD_HT100to200_2017.root","QCD_HT200to300_2017.root","QCD_HT300to500_2017.root","QCD_HT500to700_2017.root","QCD_HT700to1000_2017.root","QCD_HT1000to1500_2017.root","QCD_HT1500to2000_2017.root","QCD_HT2000toInf_2017.root","QCD_HT50to100_2018.root","QCD_HT100to200_2018.root","QCD_HT200to300_2018.root","QCD_HT300to500_2018.root","QCD_HT500to700_2018.root","QCD_HT700to1000_2018.root","QCD_HT1000to1500_2018.root","QCD_HT1500to2000_2018.root","QCD_HT2000toInf_2018.root"
     }},
 
     {"ZH", {
@@ -62,7 +69,7 @@ map<string, vector<string>> samples = {
     {"other", {
 "ttHToTauTau_2016postVFP.root","ttHToEE_2016postVFP.root","ttHTo2L2Nu_2016postVFP.root",
 "ttHToTauTau_2016preVFP.root","ttHToEE_2016preVFP.root","ttHTo2L2Nu_2016preVFP.root","ttHJetToNonbb_2016preVFP.root","TWZToLL_2016preVFP.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016preVFP.root","ttHToTauTau_2017.root","ttHToEE_2017.root","ttHTo2L2Nu_2017.root","ttHJetToNonbb_2017.root","TWZToLL_2017.root","HZJ_HToWWTo2L2Nu_ZTo2L_2017.root","ttHToTauTau_2018.root","ttHToEE_2018.root","ttHTo2L2Nu_2018.root","ttHJetToNonbb_2018.root","TWZToLL_2018.root","HZJ_HToWWTo2L2Nu_ZTo2L_2018.root","ttHJetToNonbb_2016postVFP.root","TWZToLL_2016postVFP.root","HZJ_HToWWTo2L2Nu_ZTo2L_2016postVFP.root"
-    }},
+    }},*/
 
     {"data_obs", {"SingleElectronB_2016preVFP.root","SingleElectronC_2016preVFP.root","SingleElectronD_2016preVFP.root","SingleElectronE_2016preVFP.root","SingleElectronF_2016preVFP.root","SingleElectronF_2016postVFP.root","SingleElectronG_2016postVFP.root","SingleElectronH_2016postVFP.root",
 "SingleMuonB_2016preVFP.root","SingleMuonC_2016preVFP.root","SingleMuonD_2016preVFP.root","SingleMuonE_2016preVFP.root","SingleMuonF_2016preVFP.root","SingleMuonF_2016postVFP.root","SingleMuonG_2016postVFP.root","SingleMuonH_2016postVFP.root",
@@ -110,7 +117,9 @@ void processDirectory(TDirectory* dir){// Recursively read all histograms in a d
 
         string fullName;
         fullName =  h->GetName();
-        if (fullName.find("h_m") == string::npos) {//mass histograms only
+        if (fullName.find("flat") != string::npos) {delete obj; continue;}
+        if (fullName.find("mll2") != string::npos) {delete obj; continue;}
+        if (fullName.find("h_LT") == string::npos && fullName.find("h_m") == string::npos) {//mass histograms only
 			delete obj;
 			continue;
 		}
@@ -146,7 +155,7 @@ void processDirectory(TDirectory* dir){// Recursively read all histograms in a d
 //       h_Mll_SR_3tau
 //
 //   output:
-//       h_Mll_SR_3tau_DY
+//       h_Mll_SR_tau3_DY
 //
 // ================================================================
 
@@ -256,8 +265,8 @@ void combineSample(// Combine ONE sample
 }
 
 void combine_histograms(// MAIN
-    string inputDir = "run2_noFR_metphi_zpt_recoil_roccor_toppt_syst_signal_updated",
-    string outputFile = "combined_hist.root"
+    string inputDir = "../athar_offline/run2_noFR_metphi_zpt_recoil_roccor_toppt_chargeflip_SR",
+    string outputFile = "combined_hist_onlyTau.root"
 )
 {
     cout << endl;
@@ -284,7 +293,7 @@ void combine_histograms(// MAIN
             outfile
         );
     }
-    outfile->Write(); 
+    //outfile->Write(); 
     outfile->Flush();
     outfile->Close();
     delete outfile;
