@@ -1,0 +1,187 @@
+<500
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 109 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 109 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 109 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.1146
+Expected  2.5%: r < 0.0353
+Expected 16.0%: r < 0.0599
+Expected 50.0%: r < 0.1143
+Expected 84.0%: r < 0.2272
+Expected 97.5%: r < 0.3465
+
+Done in 0.02 min (cpu), 0.03 min (real)
+<600
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 109 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 109 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 109 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.0945
+Expected  2.5%: r < 0.0281
+Expected 16.0%: r < 0.0484
+Expected 50.0%: r < 0.0947
+Expected 84.0%: r < 0.1899
+Expected 97.5%: r < 0.2873
+
+Done in 0.02 min (cpu), 0.02 min (real)
+<700
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.0847
+Expected  2.5%: r < 0.0249
+Expected 16.0%: r < 0.0432
+Expected 50.0%: r < 0.0850
+Expected 84.0%: r < 0.1710
+Expected 97.5%: r < 0.2577
+
+Done in 0.02 min (cpu), 0.02 min (real)
+<800
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.0775
+Expected  2.5%: r < 0.0221
+Expected 16.0%: r < 0.0390
+Expected 50.0%: r < 0.0776
+Expected 84.0%: r < 0.1562
+Expected 97.5%: r < 0.2355
+
+Done in 0.02 min (cpu), 0.02 min (real)
+<900
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.0736
+Expected  2.5%: r < 0.0210
+Expected 16.0%: r < 0.0371
+Expected 50.0%: r < 0.0737
+Expected 84.0%: r < 0.1484
+Expected 97.5%: r < 0.2236
+
+Done in 0.02 min (cpu), 0.02 min (real)
+<1000
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.0691
+Expected  2.5%: r < 0.0194
+Expected 16.0%: r < 0.0344
+Expected 50.0%: r < 0.0688
+Expected 84.0%: r < 0.1386
+Expected 97.5%: r < 0.2088
+
+Done in 0.02 min (cpu), 0.02 min (real)
+<1100
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.0670
+Expected  2.5%: r < 0.0186
+Expected 16.0%: r < 0.0333
+Expected 50.0%: r < 0.0669
+Expected 84.0%: r < 0.1346
+Expected 97.5%: r < 0.2029
+
+Done in 0.02 min (cpu), 0.02 min (real)
+<1200
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.0660
+Expected  2.5%: r < 0.0183
+Expected 16.0%: r < 0.0328
+Expected 50.0%: r < 0.0659
+Expected 84.0%: r < 0.1327
+Expected 97.5%: r < 0.1999
+
+Done in 0.02 min (cpu), 0.02 min (real)
+<1300
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.0653
+Expected  2.5%: r < 0.0179
+Expected 16.0%: r < 0.0324
+Expected 50.0%: r < 0.0654
+Expected 84.0%: r < 0.1317
+Expected 97.5%: r < 0.1984
+
+Done in 0.02 min (cpu), 0.02 min (real)
+<1400
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.0638
+Expected  2.5%: r < 0.0175
+Expected 16.0%: r < 0.0317
+Expected 50.0%: r < 0.0640
+Expected 84.0%: r < 0.1287
+Expected 97.5%: r < 0.1940
+
+Done in 0.02 min (cpu), 0.02 min (real)
+<1500
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+>>> method used is AsymptoticLimits
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+SimNLL created with 4 channels, 0 generic constraints, 110 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+
+ -- AsymptoticLimits ( CLs ) --
+Observed Limit: r < 0.1165
+Expected  2.5%: r < 0.0322
+Expected 16.0%: r < 0.0578
+Expected 50.0%: r < 0.1162
+Expected 84.0%: r < 0.2339
+Expected 97.5%: r < 0.3524
+
+Done in 0.03 min (cpu), 0.03 min (real)

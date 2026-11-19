@@ -1,0 +1,34 @@
+imax *
+jmax *
+kmax *
+------------
+shapes * tau2Y combined_hist_alpha.root h_mH2_tau2Y_$PROCESS h_mH2_tau2Y_$SYSTEMATIC_$PROCESS
+------------
+bin	tau2Y
+observation	-1
+------------
+bin	tau2Y          tau2Y          tau2Y          tau2Y          tau2Y          tau2Y          tau2Y          tau2Y          tau2Y          tau2Y          
+process	M500           DY             VV             VVV            ttV            WJ             ZZ             ST             TTbar          other          
+process	0              1              2              3              4              5              6              7              8              9              
+rate	1.78622        0              0              0.0127945      0.12702        0              0.258556       0              0.0658156      0.252876       
+------------
+lumi            lnN     1.025          1.025          1.025          1.025          1.025          1.025          1.025          1.025          1.025          1.025          
+fake            lnN     -              1.424          1.3            -              -              -              -              -              1.424          -              
+eIdIso          shape   1              -              -              1              1              -              1              -              1              1              
+eReco           shape   1              -              -              1              1              -              1              -              1              1              
+eTrig           shape   1              -              -              1              1              -              1              -              1              1              
+l1Prefire       shape   1              -              -              1              1              -              1              -              1              1              
+muId            shape   1              -              -              1              1              -              1              -              1              1              
+muIso           shape   1              -              -              1              1              -              1              -              1              1              
+muTrig          shape   1              -              -              1              1              -              1              -              1              1              
+pu              shape   1              -              -              1              1              -              1              -              1              1              
+tauES           shape   1              -              -              1              1              -              1              -              1              1              
+tauVsEle        shape   1              -              -              1              1              -              1              -              1              1              
+tauVsJet        shape   1              -              -              1              1              -              1              -              1              1              
+tauVsMu         shape   1              -              -              1              1              -              1              -              1              1              
+roccor          shape   1              -              -              1              1              -              1              -              1              1              
+zpt             shape   -              -              -              -              -              -              -              -              -              -              
+chargeFlip      shape   1              -              -              1              1              -              1              -              1              1              
+xsec            shape   -              -              -              -              1              -              1              -              1              1              
+
+* autoMCStats 0

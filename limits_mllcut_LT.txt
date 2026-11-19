@@ -1,0 +1,77 @@
+500
+Observed Limit: r < 0.0995
+Expected  2.5%: r < 0.0374
+Expected 16.0%: r < 0.0583
+Expected 50.0%: r < 0.0996
+Expected 84.0%: r < 0.1735
+Expected 97.5%: r < 0.2887
+600
+Observed Limit: r < 0.0773
+Expected  2.5%: r < 0.0282
+Expected 16.0%: r < 0.0448
+Expected 50.0%: r < 0.0776
+Expected 84.0%: r < 0.1364
+Expected 97.5%: r < 0.2275
+700
+Observed Limit: r < 0.0660
+Expected  2.5%: r < 0.0232
+Expected 16.0%: r < 0.0375
+Expected 50.0%: r < 0.0659
+Expected 84.0%: r < 0.1179
+Expected 97.5%: r < 0.1985
+800
+Observed Limit: r < 0.0583
+Expected  2.5%: r < 0.0200
+Expected 16.0%: r < 0.0328
+Expected 50.0%: r < 0.0581
+Expected 84.0%: r < 0.1054
+Expected 97.5%: r < 0.1761
+900
+Observed Limit: r < 0.0523
+Expected  2.5%: r < 0.0176
+Expected 16.0%: r < 0.0292
+Expected 50.0%: r < 0.0522
+Expected 84.0%: r < 0.0956
+Expected 97.5%: r < 0.1584
+1000
+Observed Limit: r < 0.0482
+Expected  2.5%: r < 0.0159
+Expected 16.0%: r < 0.0268
+Expected 50.0%: r < 0.0483
+Expected 84.0%: r < 0.0888
+Expected 97.5%: r < 0.1465
+1100
+Observed Limit: r < 0.0454
+Expected  2.5%: r < 0.0145
+Expected 16.0%: r < 0.0247
+Expected 50.0%: r < 0.0454
+Expected 84.0%: r < 0.0838
+Expected 97.5%: r < 0.1377
+1200
+Observed Limit: r < 0.0430
+Expected  2.5%: r < 0.0138
+Expected 16.0%: r < 0.0233
+Expected 50.0%: r < 0.0430
+Expected 84.0%: r < 0.0800
+Expected 97.5%: r < 0.1303
+1300
+Observed Limit: r < 0.0415
+Expected  2.5%: r < 0.0133
+Expected 16.0%: r < 0.0226
+Expected 50.0%: r < 0.0415
+Expected 84.0%: r < 0.0776
+Expected 97.5%: r < 0.1258
+1400
+Observed Limit: r < 0.0397
+Expected  2.5%: r < 0.0127
+Expected 16.0%: r < 0.0215
+Expected 50.0%: r < 0.0396
+Expected 84.0%: r < 0.0749
+Expected 97.5%: r < 0.1199
+1500
+Observed Limit: r < 0.0711
+Expected  2.5%: r < 0.0223
+Expected 16.0%: r < 0.0380
+Expected 50.0%: r < 0.0713
+Expected 84.0%: r < 0.1344
+Expected 97.5%: r < 0.2161

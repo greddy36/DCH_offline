@@ -1,0 +1,23 @@
+imax 3  number of channels
+jmax 1  number of backgrounds
+kmax *
+# kmax 4  number of nuisance parameters (sources of systematical uncertainties)
+------------
+shapes * *  nuisance_hist.root $PROCESS__$CHANNEL $PROCESS__$CHANNEL__$SYSTEMATIC 
+---------------
+# we have just one channel, in which we observe 0 events
+bin			t0	t1	t34
+observation	-1	-1	-1
+------------
+# now we list the expected events for signal and all backgrounds in that bin
+# the second 'process' line must have a positive number for backgrounds, and 0 for signal
+# then we list the independent sources of uncertainties, and give their effect (syst. error)
+# on each process and bin
+bin		t0	t0		t1	t1		t34	t34
+process	signal$MASS	prompt		signal$MASS	prompt		signal$MASS	prompt
+process         0	1		0	1		0	1    
+rate            -1	-1		-1	-1		-1	-1
+------------
+lumi	lnN	1.025	1.025		1.025	1.025		1.025	1.025
+xs_prompt	lnN	-	1.0027		-	1.0027		-	1.0027
+
